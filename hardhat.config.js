@@ -8,4 +8,13 @@ require("./tasks/faucet");
 
 module.exports = {
   solidity: "0.7.3",
+  network: {
+    localhost: {
+      url: "http://localhost:6745",
+      chainId: 31337,
+      accounts: {
+        mnemonic: "test test test test test test test test test test test junk",
+      },
+    },
+  },
 };
