@@ -7,13 +7,38 @@ require("@nomiclabs/hardhat-truffle5");
 require("./tasks/faucet");
 
 module.exports = {
-  solidity: "0.8.4",
-  network: {
-    localhost: {
-      url: "http://localhost:6745",
-      chainId: 31337,
+  networks: {
+    hardhat: {
+      gas: 12000000,
+      blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize: true,
+      inject: false, // optional. If true, it will EXPOSE your mnemonic in your frontend code. Then it would be available as an "in-page browser wallet" / signer which can sign without confirmation.
       accounts: {
-        mnemonic: "test test test test test test test test test test test junk",
+        mnemonic:
+          "inner knife flush space stool decrease place artwork hover civil army gasp",
+      },
+    },
+  },
+  solidity: {
+    version: "0.8.2",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 100,
+      },
+      evmVersion: "istanbul",
+      outputSelection: {
+        "*": {
+          "": ["ast"],
+          "*": [
+            "evm.bytecode.object",
+            "evm.deployedBytecode.object",
+            "abi",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.sourceMap",
+            "metadata",
+          ],
+        },
       },
     },
   },

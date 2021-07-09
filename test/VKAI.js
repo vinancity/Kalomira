@@ -17,6 +17,7 @@ describe("VKAI Token", () => {
 
   describe("deployment", function () {
     it("should set the right name and symbol", async function () {
+      console.log(await vkaiToken.name());
       expect(await vkaiToken.name()).to.equal("Virtual KAI");
       expect(await vkaiToken.symbol()).to.equal("vKAI");
     });
@@ -24,7 +25,8 @@ describe("VKAI Token", () => {
 
   describe("mint & redeem", function () {
     it("should mint equivalent VKAI based on exchange rate", async function () {
-      const value = web3.utils.toWei("100", "ether");
+      const value1 = web3.utils.toWei("100", "ether");
+      const value2 = web3.utils.toWei("50", "ether");
       let kaiBalance = await web3.eth.getBalance(addr1);
       const vkaiBalanceBefore = await vkaiToken.balanceOf(addr1);
       console.log(
@@ -34,7 +36,11 @@ describe("VKAI Token", () => {
       );
       await vkaiToken.deposit({
         from: addr1,
-        value,
+        value: value1,
+      });
+      await vkaiToken.deposit({
+        from: addr2,
+        value: value2,
       });
       kaiBalance = await web3.eth.getBalance(addr1);
       const vkaiBalanceAfter = await vkaiToken.balanceOf(addr1);
@@ -45,7 +51,7 @@ describe("VKAI Token", () => {
       );
       const result = await vkaiToken.balanceOf(addr1);
       const actualValue = web3.utils.hexToNumberString(result);
-      expect(actualValue).to.equal(value);
+      expect(actualValue).to.equal(value1);
 
       await vkaiToken.withdraw(web3.utils.toWei("50", "ether"), {
         from: addr1,
