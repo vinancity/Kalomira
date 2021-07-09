@@ -1,25 +1,39 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const VKAI = artifacts.require("VKAI");
+const KardiaStakingMock = artifacts.require("KardiaStakingMock");
 
 describe("VKAI Token", () => {
   let accounts;
   let vkaiToken;
+  let kardiaStaking;
   let owner;
   let addr1;
   let addr2;
   let addr3;
 
+  let stakingContractAddress;
+  let validatorContractAddress;
+
   beforeEach(async () => {
     [owner, addr1, addr2, addr3] = await web3.eth.getAccounts();
+    kardiaStaking = await KardiaStakingMock.new();
     vkaiToken = await VKAI.new();
+    console.log(`Kardia Staking Contract: ${kardiaStaking.address}`);
+    stakingContractAddress = kardiaStaking.address;
+    validatorContractAddress = "0x4952057973256F4f107eA854028Edfae2640b5Bd";
+
+    await vkaiToken.setStakingContract(
+      kardiaStaking.address,
+      validatorContractAddress
+    );
   });
 
   describe("deployment", function () {
     it("should set the right name and symbol", async function () {
       console.log(await vkaiToken.name());
-      expect(await vkaiToken.name()).to.equal("Virtual KAI");
-      expect(await vkaiToken.symbol()).to.equal("vKAI");
+      expect(await vkaiToken.name()).to.equal("Interest Bearing KAI Token");
+      expect(await vkaiToken.symbol()).to.equal("ibKAI");
     });
   });
 

@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "./libraries/WadRayMath.sol";
+import "./interfaces/IKardiaStaking.sol";
 
 contract VKAI is ERC20, Ownable {
     using SafeMath for uint;
@@ -19,6 +20,7 @@ contract VKAI is ERC20, Ownable {
     uint totalStaking;
     uint totalDeposit;
     address stakingContract;
+    address validatorContract;
 
     uint constant PRECISION = 10**4;
 
@@ -29,10 +31,13 @@ contract VKAI is ERC20, Ownable {
         _mint(_msgSender(), 100 ether);
     }
 
+    function setStakingContract(address _stakingContract, address _validatorContract) external onlyOwner {
+        stakingContract = _stakingContract;
+        validatorContract = _validatorContract;
+    }
+
     function pendingRewards() external view returns (uint) {
-        // return totalSupply().mul(PRECISION).div(10); // assumption: 0.1% is pending reward
-        // return totalSupply().mul();
-        return 19200130000000000000;
+        return IKardiaStaking(stakingContract).getDelegationRewards(validatorContract, address(this));
     }
 
     function getTotalKAIIncludeReward() external view returns (uint) {
