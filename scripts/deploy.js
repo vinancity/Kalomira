@@ -35,7 +35,14 @@ async function main() {
 
   deployments.push({name: "Kardia", addr: token.address});
   console.log(deployments[1].name, deployments[1].addr);
+/*
+  Token = await ethers.getContractFactory("TokenFarm");
+  token = await Token.deploy();
+  await token.deployed();
 
+  deployments.push({name: "TokenFarm", addr: token.address});
+  console.log(deployments[2].name, deployments[2].addr);
+*/
 
   // We also save the contract's artifacts and address in the frontend directory
   saveFrontendFiles(token, deployments);
@@ -51,7 +58,9 @@ function saveFrontendFiles(token, deployments) {
 
   fs.writeFileSync(
     contractsDir + "/contract-address.json",
-    JSON.stringify({ [deployments[0].name]: deployments[0].addr, [deployments[1].name]: deployments[1].addr }, undefined, 2),
+    JSON.stringify({ [deployments[0].name]: deployments[0].addr, 
+                     [deployments[1].name]: deployments[1].addr,
+                     /*[deployments[2].name]: deployments[2].addr*/ }, undefined, 2),
   );
 
   const KalomiraArtifact = artifacts.readArtifactSync("Kalomira");
@@ -65,6 +74,12 @@ function saveFrontendFiles(token, deployments) {
     contractsDir + "/Kardia.json",
     JSON.stringify(KardiaArtifact, null, 2)
   );
+/*
+  const FarmArtifact = artifacts.readArtifactSync("TokenFarm");
+  fs.writeFileSync(
+    contractsDir + "/TokenFarm.json",
+    JSON.stringify(FarmArtifact, null, 2)
+  );*/
 }
 
 main()

@@ -35,9 +35,9 @@ task("faucet", "Sends ETH and tokens to an address")
     const token1 = await ethers.getContractAt("KardiachainToken", address.Kardia);
     const [sender] = await ethers.getSigners();
 
-    const numTokens = 15;
+    const numTokens = 50;
 
-    const tx = await token.transfer(receiver, numTokens);
+    const tx = await token.mint(receiver, numTokens);
     await tx.wait();
 
     const tx1 = await token1.transfer(receiver, numTokens);

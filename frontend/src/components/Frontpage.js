@@ -1,5 +1,5 @@
 import React from "react";
-import { Confirmation } from "./Confirmation.js"
+//import { Confirmation } from "./Confirmation.js"
 
 export function Frontpage({ changeState }) {
 

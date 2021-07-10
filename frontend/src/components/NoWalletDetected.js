@@ -9,11 +9,11 @@ export function NoWalletDetected() {
             No Ethereum wallet was detected. <br />
             Please install{" "}
             <a
-              href="http://metamask.io"
+              href="https://chrome.google.com/webstore/detail/kardiachain-wallet/pdadjkfkgcafgbceimcpbkalnfnepbnk"
               target="_blank"
               rel="noopener noreferrer"
             >
-              MetaMask
+              KardiaChain Wallet
             </a>
             .
           </p>
