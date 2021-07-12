@@ -24,11 +24,17 @@ contract VKAI is ERC20, Ownable {
 
     uint constant PRECISION = 10**4;
 
-    constructor() ERC20("Interest Bearing KAI Token", "ibKAI") {
+    constructor(uint _totalDeposit, uint _initialSupply)
+        ERC20("Interest Bearing KAI Token", "ibKAI")
+    {
         totalReserve = 0;
-        // totalDeposit = 0;
-        totalDeposit = 100 ether;
-        _mint(_msgSender(), 100 ether);
+        totalDeposit = _totalDeposit;
+        _mint(_msgSender(), _initialSupply);
+        // _mint(_msgSender(), 100 ether);
+    }
+
+    function a() public payable {
+        this.deposit();
     }
 
     function setStakingContract(address _stakingContract, address _validatorContract) external onlyOwner {
@@ -58,8 +64,11 @@ contract VKAI is ERC20, Ownable {
      * @dev Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
      */
     function withdraw(uint256 amount) external returns (bool) {
-        _burn(_msgSender(), amount);
-        _safeTransferKAI(_msgSender(), amount);
+        require(amount <= balanceOf(_msgSender()), "insufficient balance");
+        uint kaiAmount = _getKAIRedeemAmount(amount);
+        console.log("supply: %s - balance: %s - amount: %s", totalDeposit, amount, kaiAmount);
+        _burn(_msgSender(), amount); // burn ibKAI
+        sendValue(_msgSender(), kaiAmount);
         return true;
     }
 
@@ -67,6 +76,11 @@ contract VKAI is ERC20, Ownable {
         uint totalKAI = this.getTotalKAIIncludeReward().add(kaiAmount);
         uint rate = kaiAmount.rayDiv(totalKAI);
         console.log("kai Amount: %s - totalKAI: %s - rate: %s ", kaiAmount, totalKAI, rate);
+        return rate;
+    }
+
+    function _getRateFromWithdraw(uint ibKaiAmount) internal view returns (uint) {
+        uint rate = ibKaiAmount.rayDiv(totalSupply());
         return rate;
     }
 
@@ -82,8 +96,17 @@ contract VKAI is ERC20, Ownable {
         return vkaiToMint;
     }
 
-    function _safeTransferKAI(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, "!safeTransferKAI");
+    function _getKAIRedeemAmount(uint ibKaiAmount) internal view returns (uint) {
+        uint rate = _getRateFromWithdraw(ibKaiAmount);
+        uint kaiAmount = rate.rayMul(this.getTotalKAIIncludeReward());
+        return kaiAmount;
+    }
+
+    function sendValue(address recipient, uint256 amount) internal {
+        console.log("balance: %s - amount: %s", address(this).balance, amount);
+        require(address(this).balance >= amount, "Address: insufficient balance");
+
+        (bool success, ) = recipient.call{value: amount}("");
+        require(success, "Address: unable to send value, recipient may have reverted");
     }
 }

@@ -20,9 +20,19 @@ import "../interfaces/IKardiaStaking.sol";
 
 
 contract KardiaStakingMock is IKardiaStaking {
+    uint pendingInterest;
+
+    constructor() {
+        pendingInterest = 19200130000000000000;
+    }
+
     function getDelegationRewards(address valAddr, address delAddr) override external view returns (uint256) {
         require(valAddr != address(0), "invalid");
         require(delAddr != address(0), "invalid");
-        return 19200130000000000000;
+        return pendingInterest;
+    }
+
+    function addInterest(uint amount) external {
+        pendingInterest += amount;
     }
 }
