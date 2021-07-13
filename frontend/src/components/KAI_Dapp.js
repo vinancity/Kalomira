@@ -16,8 +16,8 @@ import { Frontpage } from "./Frontpage";
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
 import { Loading } from "./Loading";
-import { Deposit } from "./Deposit";
-import { Withdraw } from "./Withdraw";
+import { Stake } from "./Stake";
+import { Unstake } from "./Unstake";
 import { Transfer } from "./Transfer";
 import { Exchange } from "./Exchange"
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
@@ -198,8 +198,8 @@ export class KaiDapp extends React.Component {
             {
               // Deposit
             }
-            {this.state.pagestate === 'deposit' && this.state.KAL_balance.gt(0) && (
-             <Deposit 
+            {this.state.pagestate === 'stake' && this.state.KAL_balance.gt(0) && (
+             <Stake 
                 depositTokens={(amount) =>
                   this._depositTokens(amount)
                 }
@@ -209,8 +209,8 @@ export class KaiDapp extends React.Component {
             {
               // Withdraw
             }
-            {this.state.pagestate === 'withdraw' && (
-             <Withdraw 
+            {this.state.pagestate === 'unstake' && (
+             <Unstake 
                 withdrawTokens={(amount) =>
                   this._withdrawTokens(amount)
                 }
@@ -495,13 +495,13 @@ export class KaiDapp extends React.Component {
   }
 
   async _updateBalance() {
-    const KAL_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
+    let KAL_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
     this.setState({ KAL_balance });   
 
-    const KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
+    let KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
     this.setState({ KAI_balance });
     
-    const KAL_deposit = await this._kalToken.depositAmount(this.state.selectedAddress);
+    let KAL_deposit = await this._kalToken.depositAmount(this.state.selectedAddress);
     this.setState({ KAL_deposit });
   }
   

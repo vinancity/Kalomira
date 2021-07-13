@@ -1,6 +1,6 @@
 import React from "react";
 
-export function Withdraw({ withdrawTokens, tokenSymbol }) {
+export function Unstake({ withdrawTokens, tokenSymbol }) {
   return (
     <div>
       <h4>Withdraw</h4>

@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 // using them with ethers
 import KalomiraArtifact from "../contracts/Kalomira.json";
 import KardiaArtifact from "../contracts/Kardia.json";
+import TokenFarmArtifact from "../contracts/TokenFarm.json"
 import contractAddress from "../contracts/contract-address.json";
 
 // All the logic of this dapp is contained in the Dapp component.
@@ -16,8 +17,8 @@ import { Frontpage } from "./Frontpage";
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
 import { Loading } from "./Loading";
-import { Deposit } from "./Deposit";
-import { Withdraw } from "./Withdraw";
+import { Stake } from "./Stake";
+import { Unstake } from "./Unstake";
 import { Transfer } from "./Transfer";
 import { Exchange } from "./Exchange"
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
@@ -58,8 +59,9 @@ export class Dapp extends React.Component {
       selectedAddress: undefined,
       KAL_balance: undefined,
       KAI_balance: undefined,
-      // The user's token deposit 
-      KAL_deposit: undefined,
+      // The user's stake
+      KAI_staked: undefined, 
+      KAL_harvest: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
       transactionError: undefined,
@@ -95,7 +97,7 @@ export class Dapp extends React.Component {
 
     // If the token data or the user's Balance hasn't loaded yet, we show
     // a loading component.
-    if (!this.state.KAL_tokenData || !this.state.KAL_balance || !this.state.KAI_tokenData || !this.state.KAI_balance || !this.state.KAL_deposit) {
+    if (!this.state.KAL_tokenData || !this.state.KAL_balance || !this.state.KAI_tokenData || !this.state.KAI_balance) {
       return <Loading />;
     }
 
@@ -111,39 +113,41 @@ export class Dapp extends React.Component {
             <p>
               Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
               <b>
-                {this.state.KAL_balance.toString()} {this.state.KAL_tokenData.symbol}
-              </b>
-              {" "}and{" "}
-              <b>
-                {this.state.KAI_balance.toString()} {this.state.KAI_tokenData.symbol}
+                {(this.state.KAI_balance/(10**18)).toString()}{" "}{this.state.KAI_tokenData.symbol}
               </b>
               .
             </p>
             <div className="row">
+            <div className="col-md-auto">
+                KAI Staked:
+                <h2>
+                  { (this.state.KAI_staked) ? (this.state.KAI_staked/(10**18)).toString() : "N/A" }
+                  {" "}
+                  {this.state.KAI_tokenData.symbol}
+                </h2>
+              </div>
               <div className="col-md-auto">
                 KAL to Harvest:
                 <h2>
-                  {this.state.KAL_deposit.toString()} {this.state.KAL_tokenData.symbol}
+                  {"N/A"}{" "}{this.state.KAL_tokenData.symbol}
                 </h2>
               </div>
               <div className="col-md-auto">
                 KAL in Wallet:
                 <h2>
-                  {this.state.KAL_balance.toString()} {this.state.KAL_tokenData.symbol}
+                  {(this.state.KAL_balance/(10**18)).toString()}{" "}{this.state.KAL_tokenData.symbol}
                 </h2>
               </div>
-              <div className="col-md-auto">
-                KAI in Wallet:
-                <h2>
-                  {this.state.KAI_balance.toString()} {this.state.KAI_tokenData.symbol}
-                </h2>
-              </div>
+              
             </div>
           </div>
         </div>
 
         <hr />
 
+        {
+          // Bring back to Homepage for any component
+        }
         <div className="row">
           {this.state.pagestate !== 'frontpage' && (
           <div className="btn" role="group">
@@ -187,9 +191,9 @@ export class Dapp extends React.Component {
             }
             {this.state.pagestate === 'frontpage' &&
               (<Frontpage changeState={(pgstate) => 
-                this.changePageState(pgstate)
-              }/>)        
-            }
+                this.changePageState(pgstate)}
+                />
+            )}
             {/*
               If the user has no tokens, we don't show the Tranfer form
             */}
@@ -197,25 +201,32 @@ export class Dapp extends React.Component {
               <NoTokensMessage selectedAddress={this.state.selectedAddress} />
             )}
             {
-              // Deposit
+              // Stake
             }
-            {this.state.pagestate === 'deposit' && this.state.KAL_balance.gt(0) && (
-             <Deposit 
-                depositTokens={(amount) =>
-                  this._depositTokens(amount)
+            {this.state.pagestate === 'stake' && this.state.KAI_balance.gt(0) && (
+             <Stake 
+                stakeTokens={(amount) =>
+                  this._stakeTokens(amount)
                 }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
+                tokenSymbol={this.state.KAI_tokenData.symbol}
              /> 
             )}
             {
-              // Withdraw
+              // Withdraw Yield
             }
             {this.state.pagestate === 'withdraw' && (
-             <Withdraw 
+             <>
+             </> 
+            )}
+            {
+              // Unstake
+            }
+            {this.state.pagestate === 'unstake' && (
+             <Unstake 
                 withdrawTokens={(amount) =>
                   this._withdrawTokens(amount)
                 }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
+                tokenSymbol={this.state.KAI_tokenData.symbol}
              /> 
             )}
             {/*
@@ -267,47 +278,28 @@ export class Dapp extends React.Component {
     this.setState({pagestate: newState});
   }
 
-  async _depositTokens(amount){
+  async _stakeTokens(amount){
     console.log("Despoit amount: %s", amount);
     try {
-      // If a transaction fails, we save that error in the component's state.
-      // We only save one such error, so before sending a second transaction, we
-      // clear it.
       this._dismissTransactionError();
-
-      // We send the transaction, and save its hash in the Dapp's state. This
-      // way we can indicate that we are waiting for it to be mined.
-      const tx = await this._kalToken.deposit(amount);
+      let toStake = ethers.utils.parseEther(amount.toString())
+      await this._kaiToken.approve(this._kalFarm.address, toStake);
+      const tx = await this._kalFarm.stake(toStake);
       this.setState({ txBeingSent: tx.hash });
 
-      // We use .wait() to wait for the transaction to be mined. This method
-      // returns the transaction's receipt.
       const receipt = await tx.wait();
 
-      // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {
-        // We can't know the exact error that make the transaction fail once it
-        // was mined, so we throw this generic one.
         throw new Error("Transaction failed");
       }
-
-      // If we got here, the transaction was successful, so you may want to
-      // update your state. Here, we update the user's KAL_balance.
       await this._updateBalance();
     } catch (error) {
-      // We check the error code to see if this error was produced because the
-      // user rejected a tx. If that's the case, we do nothing.
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
-
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
       console.error(error);
       this.setState({ transactionError: error });
     } finally {
-      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
-      // this part of the state.
       this.setState({ txBeingSent: undefined });
     }
   }
@@ -437,6 +429,12 @@ export class Dapp extends React.Component {
       KardiaArtifact.abi,
       this._provider.getSigner(0)
     );
+
+    this._kalFarm = new ethers.Contract(
+      contractAddress.TokenFarm,
+      TokenFarmArtifact.abi,
+      this._provider.getSigner(0)
+    );
   }
 
   // The next to methods are needed to start and stop polling data. While
@@ -480,9 +478,13 @@ export class Dapp extends React.Component {
 
     const KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
     this.setState({ KAI_balance });
+
     
-    const KAL_deposit = await this._kalToken.depositAmount(this.state.selectedAddress);
-    this.setState({ KAL_deposit });
+    const stake = await this._kalFarm.stakingBalance(this.state.selectedAddress);
+    this.setState({ KAI_staked: stake  });
+
+    const KAL_harvest = undefined;
+    this.setState({ KAL_harvest });
   }
   
   // This method sends an ethereum transaction to transfer tokens.

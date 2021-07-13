@@ -1,9 +1,9 @@
 import React from "react";
 
-export function Deposit({ depositTokens, tokenSymbol }) {
+export function Stake({ stakeTokens, tokenSymbol }) {
   return (
     <div>
-      <h4>Deposit</h4>
+      <h4>Stake KAI</h4>
       <form
         onSubmit={(event) => {
           // This function just calls the transferTokens callback with the
@@ -14,12 +14,12 @@ export function Deposit({ depositTokens, tokenSymbol }) {
           const amount = formData.get("amount");
 
           if (amount) {
-            depositTokens(amount);
+            stakeTokens(amount);
           }
         }}
       >
         <div className="form-group">
-          <label>Amount of {tokenSymbol} to Deposit</label>
+          <label>Amount of {tokenSymbol} to Stake</label>
           <input
             className="form-control"
             type="number"

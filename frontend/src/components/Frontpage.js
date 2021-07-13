@@ -10,14 +10,19 @@ export function Frontpage({ changeState }) {
     return (
     <div>
       <h4>Welcome! What would you like to do today?</h4>
-        
         <div className="alert alert-dark">
           <div className="btn">
-            <button className="btn btn-success" type="button" onClick={() => page("deposit")}>Deposit</button>
+            <button className="btn btn-success" type="button" onClick={() => page("stake")}>Stake</button>
           </div>
           <div className="btn">
-            <button className="btn btn-primary" type="button" onClick={() => page("withdraw")}>Withdraw</button>
+            <button className="btn btn-primary" type="button" onClick={() => page("withdraw")}>Withdraw Yield</button>
           </div>
+          <div className="btn">
+            <button className="btn btn-danger" type="button" onClick={() => page("unstake")}>Unstake</button>
+          </div>
+        </div>
+        
+        <div className="alert alert-dark">          
           {/*
           <div className="btn" role="group">
             <button className="btn btn-warning" type="button" onClick={() => page("transfer")}>Transfer</button>
