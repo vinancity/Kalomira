@@ -13,7 +13,7 @@ import "bootstrap/js/dist/modal"
 
 ReactDOM.render(
   <React.StrictMode>
-    <Dapp />
+    <KaiDapp />
   </React.StrictMode>,
   document.getElementById("root")
 );

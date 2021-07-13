@@ -30,7 +30,7 @@ export function Stake({ stakeTokens, tokenSymbol }) {
           />
         </div>
         <div className="form-group">
-          <input className="btn btn-success" type="submit" value="Deposit" />
+          <input className="btn btn-success" type="submit" value="Stake" />
         </div>
 
       </form>        

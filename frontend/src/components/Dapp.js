@@ -19,6 +19,7 @@ import { ConnectWallet } from "./ConnectWallet";
 import { Loading } from "./Loading";
 import { Stake } from "./Stake";
 import { Unstake } from "./Unstake";
+import { WithdrawYield } from "./WithdrawYield";
 import { Transfer } from "./Transfer";
 import { Exchange } from "./Exchange"
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
@@ -129,7 +130,7 @@ export class Dapp extends React.Component {
               <div className="col-md-auto">
                 KAL to Harvest:
                 <h2>
-                  {"N/A"}{" "}{this.state.KAL_tokenData.symbol}
+                  {(this.state.KAL_harvest) ? (this.state.KAL_harvest/(10**18)).toString() : "N/A"}{" "}{this.state.KAL_tokenData.symbol}
                 </h2>
               </div>
               <div className="col-md-auto">
@@ -215,16 +216,20 @@ export class Dapp extends React.Component {
               // Withdraw Yield
             }
             {this.state.pagestate === 'withdraw' && (
-             <>
-             </> 
+             <WithdrawYield 
+                withdrawYield={() => 
+                  this._withdrawYield()
+                }
+                tokenSymbol={this.state.KAL_tokenData.symbol}
+             /> 
             )}
             {
               // Unstake
             }
             {this.state.pagestate === 'unstake' && (
              <Unstake 
-                withdrawTokens={(amount) =>
-                  this._withdrawTokens(amount)
+                unstakeTokens={(amount) =>
+                  this._unstakeTokens(amount)
                 }
                 tokenSymbol={this.state.KAI_tokenData.symbol}
              /> 
@@ -279,14 +284,15 @@ export class Dapp extends React.Component {
   }
 
   async _stakeTokens(amount){
-    console.log("Despoit amount: %s", amount);
+    console.log("Amount to stake: %s", amount);
     try {
       this._dismissTransactionError();
+
       let toStake = ethers.utils.parseEther(amount.toString())
       await this._kaiToken.approve(this._kalFarm.address, toStake);
       const tx = await this._kalFarm.stake(toStake);
-      this.setState({ txBeingSent: tx.hash });
 
+      this.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
       if (receipt.status === 0) {
@@ -304,42 +310,55 @@ export class Dapp extends React.Component {
     }
   }
 
-  async _withdrawTokens(amount){
-    console.log("Despoit amount: %s", amount);
+  async _unstakeTokens(amount){
+    console.log("Amount to unstake: %s", amount);
     try {
-      // If a transaction fails, we save that error in the component's state.
-      // We only save one such error, so before sending a second transaction, we
-      // clear it.
       this._dismissTransactionError();
 
-      // We send the transaction, and save its hash in the Dapp's state. This
-      // way we can indicate that we are waiting for it to be mined.
-      const tx = await this._kalToken.withdraw(amount);
+      let toUnstake = ethers.utils.parseEther(amount.toString())
+      const tx = await this._kalFarm.unstake(toUnstake);
+      
       this.setState({ txBeingSent: tx.hash });
-
-      // We use .wait() to wait for the transaction to be mined. This method
-      // returns the transaction's receipt.
       const receipt = await tx.wait();
 
-      // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {
-        // We can't know the exact error that make the transaction fail once it
-        // was mined, so we throw this generic one.
         throw new Error("Transaction failed");
       }
 
-      // If we got here, the transaction was successful, so you may want to
-      // update your state. Here, we update the user's KAL_balance.
       await this._updateBalance();
     } catch (error) {
-      // We check the error code to see if this error was produced because the
-      // user rejected a tx. If that's the case, we do nothing.
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
 
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
+      console.error(error);
+      this.setState({ transactionError: error });
+    } finally {
+      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
+      // this part of the state.
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _withdrawYield(){
+    console.log("Withdrawing yield");
+    try {
+      this._dismissTransactionError();
+      const tx = await this._kalFarm.withdrawYield();
+      
+      this.setState({ txBeingSent: tx.hash });
+      const receipt = await tx.wait();
+
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed");
+      }
+
+      await this._updateBalance();
+    } catch (error) {
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+
       console.error(error);
       this.setState({ transactionError: error });
     } finally {
@@ -480,10 +499,11 @@ export class Dapp extends React.Component {
     this.setState({ KAI_balance });
 
     
-    const stake = await this._kalFarm.stakingBalance(this.state.selectedAddress);
-    this.setState({ KAI_staked: stake  });
-
-    const KAL_harvest = undefined;
+    const KAI_staked = await this._kalFarm.stakingBalance(this.state.selectedAddress);
+    this.setState({ KAI_staked });
+    
+    const KAL_harvest = (await this._kalFarm.calculateYieldTotal(this.state.selectedAddress)) 
+                      + (await this._kalFarm.kalBalance(this.state.selectedAddress)/(10**18));
     this.setState({ KAL_harvest });
   }
   
@@ -596,4 +616,5 @@ export class Dapp extends React.Component {
 
     return false;
   }
+
 }

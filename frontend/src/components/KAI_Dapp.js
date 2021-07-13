@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 // using them with ethers
 import KalomiraArtifact from "../contracts/Kalomira.json";
 import KardiaArtifact from "../contracts/Kardia.json";
+import TokenFarmArtifact from "../contracts/TokenFarm.json"
 import contractAddress from "../contracts/contract-address.json";
 
 // All the logic of this dapp is contained in the Dapp component.
@@ -18,6 +19,7 @@ import { ConnectWallet } from "./ConnectWallet";
 import { Loading } from "./Loading";
 import { Stake } from "./Stake";
 import { Unstake } from "./Unstake";
+import { WithdrawYield } from "./WithdrawYield";
 import { Transfer } from "./Transfer";
 import { Exchange } from "./Exchange"
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
@@ -49,7 +51,7 @@ export class KaiDapp extends React.Component {
     // We store multiple things in Dapp's state.
     // You don't need to follow this pattern, but it's an useful example.
     this.initialState = {
-      //which state we are on
+      //which statewe are on
       pagestate: undefined,
       // The info of the token (i.e. It's Name and symbol)
       KAL_tokenData: undefined,
@@ -58,8 +60,9 @@ export class KaiDapp extends React.Component {
       selectedAddress: undefined,
       KAL_balance: undefined,
       KAI_balance: undefined,
-      // The user's token deposit 
-      KAL_deposit: undefined,
+      // The user's stake
+      KAI_staked: undefined, 
+      KAL_harvest: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
       transactionError: undefined,
@@ -72,9 +75,10 @@ export class KaiDapp extends React.Component {
   render() {
     // Ethereum wallets inject the window.ethereum object. If it hasn't been
     // injected, we instruct the user to install MetaMask.
-    if (window.kardiachain === undefined) {      
+    if (window.kardiachain === undefined) {
       return <NoWalletDetected />;
     }
+
     // The next thing we need to do, is to ask the user to connect their wallet.
     // When the wallet gets connected, we are going to save the users's address
     // in the component's state. So, if it hasn't been saved yet, we have
@@ -94,7 +98,7 @@ export class KaiDapp extends React.Component {
 
     // If the token data or the user's Balance hasn't loaded yet, we show
     // a loading component.
-    if (!this.state.KAL_tokenData || !this.state.KAL_balance || !this.state.KAI_tokenData || !this.state.KAI_balance || !this.state.KAL_deposit) {
+    if (!this.state.KAL_tokenData || !this.state.KAL_balance || !this.state.KAI_tokenData || !this.state.KAI_balance) {
       return <Loading />;
     }
 
@@ -110,39 +114,41 @@ export class KaiDapp extends React.Component {
             <p>
               Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
               <b>
-                {this.state.KAL_balance.toString()} {this.state.KAL_tokenData.symbol}
-              </b>
-              {" "}and{" "}
-              <b>
-                {this.state.KAI_balance.toString()} {this.state.KAI_tokenData.symbol}
+                {(this.state.KAI_balance/(10**18)).toString()}{" "}{this.state.KAI_tokenData.symbol}
               </b>
               .
             </p>
             <div className="row">
+            <div className="col-md-auto">
+                KAI Staked:
+                <h2>
+                  { (this.state.KAI_staked) ? (this.state.KAI_staked/(10**18)).toString() : "N/A" }
+                  {" "}
+                  {this.state.KAI_tokenData.symbol}
+                </h2>
+              </div>
               <div className="col-md-auto">
                 KAL to Harvest:
                 <h2>
-                  {this.state.KAL_deposit.toString()} {this.state.KAL_tokenData.symbol}
+                  {(this.state.KAL_harvest) ? (this.state.KAL_harvest/(10**18)).toString() : "N/A"}{" "}{this.state.KAL_tokenData.symbol}
                 </h2>
               </div>
               <div className="col-md-auto">
                 KAL in Wallet:
                 <h2>
-                  {this.state.KAL_balance.toString()} {this.state.KAL_tokenData.symbol}
+                  {(this.state.KAL_balance/(10**18)).toString()}{" "}{this.state.KAL_tokenData.symbol}
                 </h2>
               </div>
-              <div className="col-md-auto">
-                KAI in Wallet:
-                <h2>
-                  {this.state.KAI_balance.toString()} {this.state.KAI_tokenData.symbol}
-                </h2>
-              </div>
+              
             </div>
           </div>
         </div>
 
         <hr />
 
+        {
+          // Bring back to Homepage for any component
+        }
         <div className="row">
           {this.state.pagestate !== 'frontpage' && (
           <div className="btn" role="group">
@@ -186,9 +192,9 @@ export class KaiDapp extends React.Component {
             }
             {this.state.pagestate === 'frontpage' &&
               (<Frontpage changeState={(pgstate) => 
-                this.changePageState(pgstate)
-              }/>)        
-            }
+                this.changePageState(pgstate)}
+                />
+            )}
             {/*
               If the user has no tokens, we don't show the Tranfer form
             */}
@@ -196,25 +202,36 @@ export class KaiDapp extends React.Component {
               <NoTokensMessage selectedAddress={this.state.selectedAddress} />
             )}
             {
-              // Deposit
+              // Stake
             }
-            {this.state.pagestate === 'stake' && this.state.KAL_balance.gt(0) && (
+            {this.state.pagestate === 'stake' && this.state.KAI_balance.gt(0) && (
              <Stake 
-                depositTokens={(amount) =>
-                  this._depositTokens(amount)
+                stakeTokens={(amount) =>
+                  this._stakeTokens(amount)
+                }
+                tokenSymbol={this.state.KAI_tokenData.symbol}
+             /> 
+            )}
+            {
+              // Withdraw Yield
+            }
+            {this.state.pagestate === 'withdraw' && (
+             <WithdrawYield 
+                withdrawYield={() => 
+                  this._withdrawYield()
                 }
                 tokenSymbol={this.state.KAL_tokenData.symbol}
              /> 
             )}
             {
-              // Withdraw
+              // Unstake
             }
             {this.state.pagestate === 'unstake' && (
              <Unstake 
-                withdrawTokens={(amount) =>
-                  this._withdrawTokens(amount)
+                unstakeTokens={(amount) =>
+                  this._unstakeTokens(amount)
                 }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
+                tokenSymbol={this.state.KAI_tokenData.symbol}
              /> 
             )}
             {/*
@@ -266,42 +283,54 @@ export class KaiDapp extends React.Component {
     this.setState({pagestate: newState});
   }
 
-  async _depositTokens(amount){
-    console.log("Despoit amount: %s", amount);
+  async _stakeTokens(amount){
+    console.log("Amount to stake: %s", amount);
     try {
-      // If a transaction fails, we save that error in the component's state.
-      // We only save one such error, so before sending a second transaction, we
-      // clear it.
       this._dismissTransactionError();
 
-      // We send the transaction, and save its hash in the Dapp's state. This
-      // way we can indicate that we are waiting for it to be mined.
-      const tx = await this._kalToken.deposit(amount);
-      this.setState({ txBeingSent: tx.hash });
+      let toStake = ethers.utils.parseEther(amount.toString())
+      await this._kaiToken.approve(this._kalFarm.address, toStake);
+      const tx = await this._kalFarm.stake(toStake);
 
-      // We use .wait() to wait for the transaction to be mined. This method
-      // returns the transaction's receipt.
+      this.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
-      // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {
-        // We can't know the exact error that make the transaction fail once it
-        // was mined, so we throw this generic one.
+        throw new Error("Transaction failed");
+      }
+      await this._updateBalance();
+    } catch (error) {
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+      console.error(error);
+      this.setState({ transactionError: error });
+    } finally {
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _unstakeTokens(amount){
+    console.log("Amount to unstake: %s", amount);
+    try {
+      this._dismissTransactionError();
+
+      let toUnstake = ethers.utils.parseEther(amount.toString())
+      const tx = await this._kalFarm.unstake(toUnstake);
+      
+      this.setState({ txBeingSent: tx.hash });
+      const receipt = await tx.wait();
+
+      if (receipt.status === 0) {
         throw new Error("Transaction failed");
       }
 
-      // If we got here, the transaction was successful, so you may want to
-      // update your state. Here, we update the user's KAL_balance.
       await this._updateBalance();
     } catch (error) {
-      // We check the error code to see if this error was produced because the
-      // user rejected a tx. If that's the case, we do nothing.
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
 
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
       console.error(error);
       this.setState({ transactionError: error });
     } finally {
@@ -311,42 +340,25 @@ export class KaiDapp extends React.Component {
     }
   }
 
-  async _withdrawTokens(amount){
-    console.log("Despoit amount: %s", amount);
+  async _withdrawYield(){
+    console.log("Withdrawing yield");
     try {
-      // If a transaction fails, we save that error in the component's state.
-      // We only save one such error, so before sending a second transaction, we
-      // clear it.
       this._dismissTransactionError();
-
-      // We send the transaction, and save its hash in the Dapp's state. This
-      // way we can indicate that we are waiting for it to be mined.
-      const tx = await this._kalToken.withdraw(amount);
+      const tx = await this._kalFarm.withdrawYield();
+      
       this.setState({ txBeingSent: tx.hash });
-
-      // We use .wait() to wait for the transaction to be mined. This method
-      // returns the transaction's receipt.
       const receipt = await tx.wait();
 
-      // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {
-        // We can't know the exact error that make the transaction fail once it
-        // was mined, so we throw this generic one.
         throw new Error("Transaction failed");
       }
 
-      // If we got here, the transaction was successful, so you may want to
-      // update your state. Here, we update the user's KAL_balance.
       await this._updateBalance();
     } catch (error) {
-      // We check the error code to see if this error was produced because the
-      // user rejected a tx. If that's the case, we do nothing.
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
 
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
       console.error(error);
       this.setState({ transactionError: error });
     } finally {
@@ -368,36 +380,19 @@ export class KaiDapp extends React.Component {
 
     // To connect to the user's wallet, we have to run this method.
     // It returns a promise that will resolve to the user's address.
-    //const [selectedAddress] = await window.ethereum.request({ method: "eth_requestAccounts"})
     const [selectedAddress] = await window.kardiachain.request({ method: "eth_requestAccounts"})
-
-    //console.log("Kardia wallet: %s", KAIaccount);
 
     // Once we have the address, we can initialize the application.
 
     // First we check the network
-    if (!(await this._checkNetwork())) {
+    if (!this._checkNetwork()) {
       return;
     }
 
     this._initialize(selectedAddress);
 
-    window.kardiachain.on("accountsChanged", ([newAddress]) => {
-      this._stopPollingData();
-      if (newAddress === undefined) {
-        return this._resetState();
-      }
-      
-      this._initialize(newAddress);
-    });
-
-    window.kardiachain.on("networkChanged", ([networkId]) => {
-        this._stopPollingData();
-        this._resetState();
-    });
-/*
     // We reinitialize it whenever the user changes their account.
-    window.ethereum.on("accountsChanged", ([newAddress]) => {
+    window.kardiachain.on("accountsChanged", ([newAddress]) => {
       this._stopPollingData();
       // `accountsChanged` event can be triggered with an undefined newAddress.
       // This happens when the user removes the Dapp from the "Connected
@@ -411,10 +406,10 @@ export class KaiDapp extends React.Component {
     });
     
     // We reset the dapp state if the network is changed
-    window.ethereum.on("networkChanged", ([networkId]) => {
+    window.kardiachain.on("networkChanged", ([networkId]) => {
       this._stopPollingData();
       this._resetState();
-    });*/
+    });
   }
 
   _initialize(userAddress) {
@@ -438,9 +433,6 @@ export class KaiDapp extends React.Component {
 
   async _intializeEthers() {
     // We first initialize ethers by creating a provider using window.ethereum
-    //this._provider = new ethers.providers.Web3Provider(window.ethereum);
-    window.kardiachain.networkVersion = HARDHAT_NETWORK_ID;
-    window.kardiachain.chainId = "0x" + parseInt(HARDHAT_NETWORK_ID).toString(16);
     this._provider = new ethers.providers.Web3Provider(window.kardiachain);
 
     // When, we initialize the contract using that provider and the token's
@@ -454,6 +446,12 @@ export class KaiDapp extends React.Component {
     this._kaiToken = new ethers.Contract(
       contractAddress.Kardia,
       KardiaArtifact.abi,
+      this._provider.getSigner(0)
+    );
+
+    this._kalFarm = new ethers.Contract(
+      contractAddress.TokenFarm,
+      TokenFarmArtifact.abi,
       this._provider.getSigner(0)
     );
   }
@@ -482,27 +480,31 @@ export class KaiDapp extends React.Component {
   async _getTokenData() {
     let name = await this._kalToken.name();
     let symbol = await this._kalToken.symbol();
-    let decimals = await this._kalToken.decimals();
 
-    this.setState({ KAL_tokenData: { name, symbol, decimals } });
+    this.setState({ KAL_tokenData: { name, symbol } });
 
     
     name = await this._kaiToken.name();
     symbol = await this._kaiToken.symbol();
-    decimals = await this._kaiToken.decimals();
 
-    this.setState({ KAI_tokenData: { name, symbol, decimals } });
+    this.setState({ KAI_tokenData: { name, symbol } });
   }
 
   async _updateBalance() {
-    let KAL_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
-    this.setState({ KAL_balance });   
+    const KAL_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
+    this.setState({ KAL_balance });
+   
 
-    let KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
+    const KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
     this.setState({ KAI_balance });
+
     
-    let KAL_deposit = await this._kalToken.depositAmount(this.state.selectedAddress);
-    this.setState({ KAL_deposit });
+    const KAI_staked = await this._kalFarm.stakingBalance(this.state.selectedAddress);
+    this.setState({ KAI_staked });
+    
+    const KAL_harvest = (await this._kalFarm.calculateYieldTotal(this.state.selectedAddress)) 
+                      + (await this._kalFarm.kalBalance(this.state.selectedAddress)/(10**18));
+    this.setState({ KAL_harvest });
   }
   
   // This method sends an ethereum transaction to transfer tokens.
@@ -603,16 +605,12 @@ export class KaiDapp extends React.Component {
   }
 
   // This method checks if Metamask selected network is Localhost:8545 
-  async _checkNetwork() {  
+  async _checkNetwork() {
     let chainID = await window.kardiachain.request({ method: "eth_chainId"})
     chainID = (parseInt(chainID)).toString();
     if (chainID === HARDHAT_NETWORK_ID){
       return true;
     }
-/*
-    if (window.ethereum.networkVersion === HARDHAT_NETWORK_ID) {
-      return true;
-    }*/
 
     this.setState({ 
       networkError: 'Please connect Kardia Wallet to Localhost:8545'

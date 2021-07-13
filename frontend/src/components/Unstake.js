@@ -1,9 +1,9 @@
 import React from "react";
 
-export function Unstake({ withdrawTokens, tokenSymbol }) {
+export function Unstake({ unstakeTokens, tokenSymbol }) {
   return (
     <div>
-      <h4>Withdraw</h4>
+      <h4>Unstake</h4>
       <form
         onSubmit={(event) => {
           // This function just calls the transferTokens callback with the
@@ -14,12 +14,12 @@ export function Unstake({ withdrawTokens, tokenSymbol }) {
           const amount = formData.get("amount");
 
           if (amount) {
-            withdrawTokens(amount);
+            unstakeTokens(amount);
           }
         }}
       >
         <div className="form-group">
-          <label>Amount of {tokenSymbol} to Withdraw</label>
+          <label>Amount of {tokenSymbol} to Unstake</label>
           <input
             className="form-control"
             type="number"
@@ -30,7 +30,7 @@ export function Unstake({ withdrawTokens, tokenSymbol }) {
           />
         </div>
         <div className="form-group">
-          <input className="btn btn-primary" type="submit" value="Withdraw" />
+          <input className="btn btn-danger" type="submit" value="Unstake" />
         </div>
 
       </form>        
