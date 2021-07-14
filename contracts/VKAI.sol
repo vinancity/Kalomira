@@ -24,8 +24,7 @@ contract VKAI is ERC20, Ownable {
 
     uint constant PRECISION = 10**4;
 
-    constructor(uint _totalDeposit, uint _initialSupply)
-        ERC20("Interest Bearing KAI Token", "ibKAI")
+    constructor(uint _totalDeposit, uint _initialSupply) ERC20("Interest Bearing KAI Token", "ibKAI") payable
     {
         totalReserve = 0;
         totalDeposit = _totalDeposit;
@@ -33,7 +32,7 @@ contract VKAI is ERC20, Ownable {
         // _mint(_msgSender(), 100 ether);
     }
 
-    function a() public payable {
+    fallback() external payable {
         this.deposit();
     }
 

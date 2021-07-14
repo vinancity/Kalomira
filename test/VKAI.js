@@ -22,11 +22,16 @@ describe("VKAI Token", () => {
       web3.utils.toWei("100", "ether"), // _totalDeposit
       web3.utils.toWei("100", "ether") // _initialSupply
     );
-    // await web3.eth.sendTransaction({
-    //   from: addr3,
-    //   to: vkaiToken.address,
-    //   value: web3.utils.toWei("100", "ether"),
-    // });
+
+    try {
+      await web3.eth.sendTransaction({
+        from: addr3,
+        to: vkaiToken.address,
+        value: web3.utils.toWei("100", "ether"),
+      });
+    } catch (err) {
+      console.error(err);
+    }
 
     console.log(`Kardia Staking Contract: ${kardiaStaking.address}`);
     stakingContractAddress = kardiaStaking.address;
