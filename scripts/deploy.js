@@ -43,6 +43,8 @@ async function main() {
   deployments.push({name: "TokenFarm", addr: farm.address});
   console.log(deployments[2].name, deployments[2].addr);
 
+  await kal_token._transferOwnership(farm.address);
+
 
   // We also save the contract's artifacts and address in the frontend directory
   saveFrontendFiles(deployments);
