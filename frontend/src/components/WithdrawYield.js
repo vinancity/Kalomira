@@ -13,7 +13,7 @@ export function WithdrawYield({ withdrawYield, tokenSymbol }) {
         }}
       >
         <div className="form-group">
-          <input className="btn btn-danger" type="submit" value="Withdraw" />
+          <input className="btn btn-primary" type="submit" value="Withdraw" />
         </div>
 
       </form>        
