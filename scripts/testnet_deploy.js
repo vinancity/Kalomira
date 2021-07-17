@@ -52,15 +52,23 @@ async function main(){
     let contract = JSON.parse(rawdata);
     const kal_token = await deployKardiaContract(contract, [], "Kalomira");
 
+    /*
     path = contractsDir + "/Kardia.json";
     rawdata = fs.readFileSync(path);
     contract = JSON.parse(rawdata);
-    const kai_token = await deployKardiaContract(contract, [], "KardiachainToken");
+    const kai_token = await deployKardiaContract(contract, [], "KardiachainToken");*/
+
+    path = contractsDir + "/ibKAI.json";
+    rawdata = fs.readFileSync(path);
+    contract = JSON.parse(rawdata);    
+    const deposit = 5000000000000000000;
+    const initialSupply = 100000000000000000000;
+    const ibKAI_token = await deployKardiaContract(contract, [deposit, initialSupply], "ibKAI");
 
     path = contractsDir + "/TokenFarm.json";
     rawdata = fs.readFileSync(path);
     contract = JSON.parse(rawdata);
-    const farm = await deployKardiaContract(contract, [kai_token.address, kal_token.address], "TokenFarm");
+    const farm = await deployKardiaContract(contract, [ibKAI_token.address, kal_token.address], "TokenFarm");
 
 }
 

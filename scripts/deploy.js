@@ -1,5 +1,4 @@
-// This is a script for deploying your contracts. You can adapt it to deploy
-// yours, or create new ones.
+
 async function main() {
   // This is just a convenience check
   if (network.name === "hardhat") {
@@ -24,24 +23,28 @@ async function main() {
   const Kalomira = await ethers.getContractFactory("Kalomira");
   let kal_token = await Kalomira.deploy();
   await kal_token.deployed();
-
   deployments.push({name: "Kalomira", addr: kal_token.address});
   console.log(deployments[0].name, deployments[0].addr);
   
-
   const Kardia = await ethers.getContractFactory("KardiachainToken");
   let kai_token = await Kardia.deploy();
   await kai_token.deployed();
-
   deployments.push({name: "Kardia", addr: kai_token.address});
   console.log(deployments[1].name, deployments[1].addr);
 
-  const TokenFarm = await ethers.getContractFactory("TokenFarm");
-  let farm = await TokenFarm.deploy(kai_token.address, kal_token.address);
-  await farm.deployed();
-
-  deployments.push({name: "TokenFarm", addr: farm.address});
+  const ibKAI = await ethers.getContractFactory("ibKAI");
+  const deposit = ethers.utils.parseEther("5");
+  const initialSupply = ethers.utils.parseEther("100");
+  let ibkai_token = await ibKAI.deploy(deposit, initialSupply);
+  await ibkai_token.deployed( );
+  deployments.push({name: "ibKAI", addr: ibkai_token.address});
   console.log(deployments[2].name, deployments[2].addr);
+
+  const TokenFarm = await ethers.getContractFactory("TokenFarm");
+  let farm = await TokenFarm.deploy(ibkai_token.address, kal_token.address);
+  await farm.deployed();
+  deployments.push({name: "TokenFarm", addr: farm.address});
+  console.log(deployments[3].name, deployments[3].addr);
 
   await kal_token._transferOwnership(farm.address);
 
@@ -62,7 +65,8 @@ function saveFrontendFiles(deployments) {
     contractsDir + "/contract-address.json",
     JSON.stringify({ [deployments[0].name]: deployments[0].addr, 
                      [deployments[1].name]: deployments[1].addr,
-                     [deployments[2].name]: deployments[2].addr }, undefined, 2),
+                     [deployments[2].name]: deployments[2].addr,
+                     [deployments[3].name]: deployments[3].addr}, undefined, 2),
   );
 
   const KalomiraArtifact = artifacts.readArtifactSync("Kalomira");
@@ -75,6 +79,12 @@ function saveFrontendFiles(deployments) {
   fs.writeFileSync(
     contractsDir + "/Kardia.json",
     JSON.stringify(KardiaArtifact, null, 2)
+  );
+
+  const ibKAIArtifact = artifacts.readArtifactSync("ibKAI");
+  fs.writeFileSync(
+    contractsDir + "/ibKAI.json",
+    JSON.stringify(ibKAIArtifact, null, 2)
   );
 
   const FarmArtifact = artifacts.readArtifactSync("TokenFarm");

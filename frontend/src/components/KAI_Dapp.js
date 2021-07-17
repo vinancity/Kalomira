@@ -6,7 +6,8 @@ import { ethers } from "ethers";
 // We import the contract's artifacts and address here, as we are going to be
 // using them with ethers
 import KalomiraArtifact from "../contracts/Kalomira.json";
-import KardiaArtifact from "../contracts/Kardia.json";
+//import KardiaArtifact from "../contracts/Kardia.json";
+import ibKAIArtifact from "../contracts/ibKAI.json";
 import TokenFarmArtifact from "../contracts/TokenFarm.json"
 import contractAddress from "../contracts/contract-address.json";
 
@@ -289,7 +290,7 @@ export class KaiDapp extends React.Component {
       this._dismissTransactionError();
 
       let toStake = ethers.utils.parseEther(amount.toString())
-      await this._kaiToken.approve(this._kalFarm.address, toStake);
+      await this._ibKaiToken.approve(this._kalFarm.address, toStake);
       const tx = await this._kalFarm.stake(toStake);
 
       this.setState({ txBeingSent: tx.hash });
@@ -443,9 +444,9 @@ export class KaiDapp extends React.Component {
       this._provider.getSigner(0)
     );
 
-    this._kaiToken = new ethers.Contract(
-      contractAddress.Kardia,
-      KardiaArtifact.abi,
+    this._ibKaiToken = new ethers.Contract(
+      contractAddress.ibKAI,
+      ibKAIArtifact.abi,
       this._provider.getSigner(0)
     );
 
@@ -484,8 +485,8 @@ export class KaiDapp extends React.Component {
     this.setState({ KAL_tokenData: { name, symbol } });
 
     
-    name = await this._kaiToken.name();
-    symbol = await this._kaiToken.symbol();
+    name = await this._ibKaiToken.name();
+    symbol = await this._ibKaiToken.symbol();
 
     this.setState({ KAI_tokenData: { name, symbol } });
   }
@@ -495,7 +496,7 @@ export class KaiDapp extends React.Component {
     this.setState({ KAL_balance });
    
 
-    const KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
+    const KAI_balance = await this._ibKaiToken.balanceOf(this.state.selectedAddress);
     this.setState({ KAI_balance });
 
     
@@ -539,7 +540,7 @@ export class KaiDapp extends React.Component {
       }
       else if(symbol === this.state.KAI_tokenData.symbol){
         console.log("transferring KAI");
-        tx = await this._kaiToken.transfer(to, amount);
+        tx = await this._ibKaiToken.transfer(to, amount);
       }
       else{
         throw new Error("Cannot transfer token");

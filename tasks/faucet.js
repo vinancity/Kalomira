@@ -30,7 +30,8 @@ task("faucet", "Sends ETH and tokens to an address")
     }
 
     const token = await ethers.getContractAt("Kalomira", address.Kalomira);
-    const token1 = await ethers.getContractAt("KardiachainToken", address.Kardia);
+    //const token1 = await ethers.getContractAt("KardiachainToken", address.Kardia);
+    const token1 = await ethers.getContractAt("ibKAI", address.ibKAI);
     const [sender] = await ethers.getSigners();
 
     const numTokens = 5;
@@ -47,5 +48,5 @@ task("faucet", "Sends ETH and tokens to an address")
     });
     await tx2.wait();
 
-    console.log(`Transferred 1 ETH, ${numTokens} KAL, and ${numTokens} KAI to ${receiver}`);
+    console.log(`Transferred 1 ETH and ${numTokens} ibKAI to ${receiver}`);
   });

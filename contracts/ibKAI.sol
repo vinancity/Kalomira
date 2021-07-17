@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./libraries/WadRayMath.sol";
 import "./interfaces/IKardiaStaking.sol";
 
-contract VKAI is ERC20, Ownable {
+contract ibKAI is ERC20, Ownable {
     using SafeMath for uint;
     using WadRayMath for uint;
 
@@ -86,12 +86,12 @@ contract VKAI is ERC20, Ownable {
         uint rate = _getRateFromDeposit(kaiAmount);
         uint subRate = WadRayMath.ray().sub(rate);
         uint supply = totalSupply();
-        uint vkaiToMint = kaiAmount;
+        uint ibKaiToMint = kaiAmount;
         if (supply > 0) {
-            vkaiToMint = (rate.rayMul(supply)).rayDiv(subRate);
+            ibKaiToMint = (rate.rayMul(supply)).rayDiv(subRate);
         }
-        //console.log("vkai to %s mint %s - subRate: %s:", supply, vkaiToMint, subRate);
-        return vkaiToMint;
+        //console.log("ibKai to %s mint %s - subRate: %s:", supply, ibKaiToMint, subRate);
+        return ibKaiToMint;
     }
 
     function _getKAIRedeemAmount(uint ibKaiAmount) internal view returns (uint) {

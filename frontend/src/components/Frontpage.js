@@ -36,7 +36,7 @@ export function Frontpage({ changeState }) {
             <div className="dropdown-menu">
               <div className="dropdown-item" onClick={() => page("transferKAL")}>Transfer KAL</div>
               <div className="dropdown-divider"></div>
-              <div className="dropdown-item" onClick={() => page("transferKAI")}>Transfer KAI</div>
+              <div className="dropdown-item" onClick={() => page("transferKAI")}>Transfer ibKAI</div>
             </div>
           </div>
 
