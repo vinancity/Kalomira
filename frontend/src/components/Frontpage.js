@@ -1,5 +1,4 @@
 import React from "react";
-//import { Confirmation } from "./Confirmation.js"
 
 export function Frontpage({ changeState }) {
 
@@ -38,10 +37,6 @@ export function Frontpage({ changeState }) {
               <div className="dropdown-divider"></div>
               <div className="dropdown-item" onClick={() => page("transferKAI")}>Transfer ibKAI</div>
             </div>
-          </div>
-
-          <div className="btn">
-            <button className="btn btn-info" type="button" onClick={() => page("exchange")}>Exchange</button>
           </div>
           {/*
           <div className="btn">
