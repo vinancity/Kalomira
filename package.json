@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy:kai": "node scripts/deploy_kardia.js"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "web3": "1.4.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.2.0"
+    "@openzeppelin/contracts": "4.2.0",
+    "kardia-js-sdk": "0.4.6"
   }
 }

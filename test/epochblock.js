@@ -2,6 +2,7 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const VKAI = artifacts.require("VKAI");
 const KardiaStakingMock = artifacts.require("KardiaStakingMock");
+const EpochBlock = artifacts.require("EpochBlock");
 
 describe("VKAI Token", () => {
   let accounts;
