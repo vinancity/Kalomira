@@ -59,10 +59,12 @@ contract MasterChef is Ownable {
     Kalomira public kalo;
     // Dev address.
     address public devaddr;
-    // Block number when bonus KALO period ends.
-    uint256 public bonusEndBlock;
+    // The block number when KALO mining starts.
+    uint256 public startBlock;
     // KALO tokens created per block.
     uint256 public kaloPerBlock;
+    // Block number when bonus SUSHI period ends.
+    uint256 public bonusEndBlock;
     // Bonus muliplier for early kalo makers.
     uint256 public constant BONUS_MULTIPLIER = 10;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
@@ -73,28 +75,23 @@ contract MasterChef is Ownable {
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when KALO mining starts.
-    uint256 public startBlock;
+  
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event EmergencyWithdraw(
-        address indexed user,
-        uint256 indexed pid,
-        uint256 amount
-    );
+    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
         Kalomira _kalo,
         address _devaddr,
-        uint256 _kaloPerBlock,
         uint256 _startBlock,
-        uint256 _bonusEndBlock
-    ) public {
+        uint256 _kaloPerBlock,
+        uint256 _bonusEndBlock        
+    ) {
         kalo = _kalo;
         devaddr = _devaddr;
-        kaloPerBlock = _kaloPerBlock;
-        bonusEndBlock = _bonusEndBlock;
         startBlock = _startBlock;
+        kaloPerBlock = _kaloPerBlock;
+        bonusEndBlock = _bonusEndBlock;    
     }
 
     function poolLength() external view returns (uint256) {
@@ -149,11 +146,7 @@ contract MasterChef is Ownable {
     }
 
     // Return reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256)
-    {
+    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {       
         if (_to <= bonusEndBlock) {
             return _to.sub(_from).mul(BONUS_MULTIPLIER);
         } else if (_from >= bonusEndBlock) {
@@ -282,8 +275,9 @@ contract MasterChef is Ownable {
     }
 
     // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(msg.sender == devaddr, "dev: wut?");
+    function setDev(address _devaddr) public {
+        require(msg.sender == devaddr, "setDev: FORBIDDEN");
+        require(devaddr != address(0), "setDev: ZERO ADDRESS");
         devaddr = _devaddr;
     }
 }

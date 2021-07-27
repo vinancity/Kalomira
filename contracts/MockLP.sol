@@ -7,5 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MockLP is ERC20, Ownable{
     
-    constructor() ERC20("MockLP", "MLP") { }
+    constructor(
+        string memory name, 
+        string memory symbol, 
+        uint256 supply
+    ) ERC20(name, symbol) { 
+        _mint(msg.sender, supply);
+    }
 }

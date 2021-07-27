@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Kalomira is ERC20, Ownable{
     
-    constructor() ERC20("Kalomira", "KAL") { }
+    constructor() ERC20("Kalomira", "KALO") { }
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
