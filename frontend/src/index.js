@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-//import { Dapp } from "./components/Dapp";
+import { Dapp } from "./components/Dapp";
 import { KaiDapp } from "./components/KAI_Dapp";
 
 // We import bootstrap here, but you can remove if you want
@@ -13,7 +13,7 @@ import "bootstrap/js/dist/modal"
 
 ReactDOM.render(
   <React.StrictMode>
-    <KaiDapp />
+    <Dapp />
   </React.StrictMode>,
   document.getElementById("root")
 );

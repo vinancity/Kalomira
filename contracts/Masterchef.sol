@@ -53,7 +53,7 @@ contract MasterChef is Ownable {
         IERC20 lpToken; // Address of LP token contract.
         uint256 allocPoint; // How many allocation points assigned to this pool. KALOs to distribute per block.
         uint256 lastRewardBlock; // Last block number that KALOs distribution occurs.
-        uint256 accKaloPerShare; // Accumulated KALOs per share, times 1e12. See below.
+        uint256 accKaloPerShare; // Accumulated KALOs per share, times 1e18. See below.
     }
     // The KALO TOKEN!
     Kalomira public kalo;
@@ -93,6 +93,10 @@ contract MasterChef is Ownable {
         kaloPerBlock = _kaloPerBlock;
         bonusEndBlock = _bonusEndBlock;    
     }
+
+    function getBlock() external view returns (uint256) {
+        return block.number;
+    } 
 
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
@@ -177,10 +181,10 @@ contract MasterChef is Ownable {
                     totalAllocPoint
                 );
             accKaloPerShare = accKaloPerShare.add(
-                kaloReward.mul(1e12).div(lpSupply)
+                kaloReward.mul(1e18).div(lpSupply)
             );
         }
-        return user.amount.mul(accKaloPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accKaloPerShare).div(1e18).sub(user.rewardDebt);
     }
 
     // Update reward vairables for all pools. Be careful of gas spending!
@@ -210,7 +214,7 @@ contract MasterChef is Ownable {
         kalo.mint(devaddr, kaloReward.div(10));
         kalo.mint(address(this), kaloReward);
         pool.accKaloPerShare = pool.accKaloPerShare.add(
-            kaloReward.mul(1e12).div(lpSupply)
+            kaloReward.mul(1e18).div(lpSupply)
         );
         pool.lastRewardBlock = block.number;
     }
@@ -222,7 +226,7 @@ contract MasterChef is Ownable {
         updatePool(_pid);
         if (user.amount > 0) {
             uint256 pending =
-                user.amount.mul(pool.accKaloPerShare).div(1e12).sub(
+                user.amount.mul(pool.accKaloPerShare).div(1e18).sub(
                     user.rewardDebt
                 );
             safeKaloTransfer(msg.sender, pending);
@@ -233,7 +237,7 @@ contract MasterChef is Ownable {
             _amount
         );
         user.amount = user.amount.add(_amount);
-        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e18);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
@@ -244,12 +248,12 @@ contract MasterChef is Ownable {
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
         uint256 pending =
-            user.amount.mul(pool.accKaloPerShare).div(1e12).sub(
+            user.amount.mul(pool.accKaloPerShare).div(1e18).sub(
                 user.rewardDebt
             );
         safeKaloTransfer(msg.sender, pending);
         user.amount = user.amount.sub(_amount);
-        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e18);
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
     }

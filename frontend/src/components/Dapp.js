@@ -6,38 +6,33 @@ import { ethers } from "ethers";
 // We import the contract's artifacts and address here, as we are going to be
 // using them with ethers
 import KalomiraArtifact from "../contracts/Kalomira.json";
-import KardiaArtifact from "../contracts/Kardia.json";
+import ibKAIArtifact from "../contracts/ibKAI.json";
+import MockLPArtifact from "../contracts/MockLP.json"
+import MasterChefArtifact from "../contracts/MasterChef.json"
 import TokenFarmArtifact from "../contracts/TokenFarm.json"
 import contractAddress from "../contracts/contract-address.json";
 
-// All the logic of this dapp is contained in the Dapp component.
-// These other components are just presentational ones: they don't have any
-// logic. They just render HTML.
-import { Frontpage } from "./Frontpage";
+//import { Frontpage } from "./Frontpage";
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
+import { Farms } from "./Farms"
 import { Loading } from "./Loading";
-import { Stake } from "./Stake";
-import { Unstake } from "./Unstake";
-import { WithdrawYield } from "./WithdrawYield";
-import { Transfer } from "./Transfer";
-import { Exchange } from "./Exchange"
+//import { Stake } from "./Stake";
+//import { Unstake } from "./Unstake";
+//import { WithdrawYield } from "./WithdrawYield";
+//import { Transfer } from "./Transfer";
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
-import { NoTokensMessage } from "./NoTokensMessage";
-
-// This is the Hardhat Network id, you might change it in the hardhat.config.js
-// Here's a list of network ids https://docs.metamask.io/guide/ethereum-provider.html#properties
-// to use when deploying to other networks.
-const HARDHAT_NETWORK_ID = '31337';
-
+//import { NoTokensMessage } from "./NoTokensMessage";
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
+const ethNetwork = "http://127.0.0.1:8545";
+const kaiNetwork = "https://dev-1.kardiachain.io";
 
 // This component is in charge of doing these things:
 //   1. It connects to the user's wallet
 //   2. Initializes ethers and the Token contract
-//   3. Polls the user KAL_balance to keep it updated.
+//   3. Polls the user KALO_balance to keep it updated.
 //   4. Transfers tokens by sending transactions
 //   5. Renders the whole application
 //
@@ -54,15 +49,23 @@ export class Dapp extends React.Component {
       //which statewe are on
       pagestate: undefined,
       // The info of the token (i.e. It's Name and symbol)
-      KAL_tokenData: undefined,
+      KALO_tokenData: undefined,
       KAI_tokenData: undefined,
+      Pools: [],
+      UserInfo: [],
+      PendingRewards: [],
+      LP_tokenData: [],
+      LP1_tokenData: undefined,
+      LP2_tokenData: undefined,
       // The user's address and token balances
       selectedAddress: undefined,
-      KAL_balance: undefined,
-      KAI_balance: undefined,
+      KALO_balance: undefined,
+      ibKAI_balance: undefined,
+      LP1_balance: undefined,
+      LP2_balance: undefined,
       // The user's stake
-      KAI_staked: undefined, 
-      KAL_harvest: undefined,
+      LP_staked: undefined, 
+      KALO_harvest: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
       transactionError: undefined,
@@ -75,21 +78,14 @@ export class Dapp extends React.Component {
   render() {
     // Ethereum wallets inject the window.ethereum object. If it hasn't been
     // injected, we instruct the user to install MetaMask.
-    if (window.ethereum === undefined) {
+    if (!window.ethereum && !window.kardiachain) {
       return <NoWalletDetected />;
     }
 
-    // The next thing we need to do, is to ask the user to connect their wallet.
-    // When the wallet gets connected, we are going to save the users's address
-    // in the component's state. So, if it hasn't been saved yet, we have
-    // to show the ConnectWallet component.
-    //
-    // Note that we pass it a callback that is going to be called when the user
-    // clicks a button. This callback just calls the _connectWallet method.
     if (!this.state.selectedAddress) {
       return (
         <ConnectWallet 
-          connectWallet={() => this._connectWallet()} 
+          connectWallet={(wallet) => this._connectWallet(wallet)} 
           networkError={this.state.networkError}
           dismiss={() => this._dismissNetworkError()}
         />
@@ -98,85 +94,71 @@ export class Dapp extends React.Component {
 
     // If the token data or the user's Balance hasn't loaded yet, we show
     // a loading component.
-    if (!this.state.KAL_tokenData || !this.state.KAL_balance || !this.state.KAI_tokenData || !this.state.KAI_balance) {
+    if (!this.state.KALO_tokenData || !this.state.KALO_balance 
+     || !this.state.KAI_tokenData || !this.state.ibKAI_balance
+     || !this.state.LP1_tokenData || !this.state.LP1_balance
+     || !this.state.LP2_tokenData || !this.state.LP2_balance
+     || !this.state.Pools.length || !this.state.UserInfo.length ) {
       return <Loading />;
     }
 
-    // If everything is loaded, we render the application.
     return (
       
       <div className="container p-4">       
         <div className="row">
           <div className="col-12">
             <h1>
-              {this.state.KAL_tokenData.name} ({this.state.KAL_tokenData.symbol})
+              {this.state.KALO_tokenData.name} ({this.state.KALO_tokenData.symbol})
             </h1>
             <p>
-              Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
+              Welcome <b>{this.state.selectedAddress}</b>
+            </p>
+            <p>
+              You have{" "}
               <b>
-                {(this.state.KAI_balance/(10**18)).toString()}{" "}{this.state.KAI_tokenData.symbol}
+                {(this.state.ibKAI_balance/(10**18)).toFixed(4)}{" "}{this.state.KAI_tokenData.symbol}
+              </b>
+              {", "}
+              <b>
+                {(this.state.LP1_balance/(10**18)).toFixed(4)}{" "}{this.state.LP1_tokenData.name}
+              </b>
+              {", "}and{" "}
+              <b>
+                {(this.state.LP2_balance/(10**18)).toFixed(4)}{" "}{this.state.LP2_tokenData.name}
               </b>
               .
             </p>
             <div className="row">
             <div className="col-md-auto">
-                KAI Staked:
+              Total LP Staked:
                 <h2>
-                  { (this.state.KAI_staked) ? (this.state.KAI_staked/(10**18)).toString() : "N/A" }
-                  {" "}
-                  {this.state.KAI_tokenData.symbol}
+                  { (this.state.LP_staked) ? (this.state.LP_staked/(10**18)).toFixed(4) : "N/A" }{" LP"}
                 </h2>
               </div>
               <div className="col-md-auto">
-                KAL to Harvest:
+                {this.state.KALO_tokenData.symbol} to Harvest:
                 <h2>
-                  {(this.state.KAL_harvest) ? (this.state.KAL_harvest/(10**18)).toString() : "N/A"}{" "}{this.state.KAL_tokenData.symbol}
+                  {(this.state.KALO_harvest) ? (this.state.KALO_harvest/(10**18)).toString() : "N/A"}{" "}{this.state.KALO_tokenData.symbol}
                 </h2>
               </div>
               <div className="col-md-auto">
-                KAL in Wallet:
+                {this.state.KALO_tokenData.symbol} in Wallet:
                 <h2>
-                  {(this.state.KAL_balance/(10**18)).toString()}{" "}{this.state.KAL_tokenData.symbol}
+                  {(this.state.KALO_balance/(10**18)).toString()}{" "}{this.state.KALO_tokenData.symbol}
                 </h2>
               </div>
               
             </div>
           </div>
         </div>
-
         <hr />
-
-        {
-          // Bring back to Homepage for any component
-        }
-        <div className="row">
-          {this.state.pagestate !== 'frontpage' && (
-          <div className="btn" role="group">
-            <button className="btn btn-secondary" type="button" 
-              onClick={() => {
-                this.setState({pagestate: 'frontpage'});
-                console.log('frontpage');
-              }
-            }>Back to Home</button>
-          </div>)}
-        </div>
 
         <div className="row">
           <div className="col-12">
-            {/* 
-              Sending a transaction isn't an immidiate action. You have to wait
-              for it to be mined.
-              If we are waiting for one, we show a message here.
-            */}
             {this.state.txBeingSent && (
               <WaitingForTransactionMessage txHash={this.state.txBeingSent} />
             )}
-
-            {/* 
-              Sending a transaction can fail in multiple ways. 
-              If that happened, we show a message here.
-            */}
-            {this.state.transactionError && (
+                        {this.state.transactionError && (
               <TransactionErrorMessage
                 message={this._getRpcErrorMessage(this.state.transactionError)}
                 dismiss={() => this._dismissTransactionError()}
@@ -187,91 +169,17 @@ export class Dapp extends React.Component {
 
         <div className="row">
           <div className="col-12">
-            {
-              // Front page
-            }
-            {this.state.pagestate === 'frontpage' &&
-              (<Frontpage changeState={(pgstate) => 
-                this.changePageState(pgstate)}
+            {/* Front page */}
+            {this.state.pagestate === 'frontpage' && this.state.Pools.length && this.state.UserInfo.length && 
+              ( <Farms 
+                  stakeLP={(pid, amount) => this._stakeTokens(pid, amount)}
+                  unstakeLP={(pid, amount) => this._unstakeTokens(pid, amount)}
+                  LP_data={this.state.LP_tokenData}
+                  pools={this.state.Pools}
+                  userInfo={this.state.UserInfo}
+                  pendingRewards={this.state.PendingRewards}
                 />
-            )}
-            {/*
-              If the user has no tokens, we don't show the Tranfer form
-            */}
-            {this.state.KAL_balance.eq(0) && this.state.KAI_balance.eq(0) && (
-              <NoTokensMessage selectedAddress={this.state.selectedAddress} />
-            )}
-            {
-              // Stake
-            }
-            {this.state.pagestate === 'stake' && this.state.KAI_balance.gt(0) && (
-             <Stake 
-                stakeTokens={(amount) =>
-                  this._stakeTokens(amount)
-                }
-                tokenSymbol={this.state.KAI_tokenData.symbol}
-             /> 
-            )}
-            {
-              // Withdraw Yield
-            }
-            {this.state.pagestate === 'withdraw' && (
-             <WithdrawYield 
-                withdrawYield={() => 
-                  this._withdrawYield()
-                }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
-             /> 
-            )}
-            {
-              // Unstake
-            }
-            {this.state.pagestate === 'unstake' && (
-             <Unstake 
-                unstakeTokens={(amount) =>
-                  this._unstakeTokens(amount)
-                }
-                tokenSymbol={this.state.KAI_tokenData.symbol}
-             /> 
-            )}
-            {/*
-              This component displays a form that the user can use to send a 
-              transaction and transfer some tokens.
-              The component doesn't have logic, it just calls the transferTokens
-              callback.
-            */}
-            {this.state.pagestate === 'transfer' && this.state.KAL_balance.gt(0) && (
-              <Transfer
-                transferTokens={(to, amount) =>
-                  this._transferTokens(to, amount)
-                }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
-              />
-            )}
-
-            {this.state.pagestate === 'transferKAL' && this.state.KAL_balance.gt(0) && (
-              <Transfer
-                transferTokens={(to, amount, symbol) =>
-                  this._transferTokens(to, amount, symbol)
-                }
-                tokenSymbol={this.state.KAL_tokenData.symbol}
-              />
-            )}
-
-            {this.state.pagestate === 'transferKAI' && this.state.KAI_balance.gt(0) && (
-              <Transfer
-                transferTokens={(to, amount, symbol) =>
-                  this._transferTokens(to, amount, symbol)
-                }
-                tokenSymbol={this.state.KAI_tokenData.symbol}
-              />
-            )}
-            {
-              // Exchange
-            }
-            {this.state.pagestate === 'exchange' && (this.state.KAL_balance.gt(0) || this.state.KAI_balance.gt(0)) && (
-             <Exchange /> 
-            )}
+            )}      
           </div>
         </div>
       </div>
@@ -279,18 +187,39 @@ export class Dapp extends React.Component {
   }
 
   changePageState(newState) {
-    console.log(newState);
+    //console.log(newState);
     this.setState({pagestate: newState});
   }
 
-  async _stakeTokens(amount){
+  async totalStaked(userAddr){
+    let length = await this._masterchef.poolLength();
+    let total = 0;
+  
+    for(let x = 0; x < length; x++){
+      total += Number((await this._masterchef.userInfo(x, userAddr)).amount)
+    }
+    return total.toString();
+  }
+
+  async totalHarvestable(userAddr){
+    let length = await this._masterchef.poolLength();
+    let total = 0;
+  
+    for(let x = 0; x < length; x++){
+      total += Number((await this._masterchef.pendingKalo(x, userAddr)))
+    }
+    return total.toString();
+  }
+
+  async _stakeTokens(pid, amount){
     console.log("Amount to stake: %s", amount);
     try {
       this._dismissTransactionError();
 
-      let toStake = ethers.utils.parseEther(amount.toString())
-      await this._kaiToken.approve(this._kalFarm.address, toStake);
-      const tx = await this._kalFarm.stake(toStake);
+      let toStake = ethers.utils.parseEther(amount)
+      console.log(pid)
+      await this._lp[pid].approve(this._masterchef.address, toStake);
+      const tx = await this._masterchef.deposit(pid, toStake);
 
       this.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
@@ -299,24 +228,26 @@ export class Dapp extends React.Component {
         throw new Error("Transaction failed");
       }
       await this._updateBalance();
-    } catch (error) {
+    } 
+    catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
       console.error(error);
       this.setState({ transactionError: error });
-    } finally {
+    } 
+    finally {
       this.setState({ txBeingSent: undefined });
     }
   }
 
-  async _unstakeTokens(amount){
+  async _unstakeTokens(pid, amount){
     console.log("Amount to unstake: %s", amount);
     try {
       this._dismissTransactionError();
 
-      let toUnstake = ethers.utils.parseEther(amount.toString())
-      const tx = await this._kalFarm.unstake(toUnstake);
+      let toUnstake = ethers.utils.parseEther(amount)
+      const tx = await this._masterchef.withdraw(pid, toUnstake);
       
       this.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
@@ -326,11 +257,82 @@ export class Dapp extends React.Component {
       }
 
       await this._updateBalance();
-    } catch (error) {
+    } 
+    catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
 
+      console.error(error);
+      this.setState({ transactionError: error });
+    } 
+    finally {
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _transferTokens(to, amount, symbol) {
+    // Sending a transaction is a complex operation:
+    //   - The user can reject it
+    //   - It can fail before reaching the ethereum network (i.e. if the user
+    //     doesn't have ETH for paying for the tx's gas)
+    //   - It has to be mined, so it isn't immediately confirmed.
+    //     Note that some testing networks, like Hardhat Network, do mine
+    //     transactions immediately, but your dapp should be prepared for
+    //     other networks.
+    //   - It can fail once mined.
+    //
+    // This method handles all of those things, so keep reading to learn how to
+    // do it.
+
+    try {
+      // If a transaction fails, we save that error in the component's state.
+      // We only save one such error, so before sending a second transaction, we
+      // clear it.
+      this._dismissTransactionError();
+      
+      // We send the transaction, and save its hash in the Dapp's state. This
+      // way we can indicate that we are waiting for it to be mined.
+      let tx;
+      let toTransfer = ethers.utils.parseEther(amount.toString())
+      if(symbol === this.state.KALO_tokenData.symbol){
+        console.log("transferring KALO");
+        tx = await this._kalToken.transfer(to, toTransfer);
+      }
+      else if(symbol === this.state.KAI_tokenData.symbol){
+        console.log("transferring KAI");
+        tx = await this._ibKaiToken.transfer(to, toTransfer);
+      }
+      else{
+        throw new Error("Cannot transfer token");
+      }
+      
+      this.setState({ txBeingSent: tx.hash });
+      console.log(tx);
+
+      // We use .wait() to wait for the transaction to be mined. This method
+      // returns the transaction's receipt.
+      const receipt = await tx.wait();
+      
+      // The receipt, contains a status flag, which is 0 to indicate an error.
+      if (receipt.status === 0) {
+        // We can't know the exact error that make the transaction fail once it
+        // was mined, so we throw this generic one.
+        throw new Error("Transaction failed");
+      }
+
+      // If we got here, the transaction was successful, so you may want to
+      // update your state. Here, we update the user's KALO_balance.
+      await this._updateBalance();
+    } catch (error) {
+      // We check the error code to see if this error was produced because the
+      // user rejected a tx. If that's the case, we do nothing.
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+
+      // Other errors are logged and stored in the Dapp's state. This is used to
+      // show them to the user, and for debugging.
       console.error(error);
       this.setState({ transactionError: error });
     } finally {
@@ -347,7 +349,8 @@ export class Dapp extends React.Component {
       const tx = await this._kalFarm.withdrawYield();
       
       this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();
+      console.log(tx)
+      const receipt = await tx.wait();      
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -369,30 +372,39 @@ export class Dapp extends React.Component {
   }
 
   componentWillUnmount() {
-    // We poll the user's KAL_balance, so we have to stop doing that when Dapp
+    // We poll the user's KALO_balance, so we have to stop doing that when Dapp
     // gets unmounted
     this._stopPollingData();
   }
 
-  async _connectWallet() {
-    // This method is run when the user clicks the Connect. It connects the
-    // dapp to the user's wallet, and initializes it.
+  async _getAccounts() {
+    let accounts;
+    try {
+      accounts = (await this._wallet.send("eth_requestAccounts")).result
+    }
+    catch(error){
+      console.error(this._getRpcErrorMessage(error))
+    }
 
-    // To connect to the user's wallet, we have to run this method.
-    // It returns a promise that will resolve to the user's address.
-    const [selectedAddress] = await window.ethereum.enable();
+    if(!accounts) {
+      accounts = await this._wallet.enable()
+    }
+    return accounts;
+  }
 
+  async _connectWallet(wallet) {    
+    this._wallet = wallet;
+    const [selectedAddress] = await this._getAccounts()
     // Once we have the address, we can initialize the application.
 
     // First we check the network
-    if (!this._checkNetwork()) {
+    if (!(await this._checkNetwork())) {
       return;
     }
-
-    this._initialize(selectedAddress);
+    await this._initialize(selectedAddress);
 
     // We reinitialize it whenever the user changes their account.
-    window.ethereum.on("accountsChanged", ([newAddress]) => {
+    this._wallet.on("accountsChanged", ([newAddress]) => {
       this._stopPollingData();
       // `accountsChanged` event can be triggered with an undefined newAddress.
       // This happens when the user removes the Dapp from the "Connected
@@ -406,51 +418,80 @@ export class Dapp extends React.Component {
     });
     
     // We reset the dapp state if the network is changed
-    window.ethereum.on("networkChanged", ([networkId]) => {
+    this._wallet.on("networkChanged", ([networkId]) => {
+      console.log("Network ID changed to: %s", networkId);
       this._stopPollingData();
       this._resetState();
+      return window.location.reload();
+    });
+
+    // We reset the dapp state if the network is changed
+    this._wallet.on("chainChanged", ([chainId]) => {
+      console.log("Chain ID changed to: %s", chainId);
+      this._stopPollingData();
+      this._resetState();
+      return window.location.reload();
     });
   }
 
-  _initialize(userAddress) {
-    // This method initializes the dapp
+  async _initialize(userAddress) {
 
-    // We first store the user's address in the component's state
     this.setState({
       pagestate: 'frontpage',
       selectedAddress: userAddress,
     });
 
-    // Then, we initialize ethers, fetch the token's data, and start polling
-    // for the user's KAL_balance.
+    // initialize ethers, fetch the token's data, and start polling balance
 
-    // Fetching the token data and the user's KAL_balance are specific to this
-    // sample project, but you can reuse the same initialization pattern.
-    this._intializeEthers();
-    this._getTokenData();
+    await this._intializeEthers();
+    await this._getTokenData();
     this._startPollingData();
   }
 
   async _intializeEthers() {
-    // We first initialize ethers by creating a provider using window.ethereum
-    this._provider = new ethers.providers.Web3Provider(window.ethereum);
+    // provider using window.ethereum
+    this._provider = new ethers.providers.Web3Provider(this._wallet);
+    //this._provider = new ethers.providers.Web3Provider(window.kardiachain);
 
-    // When, we initialize the contract using that provider and the token's
-    // artifact. You can do this same thing with your contracts.
     this._kalToken = new ethers.Contract(
-      contractAddress.Kalomira,
+      //contractAddress.Kalomira,
+      this._wallet === window.ethereum ? contractAddress.Kalomira : "0x6765ed069D4f20e061B6489fB0ae11C6797ABf63",
       KalomiraArtifact.abi,
       this._provider.getSigner(0)
     );
 
-    this._kaiToken = new ethers.Contract(
-      contractAddress.Kardia,
-      KardiaArtifact.abi,
+    this._ibKaiToken = new ethers.Contract(
+      //contractAddress.ibKAI,
+      this._wallet === window.ethereum ? contractAddress.ibKAI : "0x73aBef771479d89a93ACd896772608ae2625e18b",
+      ibKAIArtifact.abi,
+      this._provider.getSigner(0)
+    );
+
+    this._lp = [];
+
+    this._lp1 = new ethers.Contract(
+      contractAddress.MockLP1,
+      MockLPArtifact.abi,
+      this._provider.getSigner(0)
+    );
+    this._lp.push(this._lp1)
+
+    this._lp2 = new ethers.Contract(
+      contractAddress.MockLP2,
+      MockLPArtifact.abi,
+      this._provider.getSigner(0)
+    );
+    this._lp.push(this._lp2)
+
+    this._masterchef = new ethers.Contract(
+      contractAddress.MasterChef,
+      MasterChefArtifact.abi,
       this._provider.getSigner(0)
     );
 
     this._kalFarm = new ethers.Contract(
-      contractAddress.TokenFarm,
+      //contractAddress.TokenFarm,
+      this._wallet === window.ethereum ? contractAddress.TokenFarm :"0xa154926A29c8e063d09D2F3FE0d5278F745E3339",
       TokenFarmArtifact.abi,
       this._provider.getSigner(0)
     );
@@ -480,141 +521,110 @@ export class Dapp extends React.Component {
   async _getTokenData() {
     let name = await this._kalToken.name();
     let symbol = await this._kalToken.symbol();
+    this.setState({ KALO_tokenData: { name, symbol } });
 
-    this.setState({ KAL_tokenData: { name, symbol } });
-
-    
-    name = await this._kaiToken.name();
-    symbol = await this._kaiToken.symbol();
-
+    name = await this._ibKaiToken.name();
+    symbol = await this._ibKaiToken.symbol();
     this.setState({ KAI_tokenData: { name, symbol } });
+
+    name = await this._lp1.name(); 
+    symbol = await this._lp1.symbol();
+    this.setState({ LP1_tokenData: { name, symbol } });    
+    this.setState({ LP_tokenData: [...this.state.LP_tokenData, { name, symbol }] })
+
+    name = await this._lp2.name();
+    symbol = await this._lp2.symbol();
+    this.setState({ LP2_tokenData: { name, symbol } });
+    this.setState({ LP_tokenData: [...this.state.LP_tokenData, { name, symbol }] })
+
+    const Pools = [];
+    const UserInfo = [];
+    const PendingRewards = [];
+
+    let length = await this._masterchef.poolLength();  
+    for(let x = 0; x < length; x++){
+      Pools.push(await this._masterchef.poolInfo(x))
+      UserInfo.push(await this._masterchef.userInfo(x, this.state.selectedAddress))
+      PendingRewards.push(await this._masterchef.pendingKalo(x, this.state.selectedAddress))
+    }
+
+    this.setState({ Pools })
+    console.log(this.state.Pools)
+    this.setState({ UserInfo })
+    console.log(this.state.UserInfo)
+    this.setState({ PendingRewards })
+    console.log(this.state.PendingRewards)
   }
 
   async _updateBalance() {
-    const KAL_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
-    this.setState({ KAL_balance });
+    const KALO_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
+    this.setState({ KALO_balance });
+
+    const KALO_harvest = await this.totalHarvestable(this.state.selectedAddress);
+    this.setState({ KALO_harvest });
    
-
-    const KAI_balance = await this._kaiToken.balanceOf(this.state.selectedAddress);
-    this.setState({ KAI_balance });
-
+    const ibKAI_balance = await this._ibKaiToken.balanceOf(this.state.selectedAddress);
+    this.setState({ ibKAI_balance });
     
-    const KAI_staked = await this._kalFarm.stakingBalance(this.state.selectedAddress);
-    this.setState({ KAI_staked });
+    const LP_staked = await this.totalStaked(this.state.selectedAddress)
+    this.setState({ LP_staked });
     
-    const KAL_harvest = (await this._kalFarm.calculateYieldTotal(this.state.selectedAddress)) 
-                      + (await this._kalFarm.kalBalance(this.state.selectedAddress)/(10**18));
-    this.setState({ KAL_harvest });
+    const LP1_balance = await this._lp1.balanceOf(this.state.selectedAddress);
+    this.setState({ LP1_balance });
+
+    const LP2_balance = await this._lp2.balanceOf(this.state.selectedAddress);
+    this.setState({ LP2_balance });
+
+    const UserInfo = [];
+    const PendingRewards = [];
+    let length = await this._masterchef.poolLength();
+    for(let x = 0; x < length; x++){
+      UserInfo.push(await this._masterchef.userInfo(x, this.state.selectedAddress))
+      PendingRewards.push(await this._masterchef.pendingKalo(x, this.state.selectedAddress))
+    }
+    this.setState({ UserInfo })
+    this.setState({ PendingRewards })
+
+    console.log("Block: ", (await this._masterchef.getBlock()).toString())    
   }
   
-  // This method sends an ethereum transaction to transfer tokens.
-  // While this action is specific to this application, it illustrates how to
-  // send a transaction.
-  async _transferTokens(to, amount, symbol) {
-    // Sending a transaction is a complex operation:
-    //   - The user can reject it
-    //   - It can fail before reaching the ethereum network (i.e. if the user
-    //     doesn't have ETH for paying for the tx's gas)
-    //   - It has to be mined, so it isn't immediately confirmed.
-    //     Note that some testing networks, like Hardhat Network, do mine
-    //     transactions immediately, but your dapp should be prepared for
-    //     other networks.
-    //   - It can fail once mined.
-    //
-    // This method handles all of those things, so keep reading to learn how to
-    // do it.
-
-    try {
-      // If a transaction fails, we save that error in the component's state.
-      // We only save one such error, so before sending a second transaction, we
-      // clear it.
-      this._dismissTransactionError();
-      
-      // We send the transaction, and save its hash in the Dapp's state. This
-      // way we can indicate that we are waiting for it to be mined.
-      let tx;
-      if(symbol === this.state.KAL_tokenData.symbol){
-        console.log("transferring KAL");
-        tx = await this._kalToken.transfer(to, amount);
-      }
-      else if(symbol === this.state.KAI_tokenData.symbol){
-        console.log("transferring KAI");
-        tx = await this._kaiToken.transfer(to, amount);
-      }
-      else{
-        throw new Error("Cannot transfer token");
-      }
-      
-      this.setState({ txBeingSent: tx.hash });
-
-      // We use .wait() to wait for the transaction to be mined. This method
-      // returns the transaction's receipt.
-      const receipt = await tx.wait();
-
-      // The receipt, contains a status flag, which is 0 to indicate an error.
-      if (receipt.status === 0) {
-        // We can't know the exact error that make the transaction fail once it
-        // was mined, so we throw this generic one.
-        throw new Error("Transaction failed");
-      }
-
-      // If we got here, the transaction was successful, so you may want to
-      // update your state. Here, we update the user's KAL_balance.
-      await this._updateBalance();
-    } catch (error) {
-      // We check the error code to see if this error was produced because the
-      // user rejected a tx. If that's the case, we do nothing.
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-
-      // Other errors are logged and stored in the Dapp's state. This is used to
-      // show them to the user, and for debugging.
-      console.error(error);
-      this.setState({ transactionError: error });
-    } finally {
-      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
-      // this part of the state.
-      this.setState({ txBeingSent: undefined });
-    }
-  }
-
-  // This method just clears part of the state.
+  // method clears part of the state.
   _dismissTransactionError() {
     this.setState({ transactionError: undefined });
   }
 
-  // This method just clears part of the state.
+  // method clears part of the state.
   _dismissNetworkError() {
     this.setState({ networkError: undefined });
   }
 
-  // This is an utility method that turns an RPC error into a human readable
-  // message.
+  // utility method that turns an RPC error into a human readable message.
   _getRpcErrorMessage(error) {
     if (error.data) {
       return error.data.message;
     }
-
     return error.message;
   }
 
-  // This method resets the state
+  // method resets the state
   _resetState() {
     this.setState(this.initialState);
   }
 
-  // This method checks if Metamask selected network is Localhost:8545 
-  _checkNetwork() {
-    if (window.ethereum.networkVersion === HARDHAT_NETWORK_ID) {
+  // method checks if wallet connected to deplyoed network
+  async _checkNetwork() {
+    let chainID = await this._wallet.send("net_version")
+    if(this._wallet === window.ethereum && chainID.result === "31337"){
+      return true;
+    }
+    if (this._wallet === window.kardiachain && chainID.result === "69"){
       return true;
     }
 
     this.setState({ 
-      networkError: 'Please connect Metamask to Localhost:8545'
+      networkError: `Please connect Wallet to ${this._wallet === window.ethereum ? ethNetwork : kaiNetwork}`
     });
 
     return false;
   }
-
 }
