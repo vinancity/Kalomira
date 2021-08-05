@@ -1,4 +1,9 @@
 import React from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
 
 // We'll use ethers to interact with the Ethereum network and our contract
 import { ethers } from "ethers";
@@ -9,13 +14,15 @@ import KalomiraArtifact from "../contracts/Kalomira.json";
 import ibKAIArtifact from "../contracts/ibKAI.json";
 import MockLPArtifact from "../contracts/MockLP.json"
 import MasterChefArtifact from "../contracts/MasterChef.json"
-import TokenFarmArtifact from "../contracts/TokenFarm.json"
 import contractAddress from "../contracts/contract-address.json";
 
-//import { Frontpage } from "./Frontpage";
+
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
-import { Farms } from "./Farms"
+import { Navbar } from "./Navbar"
+import { Home } from "./Home";
+import { Farms } from "./Farm/Farms"
+import { MintAndRedeem } from "./MintAndRedeem/MintAndRedeem";
 import { Loading } from "./Loading";
 //import { Stake } from "./Stake";
 //import { Unstake } from "./Unstake";
@@ -50,19 +57,22 @@ export class Dapp extends React.Component {
       pagestate: undefined,
       // The info of the token (i.e. It's Name and symbol)
       KALO_tokenData: undefined,
-      KAI_tokenData: undefined,
+      ibKAI_tokenData: undefined,
       Pools: [],
       UserInfo: [],
       PendingRewards: [],
       LP_tokenData: [],
       LP1_tokenData: undefined,
       LP2_tokenData: undefined,
+      LP3_tokenData: undefined,
+      selectedPID: undefined,
       // The user's address and token balances
       selectedAddress: undefined,
       KALO_balance: undefined,
       ibKAI_balance: undefined,
       LP1_balance: undefined,
       LP2_balance: undefined,
+      LP3_balance: undefined,
       // The user's stake
       LP_staked: undefined, 
       KALO_harvest: undefined,
@@ -95,100 +105,127 @@ export class Dapp extends React.Component {
     // If the token data or the user's Balance hasn't loaded yet, we show
     // a loading component.
     if (!this.state.KALO_tokenData || !this.state.KALO_balance 
-     || !this.state.KAI_tokenData || !this.state.ibKAI_balance
+     || !this.state.ibKAI_tokenData || !this.state.ibKAI_balance
      || !this.state.LP1_tokenData || !this.state.LP1_balance
      || !this.state.LP2_tokenData || !this.state.LP2_balance
+     || !this.state.LP3_tokenData || !this.state.LP3_balance
      || !this.state.Pools.length || !this.state.UserInfo.length ) {
       return <Loading />;
     }
 
     return (
       
-      <div className="container p-4">       
-        <div className="row">
-          <div className="col-12">
-            <h1>
-              {this.state.KALO_tokenData.name} ({this.state.KALO_tokenData.symbol})
-            </h1>
-            <p>
-              Welcome <b>{this.state.selectedAddress}</b>
-            </p>
-            <p>
-              You have{" "}
-              <b>
-                {(this.state.ibKAI_balance/(10**18)).toFixed(4)}{" "}{this.state.KAI_tokenData.symbol}
-              </b>
-              {", "}
-              <b>
-                {(this.state.LP1_balance/(10**18)).toFixed(4)}{" "}{this.state.LP1_tokenData.name}
-              </b>
-              {", "}and{" "}
-              <b>
-                {(this.state.LP2_balance/(10**18)).toFixed(4)}{" "}{this.state.LP2_tokenData.name}
-              </b>
-              .
-            </p>
-            <div className="row">
-            <div className="col-md-auto">
-              Total LP Staked:
-                <h2>
-                  { (this.state.LP_staked) ? (this.state.LP_staked/(10**18)).toFixed(4) : "N/A" }{" LP"}
-                </h2>
+      <div>
+        <Router>
+          <div className="container p-4">
+            <Navbar 
+              address={this.state.selectedAddress}
+              KaiBalance={this.state.ibKAI_balance} 
+              ibKaiBalance={this.state.ibKAI_balance} 
+            />
+          </div>
+          <Switch>
+            <div className="container p-4">
+              <div className="row">
+                <div className="col-12">
+                  <h1>
+                    {this.state.KALO_tokenData.name} ({this.state.KALO_tokenData.symbol})
+                  </h1>
+                  <p>
+                    Welcome <b>{this.state.selectedAddress}</b>
+                  </p>
+                  <p>
+                    You have{" "}
+                    <b>
+                      {(this.state.ibKAI_balance / (10 ** 18)).toFixed(4)}{" "}{this.state.ibKAI_tokenData.symbol}
+                    </b>
+                    {", "}
+                    <b>
+                      {(this.state.LP1_balance / (10 ** 18)).toFixed(4)}{" "}{this.state.LP1_tokenData.name}
+                    </b>
+                    {", "}
+                    <b>
+                      {(this.state.LP2_balance / (10 ** 18)).toFixed(4)}{" "}{this.state.LP2_tokenData.name}
+                    </b>
+                    {", "}and{" "}
+                    <b>
+                      {(this.state.LP3_balance / (10 ** 18)).toFixed(4)}{" "}{this.state.LP3_tokenData.name}
+                    </b>
+                    .
+                  </p>
+                  <div className="row">
+                    <div className="col-md-auto">
+                      Total LP Staked:
+                      <h2>
+                        {(this.state.LP_staked) ? (this.state.LP_staked / (10 ** 18)).toFixed(4) : "N/A"}{" LP"}
+                      </h2>
+                    </div>
+                    <div className="col-md-auto">
+                      {this.state.KALO_tokenData.symbol} to Harvest:
+                      <h2>
+                        {(this.state.KALO_harvest) ? (this.state.KALO_harvest / (10 ** 18)).toString() : "N/A"}{" "}{this.state.KALO_tokenData.symbol}
+                      </h2>
+                    </div>
+                    <div className="col-md-auto">
+                      {this.state.KALO_tokenData.symbol} in Wallet:
+                      <h2>
+                        {(this.state.KALO_balance / (10 ** 18)).toString()}{" "}{this.state.KALO_tokenData.symbol}
+                      </h2>
+                    </div>
+
+                  </div>
+                </div>
               </div>
-              <div className="col-md-auto">
-                {this.state.KALO_tokenData.symbol} to Harvest:
-                <h2>
-                  {(this.state.KALO_harvest) ? (this.state.KALO_harvest/(10**18)).toString() : "N/A"}{" "}{this.state.KALO_tokenData.symbol}
-                </h2>
+              <hr />
+              <div className="row">
+                <div className="col-12">
+                  {this.state.txBeingSent && (
+                    <WaitingForTransactionMessage txHash={this.state.txBeingSent} />
+                  )}
+                  {this.state.transactionError && (
+                    <TransactionErrorMessage
+                      message={this._getRpcErrorMessage(this.state.transactionError)}
+                      dismiss={() => this._dismissTransactionError()}
+                    />
+                  )}
+                </div>
               </div>
-              <div className="col-md-auto">
-                {this.state.KALO_tokenData.symbol} in Wallet:
-                <h2>
-                  {(this.state.KALO_balance/(10**18)).toString()}{" "}{this.state.KALO_tokenData.symbol}
-                </h2>
+              <div className="row">
+                <div className="col-12">
+                  <Route exact path="/">
+                    <Home />
+                  </Route>
+                  <Route exact path="/MintAndRedeem">
+                    <MintAndRedeem />
+                  </Route>
+                  <Route exact path="/Farm">
+                    <Farms
+                      stakeLP={(amount) => this._stakeTokens(amount)}
+                      unstakeLP={(amount) => this._unstakeTokens(amount)}
+                      harvestYield={() => this._harvestYield()}
+                      setId={(id) => this.setId(id)}
+                      lp_data={this.state.LP_tokenData}
+                      pools={this.state.Pools}
+                      userInfo={this.state.UserInfo}
+                      pendingRewards={this.state.PendingRewards}
+                    />
+                  </Route>                 
+                </div>
               </div>
-              
             </div>
-          </div>
-        </div>
-        <hr />
-
-        <div className="row">
-          <div className="col-12">
-            {this.state.txBeingSent && (
-              <WaitingForTransactionMessage txHash={this.state.txBeingSent} />
-            )}
-                        {this.state.transactionError && (
-              <TransactionErrorMessage
-                message={this._getRpcErrorMessage(this.state.transactionError)}
-                dismiss={() => this._dismissTransactionError()}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="col-12">
-            {/* Front page */}
-            {this.state.pagestate === 'frontpage' && this.state.Pools.length && this.state.UserInfo.length && 
-              ( <Farms 
-                  stakeLP={(pid, amount) => this._stakeTokens(pid, amount)}
-                  unstakeLP={(pid, amount) => this._unstakeTokens(pid, amount)}
-                  LP_data={this.state.LP_tokenData}
-                  pools={this.state.Pools}
-                  userInfo={this.state.UserInfo}
-                  pendingRewards={this.state.PendingRewards}
-                />
-            )}      
-          </div>
-        </div>
-      </div>
-    );
+          </Switch>
+        </Router>
+      </div>);
   }
 
   changePageState(newState) {
     //console.log(newState);
     this.setState({pagestate: newState});
+  }
+
+  async setId(id){
+    await this.setState({selectedPID: id})
+    console.log(this.state.selectedPID)
   }
 
   async totalStaked(userAddr){
@@ -211,12 +248,13 @@ export class Dapp extends React.Component {
     return total.toString();
   }
 
-  async _stakeTokens(pid, amount){
+  async _stakeTokens(amount){
     console.log("Amount to stake: %s", amount);
     try {
       this._dismissTransactionError();
 
       let toStake = ethers.utils.parseEther(amount)
+      let pid = this.state.selectedPID;
       console.log(pid)
       await this._lp[pid].approve(this._masterchef.address, toStake);
       const tx = await this._masterchef.deposit(pid, toStake);
@@ -241,12 +279,42 @@ export class Dapp extends React.Component {
     }
   }
 
-  async _unstakeTokens(pid, amount){
+  async _harvestYield(){
+    console.log("Withdrawing yield");
+    try {
+      this._dismissTransactionError();
+      let pid = this.state.selectedPID;
+      console.log(pid)
+      const tx = await this._masterchef.harvest(pid)
+      
+      this.setState({ txBeingSent: tx.hash });
+      const receipt = await tx.wait();      
+
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed");
+      }
+
+      await this._updateBalance();
+    } catch (error) {
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+
+      console.error(error);
+      this.setState({ transactionError: error });
+    } finally {
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _unstakeTokens(amount){
     console.log("Amount to unstake: %s", amount);
     try {
       this._dismissTransactionError();
 
       let toUnstake = ethers.utils.parseEther(amount)
+      let pid = this.state.selectedPID;
+      console.log(pid)
       const tx = await this._masterchef.withdraw(pid, toUnstake);
       
       this.setState({ txBeingSent: tx.hash });
@@ -299,7 +367,7 @@ export class Dapp extends React.Component {
         console.log("transferring KALO");
         tx = await this._kalToken.transfer(to, toTransfer);
       }
-      else if(symbol === this.state.KAI_tokenData.symbol){
+      else if(symbol === this.state.ibKAI_tokenData.symbol){
         console.log("transferring KAI");
         tx = await this._ibKaiToken.transfer(to, toTransfer);
       }
@@ -340,36 +408,7 @@ export class Dapp extends React.Component {
       // this part of the state.
       this.setState({ txBeingSent: undefined });
     }
-  }
-
-  async _withdrawYield(){
-    console.log("Withdrawing yield");
-    try {
-      this._dismissTransactionError();
-      const tx = await this._kalFarm.withdrawYield();
-      
-      this.setState({ txBeingSent: tx.hash });
-      console.log(tx)
-      const receipt = await tx.wait();      
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed");
-      }
-
-      await this._updateBalance();
-    } catch (error) {
-      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
-        return;
-      }
-
-      console.error(error);
-      this.setState({ transactionError: error });
-    } finally {
-      // If we leave the try/catch, we aren't sending a tx anymore, so we clear
-      // this part of the state.
-      this.setState({ txBeingSent: undefined });
-    }
-  }
+  }  
 
   componentWillUnmount() {
     // We poll the user's KALO_balance, so we have to stop doing that when Dapp
@@ -466,33 +505,32 @@ export class Dapp extends React.Component {
       ibKAIArtifact.abi,
       this._provider.getSigner(0)
     );
-
-    this._lp = [];
+    
 
     this._lp1 = new ethers.Contract(
       contractAddress.MockLP1,
       MockLPArtifact.abi,
       this._provider.getSigner(0)
     );
-    this._lp.push(this._lp1)
-
     this._lp2 = new ethers.Contract(
       contractAddress.MockLP2,
       MockLPArtifact.abi,
       this._provider.getSigner(0)
     );
+    this._lp3 = new ethers.Contract(
+      contractAddress.MockLP3,
+      MockLPArtifact.abi,
+      this._provider.getSigner(0)
+    );
+
+    this._lp = [];
+    this._lp.push(this._lp1)
     this._lp.push(this._lp2)
+    this._lp.push(this._lp3)
 
     this._masterchef = new ethers.Contract(
       contractAddress.MasterChef,
       MasterChefArtifact.abi,
-      this._provider.getSigner(0)
-    );
-
-    this._kalFarm = new ethers.Contract(
-      //contractAddress.TokenFarm,
-      this._wallet === window.ethereum ? contractAddress.TokenFarm :"0xa154926A29c8e063d09D2F3FE0d5278F745E3339",
-      TokenFarmArtifact.abi,
       this._provider.getSigner(0)
     );
   }
@@ -525,7 +563,7 @@ export class Dapp extends React.Component {
 
     name = await this._ibKaiToken.name();
     symbol = await this._ibKaiToken.symbol();
-    this.setState({ KAI_tokenData: { name, symbol } });
+    this.setState({ ibKAI_tokenData: { name, symbol } });
 
     name = await this._lp1.name(); 
     symbol = await this._lp1.symbol();
@@ -535,6 +573,11 @@ export class Dapp extends React.Component {
     name = await this._lp2.name();
     symbol = await this._lp2.symbol();
     this.setState({ LP2_tokenData: { name, symbol } });
+    this.setState({ LP_tokenData: [...this.state.LP_tokenData, { name, symbol }] })
+
+    name = await this._lp3.name();
+    symbol = await this._lp3.symbol();
+    this.setState({ LP3_tokenData: { name, symbol } });
     this.setState({ LP_tokenData: [...this.state.LP_tokenData, { name, symbol }] })
 
     const Pools = [];
@@ -574,6 +617,9 @@ export class Dapp extends React.Component {
 
     const LP2_balance = await this._lp2.balanceOf(this.state.selectedAddress);
     this.setState({ LP2_balance });
+
+    const LP3_balance = await this._lp3.balanceOf(this.state.selectedAddress);
+    this.setState({ LP3_balance });
 
     const UserInfo = [];
     const PendingRewards = [];

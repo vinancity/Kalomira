@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Dapp } from "./components/Dapp";
-import { KaiDapp } from "./components/KAI_Dapp";
 
 // We import bootstrap here, but you can remove if you want
 import "bootstrap/dist/css/bootstrap.css";

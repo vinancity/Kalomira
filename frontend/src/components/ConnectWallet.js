@@ -17,15 +17,6 @@ export function ConnectWallet({ connectWallet, networkError, dismiss }) {
         </div>
         <div className="col-6 p-4 text-center">
           <p>Please connect to your wallet.</p>
-          {/*
-          <button
-            className="btn btn-warning"
-            type="button"
-            onClick={connectWallet}
-          >
-            Connect Wallet
-          </button>
-          */}
           <Wallets connect={(wallet) => connectWallet(wallet)}/>
         </div>        
       </div>

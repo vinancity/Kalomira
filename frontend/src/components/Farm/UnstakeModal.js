@@ -1,16 +1,16 @@
 import React from "react";
 
-export function StakeModal({ stakeLP }) {  
+export function UnstakeModal({ unstakeLP, setId, id }) {  
     return (
       <>
-        <button type="button" className="btn btn-success float-right ml-2" data-toggle="modal" data-target="#StakeModal">
-          Stake
+        <button type="button" className="btn btn-danger float-right" data-toggle="modal" data-target="#UnstakeModal" onClick={() => setId(id)}>
+          Unstake
         </button>
-        <div className="modal fade" id="StakeModal" tabIndex="-1" role="dialog" aria-labelledby="StakeModalLabel" aria-hidden="true">
+        <div className="modal fade" id="UnstakeModal" tabIndex="-1" role="dialog" aria-labelledby="UnstakeModalLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                  <h5 className="modal-title" id="StakeModalLabel">Stake LP Tokens</h5>
+                  <h5 className="modal-title" id="UnstakeModalLabel">Unstake LP Tokens</h5>
                   <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                   </button>
@@ -23,12 +23,12 @@ export function StakeModal({ stakeLP }) {
                   const amount = formData.get("amount");
 
                   if (amount) {
-                    stakeLP(amount);
+                    unstakeLP(amount);
                   }
                 }}>
                 <div className="modal-body">
                     <div className="form-group">
-                      <label>Amount to stake</label>
+                      <label>Amount to unstake</label>
                       <input
                         className="form-control"
                         type="number"
