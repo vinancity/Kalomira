@@ -21,7 +21,7 @@ contract ibKAI is ERC20, Ownable, Initializable {
     uint public totalStaking;
     uint public totalDeposit;
     address stakingContract;
-    address validatorContract;
+    address validatorContract = 0x4952057973256F4f107eA854028Edfae2640b5Bd;
 
     constructor() ERC20("Interest Bearing KAI", "ibKAI") payable
     { }
@@ -30,6 +30,10 @@ contract ibKAI is ERC20, Ownable, Initializable {
         totalDeposit = msg.value;
         totalReserve = msg.value;
         _mint(_msgSender(), msg.value);
+        // this.setStakingContract(
+        //     0x0000000000000000000000000000000000001337,
+        //     0x4952057973256F4f107eA854028Edfae2640b5Bd
+        // ); // mock test only
     }
 
     /**
@@ -67,43 +71,88 @@ contract ibKAI is ERC20, Ownable, Initializable {
         validatorContract = _validatorContract;
     }
 
+    function _cast(address target, bytes memory data, uint value) internal {
+        (bool ok, bytes memory returndata) = target.call{value: value}(data);
+        if (!ok) {
+            if (returndata.length > 0) {
+                // The easiest way to bubble the revert reason is using memory via assembly
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    let returndata_size := mload(returndata)
+                    revert(add(32, returndata), returndata_size)
+                }
+            } else {
+                revert('bad cast call');
+            }
+        }
+    }
+
     function delegate(uint amount) external returns (bool) {
-        (bool success, ) = validatorContract.call{value:amount}(
-            // abi.encode(bytes4(keccak256("delegate()")))
-            abi.encodePacked(bytes4(keccak256("delegate()")))
-            // abi.encode(bytes4(keccak256("delegate()")))
+        // _cast(validatorContract, abi.encodeWithSignature("delegate()"), amount);
+        (bool success, bytes memory data) = validatorContract.call{value: amount}(abi.encodeWithSelector(0xc89e4361));
+        require(
+            success && (data.length == 0),
+            'Kalomira: DELEGATE_FAILED'
         );
-        require(success == true, "not delegatable");
         totalStaking += amount;
         return true;
     }
 
     function withdrawRewards() external returns (bool) {
-        (bool success, ) = validatorContract.call(
-            abi.encode(bytes4(keccak256("withdrawRewards()")))
-        );
-        require(success == true, "not withdrawable");
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     abi.encode(bytes4(keccak256("withdrawRewards()")))
+        // );
+        // require(success == true, string (returndata));
+        _cast(validatorContract, abi.encodeWithSignature("withdrawRewards()"), 0);
         totalDeposit += this.pendingRewards();
         return true;
     }
 
-    function undelegateAll() external returns (bool) {
-        (bool success, ) = validatorContract.call(
-            abi.encodePacked(bytes4(keccak256("undelegate()")))
-        );
-        require(success);
-        totalStaking = 0;
-        return true;
+    function undelegateAll() external {
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     abi.encodePacked(bytes4(keccak256(bytes("undelegate()"))))
+        //     // abi.encodeWithSignature("undelegate()")
+        // );
+        // require(success == true, string (returndata));
+        // totalStaking = 0;
+        // return true;
+
+        _cast(validatorContract, abi.encodeWithSignature("undelegate()"), 0);
+        // (bool success, bytes memory data) = validatorContract.call(abi.encodeWithSelector(0x92ab89bb));
+        // require(
+        //     success && (data.length == 0),
+        //     'Kalomira: UNDELEGATE_FAILED'
+        // );
+
+        // (bool success, bytes memory result) = address(validatorContract).call{gas: 3000000}(
+        //     abi.encode(bytes4(keccak256("undelegate()")))
+        // );
+        // if (success == false) {
+        //     assembly {
+        //         let ptr := mload(0x40)
+        //         let size := returndatasize()
+        //         returndatacopy(ptr, 0, size)
+        //         revert(ptr, size)
+        //     }
+        // }
+        // return result;
     }
 
     function undelegate(uint amount) external {
-        (bool success, ) = validatorContract.call(
-            // abi.encodeWithSignature("undelegateWithAmount(uint256)", amount)
-            abi.encodePacked(bytes4(keccak256(bytes("undelegateWithAmount(uint256)"))), amount)
-        );
-        require(success);
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     // abi.encodeWithSignature("undelegateWithAmount(uint256)", amount)
+        //     abi.encodePacked(bytes4(keccak256("undelegateWithAmount(uint256)")), amount)
+        // );
+        // require(success == true, string (returndata));
         // totalStaking = totalStaking.sub(amount);
         // return data;
+
+        (bool success, bytes memory data) = validatorContract.call(abi.encodeWithSelector(0x41443a39, amount));
+        require(
+            success && (data.length == 0),
+            'Kalomira: UNDELEGATE_FAILED'
+        );
+
     }
 
     function executeTransaction(
