@@ -1,39 +1,89 @@
-import React from "react";
+import React, { useState } from "react";
+import { ethers } from "ethers"
 
-export function Mint() {
+import { Info } from "./Info"
+
+export function Mint({ mintIBKAI, ibKaiContract, kaiBal }) {
+    const [amt, setAmt] = useState(0);
+    const [rate, setRate] = useState(0);
+
+    async function setAmount(amount) {
+        if (typeof (amount) != "string") {
+            amount = amount.toString()
+        }
+
+        let rate, mintAmt;
+        try {
+            rate = await ibKaiContract.getRateFromDeposit(ethers.utils.parseEther(amount))
+            mintAmt = await ibKaiContract.getMintAmount(ethers.utils.parseEther(amount))
+            console.log(ethers.utils.formatEther(rate)/(10**9))
+            console.log(ethers.utils.formatEther(mintAmt))
+            setRate(ethers.utils.formatEther(rate)/(10**9)) 
+            setAmt(ethers.utils.formatEther(mintAmt))            
+        }
+        catch (error) {
+            console.log(error)
+        }
+    }
+
+    function calcMint(event) {
+        event.preventDefault();
+        const amount = event.target.value;
+        if (amount) {
+            setAmount(amount)
+        }
+        else { setAmount("0") }
+    }
+
+    function maxMintInput() {
+        let max = ethers.utils.formatEther(kaiBal);
+        document.getElementById("mintInput").value = (max);
+        setAmount(max);
+    }
+
     return (
         <div className="card-body" >
             <b>MINT ibKAI</b><hr />
+            <div className="row">
+                <div className="col">
+                    <label>Amount of KAI to deposit:</label>
+                </div>
+                <div className="col-2 p-1">
+                    <button className="btn btn-link" onClick={maxMintInput}>Max</button>
+                </div>
+            </div>
             <form onSubmit={(event) => {
                 event.preventDefault();
                 const formData = new FormData(event.target);
                 const amount = formData.get("amount");
                 if (amount) {
-
+                    mintIBKAI(amount);
                 }
             }}>
                 <div className="form-group">
-                    <label>Amount to mint</label>
                     <div className="row">
                         <div className="col">
                             <input
+                                id="mintInput"
                                 className="form-control"
                                 type="number"
-                                step="1"
+                                step="0.000000000000000001"
                                 name="amount"
                                 placeholder="0"
                                 min="0"
+                                onChange={calcMint}
                                 required
                             />
                         </div>
                         <div className="col-1 p-1">
-                            <b>ibKAI</b>
+                            <b>KAI</b>
                         </div>
                     </div>
                 </div>
-                <div className>
-                    <div className="form-group">
-                        <input className="btn btn-primary" type="submit" value={"Confirm"} />
+                <Info type="mint" rate={rate} amount={amt} />
+                <div>
+                    <div className="form-group text-center">
+                        <input className="btn btn-primary btn-block" type="submit" value={"Mint"} />
                     </div>
                 </div>
             </form>

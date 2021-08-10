@@ -32,7 +32,7 @@ export function StakeModal({ stakeLP, setId, id }) {
                       <input
                         className="form-control"
                         type="number"
-                        step="1"
+                        step="0.000000000000000001"
                         name="amount"
                         placeholder="1"
                         min="0"

@@ -40,7 +40,7 @@ const deployKardiaContract = async (contract, params = [], contractName) => {
 
 
 async function main(){
-    const fs = require("fs");
+    
     const contractsDir = __dirname + "/../frontend/src/contracts";
 
     if (!fs.existsSync(contractsDir)) {
@@ -72,38 +72,27 @@ async function main(){
 
 }
 
-async function deployContract() {
-    const kardiaClient = new KardiaClient({ endpoint: "https://dev-1.kardiachain.io" })
-    //console.log(await kardiaClient.account.getBalance("0xa47d913c5CAB3B965784e75924BFf115eA15C1CB"))
-
-    const fs = require("fs");
+async function main_v2(){
     const contractsDir = __dirname + "/../frontend/src/contracts";
 
     if (!fs.existsSync(contractsDir)) {
         console.log("DNE")
     }
+}
+
+async function test() {   
+    const fs = require("fs");
+    const contractsDir = __dirname + "/../frontend/src/contracts"
+    var Web3 = require('web3');
+    var url = 'https://mainnet.infura.io/v3/7aa637dfc4e94d22bfdfe3b1f4401daf';
+    var web3 = new Web3(url);
 
     let path = contractsDir + "/Kalomira.json"; 
     let rawdata = fs.readFileSync(path);
     let contract = JSON.parse(rawdata);
-
-    const contractInstance = kardiaClient.contract;
-    contractInstance.updateAbi(contract.abi)
-    contractInstance.updateByteCode(contract.bytecode)
-
-    const preDeploy = contractInstance.deploy({ params: [], })
-    const defaultPayload = preDeploy.getDefaultTxPayload();
-
-    const maxGasLimit = 8000000;
-    const estimatedGas = await preDeploy.estimateGas(defaultPayload);
-    console.log(`Deploying ${"Kalomira"}: ${estimatedGas} estimateGas`);
     
-    const smcData = await preDeploy.send(
-        "0xc7b518d8fdfc3046c463e71031dc2edddc2e7a93fd1dc0e130b7f84944fe19b7", 
-    {
-        gas: maxGasLimit,
-    })
-    console.log(smcData.contractAddress);
+    const kal_token = new web3.eth.Contract(contract.abi, contractAddr);
+    
 }
 
 main()

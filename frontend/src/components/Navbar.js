@@ -25,14 +25,10 @@ export function Navbar({ address, KaiBalance, ibKaiBalance }) {
                 </div>
                 <div className="row">
                     <div className="col-md-auto">
-                        <text>
                             <b>{"KAI: "}</b>{(KaiBalance / (10 ** 18)).toFixed(5)}
-                        </text>
                     </div>
                     <div className="col-md-auto">
-                        <text>
-                            <b>{"ibKAI: "}</b>{(KaiBalance / (10 ** 18)).toFixed(5)}
-                        </text>
+                            <b>{"ibKAI: "}</b>{(ibKaiBalance / (10 ** 18)).toFixed(5)}
                     </div>
                     <div className="col">
                         <b>

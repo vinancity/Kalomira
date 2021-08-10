@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./libraries/WadRayMath.sol";
 import "./Kalomira.sol";
 
 interface IMigratorChef {
@@ -31,6 +32,7 @@ interface IMigratorChef {
 // Have fun reading it. Hopefully it's bug-free. God bless.
 contract MasterChef is Ownable {
     using SafeMath for uint256;
+    using WadRayMath for uint256;
     using SafeERC20 for IERC20;
     // Info of each user.
     struct UserInfo {
@@ -53,7 +55,7 @@ contract MasterChef is Ownable {
         IERC20 lpToken; // Address of LP token contract.
         uint256 allocPoint; // How many allocation points assigned to this pool. KALOs to distribute per block.
         uint256 lastRewardBlock; // Last block number that KALOs distribution occurs.
-        uint256 accKaloPerShare; // Accumulated KALOs per share, times 1e18. See below.
+        uint256 accKaloPerShare; // Accumulated KALOs per share, times KALO_PRECISION. See below.
     }
     // The KALO TOKEN!
     Kalomira public kalo;
@@ -75,22 +77,25 @@ contract MasterChef is Ownable {
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
+
+    uint256 private constant KALO_PRECISION = 1e18;
   
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
+    event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
         Kalomira _kalo,
-        address _devaddr,
-        uint256 _startBlock,
+        address _devaddr,        
         uint256 _kaloPerBlock,
+        uint256 _startBlock,
         uint256 _bonusEndBlock        
     ) {
         kalo = _kalo;
-        devaddr = _devaddr;
-        startBlock = _startBlock;
+        devaddr = _devaddr;        
         kaloPerBlock = _kaloPerBlock;
+        startBlock = _startBlock;
         bonusEndBlock = _bonusEndBlock;    
     }
 
@@ -181,10 +186,10 @@ contract MasterChef is Ownable {
                     totalAllocPoint
                 );
             accKaloPerShare = accKaloPerShare.add(
-                kaloReward.mul(1e18).div(lpSupply)
+                kaloReward.mul(KALO_PRECISION).div(lpSupply)
             );
         }
-        return user.amount.mul(accKaloPerShare).div(1e18).sub(user.rewardDebt);
+        return user.amount.mul(accKaloPerShare).div(KALO_PRECISION).sub(user.rewardDebt);
     }
 
     // Update reward vairables for all pools. Be careful of gas spending!
@@ -214,7 +219,7 @@ contract MasterChef is Ownable {
         kalo.mint(devaddr, kaloReward.div(10));
         kalo.mint(address(this), kaloReward);
         pool.accKaloPerShare = pool.accKaloPerShare.add(
-            kaloReward.mul(1e18).div(lpSupply)
+            kaloReward.mul(KALO_PRECISION).div(lpSupply)
         );
         pool.lastRewardBlock = block.number;
     }
@@ -226,7 +231,7 @@ contract MasterChef is Ownable {
         updatePool(_pid);
         if (user.amount > 0) {
             uint256 pending =
-                user.amount.mul(pool.accKaloPerShare).div(1e18).sub(
+                user.amount.mul(pool.accKaloPerShare).div(KALO_PRECISION).sub(
                     user.rewardDebt
                 );
             safeKaloTransfer(msg.sender, pending);
@@ -237,8 +242,24 @@ contract MasterChef is Ownable {
             _amount
         );
         user.amount = user.amount.add(_amount);
-        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(KALO_PRECISION);
         emit Deposit(msg.sender, _pid, _amount);
+    }
+
+    // Harvest pending KALO rewards without changing LP
+    function harvest(uint256 _pid) public {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        updatePool(_pid);
+        uint256 accumulatedKalo = user.amount.mul(pool.accKaloPerShare).div(KALO_PRECISION);
+        uint256 pending = accumulatedKalo.sub(user.rewardDebt);
+
+        user.rewardDebt = accumulatedKalo;
+                
+        if (user.amount > 0) {
+            safeKaloTransfer(msg.sender, pending);
+        }
+        emit Harvest(msg.sender, _pid, pending);
     }
 
     // Withdraw LP tokens from MasterChef.
@@ -248,12 +269,12 @@ contract MasterChef is Ownable {
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
         uint256 pending =
-            user.amount.mul(pool.accKaloPerShare).div(1e18).sub(
+            user.amount.mul(pool.accKaloPerShare).div(KALO_PRECISION).sub(
                 user.rewardDebt
             );
         safeKaloTransfer(msg.sender, pending);
         user.amount = user.amount.sub(_amount);
-        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accKaloPerShare).div(KALO_PRECISION);
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
     }

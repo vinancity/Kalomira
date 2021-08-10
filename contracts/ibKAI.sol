@@ -7,32 +7,66 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 import "./libraries/WadRayMath.sol";
-import "./interfaces/IKardiaStaking.sol";
+import "./interfaces/IKardiaValidator.sol";
 
-contract ibKAI is ERC20, Ownable {
+contract ibKAI is ERC20, Ownable, Initializable {
     using SafeMath for uint;
     using WadRayMath for uint;
 
-    uint totalReserve;
-    uint totalStaking;
-    uint totalDeposit;
+    uint public totalReserve;
+    uint public totalStaking;
+    uint public totalDeposit;
     address stakingContract;
-    address validatorContract;
+    address validatorContract = 0x4952057973256F4f107eA854028Edfae2640b5Bd;
 
-    uint constant PRECISION = 10**4;
-
-    constructor(uint _totalDeposit, uint _initialSupply) ERC20("Interest Bearing KAI Token", "ibKAI") payable
-    {
+    constructor(uint _totalDeposit, uint _initialSupply) ERC20("Interest Bearing KAI", "ibKAI") payable
+    { 
         totalReserve = 0;
         totalDeposit = _totalDeposit;
         _mint(_msgSender(), _initialSupply);
-        // _mint(_msgSender(), 100 ether);
     }
 
-    fallback() external payable {
-        this.deposit();
+    // function initialize() external payable initializer {
+    //     totalDeposit = msg.value;
+    //     totalReserve = msg.value;
+    //     _mint(_msgSender(), msg.value);
+    //     // this.setStakingContract(
+    //     //     0x0000000000000000000000000000000000001337,
+    //     //     0x4952057973256F4f107eA854028Edfae2640b5Bd
+    //     // ); // mock test only
+    // }
+
+    /**
+    * @notice Receive KAI accidentally from someone transfer to this contract
+    */
+    receive() external payable {
+        // For first deposit will use small amount of KAI to register with validator
+        if (totalDeposit > 0) {
+            this.deposit();
+        }
+    }
+
+    function getTotalReserve() external view returns (uint) {
+        return totalReserve;
+    }
+
+    function getTotalStaking() external view returns (uint) {
+        return totalStaking;
+    }
+
+    function getTotalDeposit() external view returns (uint) {
+        return totalDeposit;
+    }
+
+    function getStakingContract() external view returns (address) {
+        return stakingContract;
+    }
+
+    function getValidatorContract() external view returns (address) {
+        return validatorContract;
     }
 
     function setStakingContract(address _stakingContract, address _validatorContract) external onlyOwner {
@@ -40,8 +74,138 @@ contract ibKAI is ERC20, Ownable {
         validatorContract = _validatorContract;
     }
 
+    function getRateFromDeposit(uint kaiAmount) external view returns (uint){
+        return _getRateFromDeposit(kaiAmount);
+    }
+
+    function getRateFromWithdraw(uint kaiAmount) external view returns (uint){
+        return _getRateFromWithdraw(kaiAmount);
+    }
+
+    function getMintAmount(uint kaiAmount) external view returns (uint) {
+        return _getMintAmount(kaiAmount);
+    }
+
+    function getKAIRedeemAmount(uint ibKaiAmount) external view returns (uint) {
+        return _getKAIRedeemAmount(ibKaiAmount);
+    }
+
+    function _cast(address target, bytes memory data, uint value) internal {
+        (bool ok, bytes memory returndata) = target.call{value: value}(data);
+        if (!ok) {
+            if (returndata.length > 0) {
+                // The easiest way to bubble the revert reason is using memory via assembly
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    let returndata_size := mload(returndata)
+                    revert(add(32, returndata), returndata_size)
+                }
+            } else {
+                revert('bad cast call');
+            }
+        }
+    }
+
+    function delegate(uint amount) external returns (bool) {
+        // _cast(validatorContract, abi.encodeWithSignature("delegate()"), amount);
+        (bool success, bytes memory data) = validatorContract.call{value: amount}(abi.encodeWithSelector(0xc89e4361));
+        require(
+            success && (data.length == 0),
+            'Kalomira: DELEGATE_FAILED'
+        );
+        totalStaking += amount;
+        return true;
+    }
+
+    function withdrawRewards() external returns (bool) {
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     abi.encode(bytes4(keccak256("withdrawRewards()")))
+        // );
+        // require(success == true, string (returndata));
+        _cast(validatorContract, abi.encodeWithSignature("withdrawRewards()"), 0);
+        totalDeposit += this.pendingRewards();
+        return true;
+    }
+
+    function undelegateAll() external {
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     abi.encodePacked(bytes4(keccak256(bytes("undelegate()"))))
+        //     // abi.encodeWithSignature("undelegate()")
+        // );
+        // require(success == true, string (returndata));
+        // totalStaking = 0;
+        // return true;
+
+        _cast(validatorContract, abi.encodeWithSignature("undelegate()"), 0);
+        // (bool success, bytes memory data) = validatorContract.call(abi.encodeWithSelector(0x92ab89bb));
+        // require(
+        //     success && (data.length == 0),
+        //     'Kalomira: UNDELEGATE_FAILED'
+        // );
+
+        // (bool success, bytes memory result) = address(validatorContract).call{gas: 3000000}(
+        //     abi.encode(bytes4(keccak256("undelegate()")))
+        // );
+        // if (success == false) {
+        //     assembly {
+        //         let ptr := mload(0x40)
+        //         let size := returndatasize()
+        //         returndatacopy(ptr, 0, size)
+        //         revert(ptr, size)
+        //     }
+        // }
+        // return result;
+    }
+
+    function undelegate(uint amount) external {
+        // (bool success, bytes memory returndata) = validatorContract.call(
+        //     // abi.encodeWithSignature("undelegateWithAmount(uint256)", amount)
+        //     abi.encodePacked(bytes4(keccak256("undelegateWithAmount(uint256)")), amount)
+        // );
+        // require(success == true, string (returndata));
+        // totalStaking = totalStaking.sub(amount);
+        // return data;
+
+        (bool success, bytes memory data) = validatorContract.call(abi.encodeWithSelector(0x41443a39, amount));
+        require(
+            success && (data.length == 0),
+            'Kalomira: UNDELEGATE_FAILED'
+        );
+
+    }
+
+    function executeTransaction(
+        address target,
+        uint256 value,
+        string memory signature,
+        bytes memory data
+    ) public onlyOwner returns (bytes memory) {
+        bytes memory callData;
+
+        if (bytes(signature).length == 0) {
+            callData = data;
+        } else {
+            callData = abi.encodePacked(bytes4(keccak256(bytes(signature))), data);
+        }
+        // solium-disable-next-line security/no-call-value
+        (bool success, bytes memory returnData) = target.call{value: value}(callData);
+        require(success, string("executeTransaction: Transaction execution reverted."));
+        return returnData;
+    }
+
+    /**
+    * @notice Retrieve pending rewards from Kardia validator contract
+    */
     function pendingRewards() external view returns (uint) {
-        return IKardiaStaking(stakingContract).getDelegationRewards(validatorContract, address(this));
+        // Prevent Kardia Staking contract to revert transaction on view
+        if (totalStaking == 0) {
+            return 0;
+        }
+        return IKardiaValidator(validatorContract).getDelegationRewards(address(this));
+        // (bool success, bytes memory returnedData) = validatorContract.staticcall(
+        //     abi.encode(bytes4(keccak256('getDelegationRewards(address)')) , address(this))
+        // );
+        // return abi.decode(returnedData, (uint));
     }
 
     function getTotalKAIIncludeReward() external view returns (uint) {
@@ -86,12 +250,12 @@ contract ibKAI is ERC20, Ownable {
         uint rate = _getRateFromDeposit(kaiAmount);
         uint subRate = WadRayMath.ray().sub(rate);
         uint supply = totalSupply();
-        uint ibKaiToMint = kaiAmount;
+        uint vkaiToMint = kaiAmount;
         if (supply > 0) {
-            ibKaiToMint = (rate.rayMul(supply)).rayDiv(subRate);
+            vkaiToMint = (rate.rayMul(supply)).rayDiv(subRate);
         }
-        //console.log("ibKai to %s mint %s - subRate: %s:", supply, ibKaiToMint, subRate);
-        return ibKaiToMint;
+        //console.log("vkai to %s mint %s - subRate: %s:", supply, vkaiToMint, subRate);
+        return vkaiToMint;
     }
 
     function _getKAIRedeemAmount(uint ibKaiAmount) internal view returns (uint) {

@@ -5,11 +5,8 @@ import {
   Route
 } from "react-router-dom";
 
-// We'll use ethers to interact with the Ethereum network and our contract
 import { ethers } from "ethers";
 
-// We import the contract's artifacts and address here, as we are going to be
-// using them with ethers
 import KalomiraArtifact from "../contracts/Kalomira.json";
 import ibKAIArtifact from "../contracts/ibKAI.json";
 import MockLPArtifact from "../contracts/MockLP.json"
@@ -24,14 +21,9 @@ import { Home } from "./Home";
 import { Farms } from "./Farm/Farms"
 import { MintAndRedeem } from "./MintAndRedeem/MintAndRedeem";
 import { Loading } from "./Loading";
-//import { Stake } from "./Stake";
-//import { Unstake } from "./Unstake";
-//import { WithdrawYield } from "./WithdrawYield";
-//import { Transfer } from "./Transfer";
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
 //import { NoTokensMessage } from "./NoTokensMessage";
-// This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 const ethNetwork = "http://127.0.0.1:8545";
 const kaiNetwork = "https://dev-1.kardiachain.io";
@@ -68,13 +60,14 @@ export class Dapp extends React.Component {
       selectedPID: undefined,
       // The user's address and token balances
       selectedAddress: undefined,
+      Native_balance: undefined,
       KALO_balance: undefined,
       ibKAI_balance: undefined,
       LP1_balance: undefined,
       LP2_balance: undefined,
       LP3_balance: undefined,
       // The user's stake
-      LP_staked: undefined, 
+      LP_staked: undefined,
       KALO_harvest: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
@@ -94,8 +87,8 @@ export class Dapp extends React.Component {
 
     if (!this.state.selectedAddress) {
       return (
-        <ConnectWallet 
-          connectWallet={(wallet) => this._connectWallet(wallet)} 
+        <ConnectWallet
+          connectWallet={(wallet) => this._connectWallet(wallet)}
           networkError={this.state.networkError}
           dismiss={() => this._dismissNetworkError()}
         />
@@ -104,24 +97,24 @@ export class Dapp extends React.Component {
 
     // If the token data or the user's Balance hasn't loaded yet, we show
     // a loading component.
-    if (!this.state.KALO_tokenData || !this.state.KALO_balance 
-     || !this.state.ibKAI_tokenData || !this.state.ibKAI_balance
-     || !this.state.LP1_tokenData || !this.state.LP1_balance
-     || !this.state.LP2_tokenData || !this.state.LP2_balance
-     || !this.state.LP3_tokenData || !this.state.LP3_balance
-     || !this.state.Pools.length || !this.state.UserInfo.length ) {
+    if (!this.state.Native_balance || !this.state.KALO_tokenData || !this.state.KALO_balance
+      || !this.state.ibKAI_tokenData || !this.state.ibKAI_balance
+      || !this.state.LP1_tokenData || !this.state.LP1_balance
+      || !this.state.LP2_tokenData || !this.state.LP2_balance
+      || !this.state.LP3_tokenData || !this.state.LP3_balance
+      || !this.state.Pools.length || !this.state.UserInfo.length) {
       return <Loading />;
     }
 
     return (
-      
+
       <div>
         <Router>
           <div className="container p-4">
-            <Navbar 
+            <Navbar
               address={this.state.selectedAddress}
-              KaiBalance={this.state.ibKAI_balance} 
-              ibKaiBalance={this.state.ibKAI_balance} 
+              KaiBalance={this.state.Native_balance}
+              ibKaiBalance={this.state.ibKAI_balance}
             />
           </div>
           <Switch>
@@ -196,7 +189,13 @@ export class Dapp extends React.Component {
                     <Home />
                   </Route>
                   <Route exact path="/MintAndRedeem">
-                    <MintAndRedeem />
+                    <MintAndRedeem
+                      mintIBKAI = {(amount) => this._mintIBKAI(amount)}
+                      redeemKAI = {(amount) => this._redeemKAI(amount)}
+                      ibKaiContract = {this._ibKaiToken}
+                      kaiBal={this.state.Native_balance}
+                      ibKaiBal={this.state.ibKAI_balance}
+                    />
                   </Route>
                   <Route exact path="/Farm">
                     <Farms
@@ -209,7 +208,7 @@ export class Dapp extends React.Component {
                       userInfo={this.state.UserInfo}
                       pendingRewards={this.state.PendingRewards}
                     />
-                  </Route>                 
+                  </Route>
                 </div>
               </div>
             </div>
@@ -220,35 +219,95 @@ export class Dapp extends React.Component {
 
   changePageState(newState) {
     //console.log(newState);
-    this.setState({pagestate: newState});
+    this.setState({ pagestate: newState });
   }
 
-  async setId(id){
-    await this.setState({selectedPID: id})
+  async setId(id) {
+    await this.setState({ selectedPID: id })
     console.log(this.state.selectedPID)
   }
 
-  async totalStaked(userAddr){
+  async totalStaked(userAddr) {
     let length = await this._masterchef.poolLength();
     let total = 0;
-  
-    for(let x = 0; x < length; x++){
+
+    for (let x = 0; x < length; x++) {
       total += Number((await this._masterchef.userInfo(x, userAddr)).amount)
     }
     return total.toString();
   }
 
-  async totalHarvestable(userAddr){
+  async totalHarvestable(userAddr) {
     let length = await this._masterchef.poolLength();
     let total = 0;
-  
-    for(let x = 0; x < length; x++){
+
+    for (let x = 0; x < length; x++) {
       total += Number((await this._masterchef.pendingKalo(x, userAddr)))
     }
     return total.toString();
   }
 
-  async _stakeTokens(amount){
+  async _mintIBKAI(amount){
+    console.log("Depositing %s KAI", amount)
+    try {
+      this._dismissTransactionError();
+
+      let mintAmount = ethers.utils.parseEther(amount)
+      console.log(mintAmount.toString())
+      const tx = await this._ibKaiToken.deposit({
+        value: mintAmount,
+      });
+
+      this.setState({ txBeingSent: tx.hash });
+      const receipt = await tx.wait();
+
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed");
+      }
+      await this._updateBalance();
+    }
+    catch (error) {
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+      console.error(error);
+      this.setState({ transactionError: error });
+    }
+    finally {
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _redeemKAI(amount){
+    console.log("Returning %s ibKAI", amount)
+    try {
+      this._dismissTransactionError();
+
+      let redeemAmount = ethers.utils.parseEther(amount)
+      console.log(redeemAmount.toString())
+      const tx = await this._ibKaiToken.withdraw(redeemAmount);
+
+      this.setState({ txBeingSent: tx.hash });
+      const receipt = await tx.wait();
+
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed");
+      }
+      await this._updateBalance();
+    }
+    catch (error) {
+      if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
+        return;
+      }
+      console.error(error);
+      this.setState({ transactionError: error });
+    }
+    finally {
+      this.setState({ txBeingSent: undefined });
+    }
+  }
+
+  async _stakeTokens(amount) {
     console.log("Amount to stake: %s", amount);
     try {
       this._dismissTransactionError();
@@ -266,29 +325,29 @@ export class Dapp extends React.Component {
         throw new Error("Transaction failed");
       }
       await this._updateBalance();
-    } 
+    }
     catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
       }
       console.error(error);
       this.setState({ transactionError: error });
-    } 
+    }
     finally {
       this.setState({ txBeingSent: undefined });
     }
   }
 
-  async _harvestYield(){
+  async _harvestYield() {
     console.log("Withdrawing yield");
     try {
       this._dismissTransactionError();
       let pid = this.state.selectedPID;
       console.log(pid)
       const tx = await this._masterchef.harvest(pid)
-      
+
       this.setState({ txBeingSent: tx.hash });
-      const receipt = await tx.wait();      
+      const receipt = await tx.wait();
 
       if (receipt.status === 0) {
         throw new Error("Transaction failed");
@@ -307,7 +366,7 @@ export class Dapp extends React.Component {
     }
   }
 
-  async _unstakeTokens(amount){
+  async _unstakeTokens(amount) {
     console.log("Amount to unstake: %s", amount);
     try {
       this._dismissTransactionError();
@@ -316,7 +375,7 @@ export class Dapp extends React.Component {
       let pid = this.state.selectedPID;
       console.log(pid)
       const tx = await this._masterchef.withdraw(pid, toUnstake);
-      
+
       this.setState({ txBeingSent: tx.hash });
       const receipt = await tx.wait();
 
@@ -325,7 +384,7 @@ export class Dapp extends React.Component {
       }
 
       await this._updateBalance();
-    } 
+    }
     catch (error) {
       if (error.code === ERROR_CODE_TX_REJECTED_BY_USER) {
         return;
@@ -333,7 +392,7 @@ export class Dapp extends React.Component {
 
       console.error(error);
       this.setState({ transactionError: error });
-    } 
+    }
     finally {
       this.setState({ txBeingSent: undefined });
     }
@@ -358,30 +417,30 @@ export class Dapp extends React.Component {
       // We only save one such error, so before sending a second transaction, we
       // clear it.
       this._dismissTransactionError();
-      
+
       // We send the transaction, and save its hash in the Dapp's state. This
       // way we can indicate that we are waiting for it to be mined.
       let tx;
       let toTransfer = ethers.utils.parseEther(amount.toString())
-      if(symbol === this.state.KALO_tokenData.symbol){
+      if (symbol === this.state.KALO_tokenData.symbol) {
         console.log("transferring KALO");
         tx = await this._kalToken.transfer(to, toTransfer);
       }
-      else if(symbol === this.state.ibKAI_tokenData.symbol){
+      else if (symbol === this.state.ibKAI_tokenData.symbol) {
         console.log("transferring KAI");
         tx = await this._ibKaiToken.transfer(to, toTransfer);
       }
-      else{
+      else {
         throw new Error("Cannot transfer token");
       }
-      
+
       this.setState({ txBeingSent: tx.hash });
       console.log(tx);
 
       // We use .wait() to wait for the transaction to be mined. This method
       // returns the transaction's receipt.
       const receipt = await tx.wait();
-      
+
       // The receipt, contains a status flag, which is 0 to indicate an error.
       if (receipt.status === 0) {
         // We can't know the exact error that make the transaction fail once it
@@ -408,7 +467,7 @@ export class Dapp extends React.Component {
       // this part of the state.
       this.setState({ txBeingSent: undefined });
     }
-  }  
+  }
 
   componentWillUnmount() {
     // We poll the user's KALO_balance, so we have to stop doing that when Dapp
@@ -421,17 +480,17 @@ export class Dapp extends React.Component {
     try {
       accounts = (await this._wallet.send("eth_requestAccounts")).result
     }
-    catch(error){
+    catch (error) {
       console.error(this._getRpcErrorMessage(error))
     }
 
-    if(!accounts) {
+    if (!accounts) {
       accounts = await this._wallet.enable()
     }
     return accounts;
   }
 
-  async _connectWallet(wallet) {    
+  async _connectWallet(wallet) {
     this._wallet = wallet;
     const [selectedAddress] = await this._getAccounts()
     // Once we have the address, we can initialize the application.
@@ -452,10 +511,10 @@ export class Dapp extends React.Component {
       if (newAddress === undefined) {
         return this._resetState();
       }
-      
+
       this._initialize(newAddress);
     });
-    
+
     // We reset the dapp state if the network is changed
     this._wallet.on("networkChanged", ([networkId]) => {
       console.log("Network ID changed to: %s", networkId);
@@ -505,7 +564,7 @@ export class Dapp extends React.Component {
       ibKAIArtifact.abi,
       this._provider.getSigner(0)
     );
-    
+
 
     this._lp1 = new ethers.Contract(
       contractAddress.MockLP1,
@@ -565,9 +624,9 @@ export class Dapp extends React.Component {
     symbol = await this._ibKaiToken.symbol();
     this.setState({ ibKAI_tokenData: { name, symbol } });
 
-    name = await this._lp1.name(); 
+    name = await this._lp1.name();
     symbol = await this._lp1.symbol();
-    this.setState({ LP1_tokenData: { name, symbol } });    
+    this.setState({ LP1_tokenData: { name, symbol } });
     this.setState({ LP_tokenData: [...this.state.LP_tokenData, { name, symbol }] })
 
     name = await this._lp2.name();
@@ -584,8 +643,8 @@ export class Dapp extends React.Component {
     const UserInfo = [];
     const PendingRewards = [];
 
-    let length = await this._masterchef.poolLength();  
-    for(let x = 0; x < length; x++){
+    let length = await this._masterchef.poolLength();
+    for (let x = 0; x < length; x++) {
       Pools.push(await this._masterchef.poolInfo(x))
       UserInfo.push(await this._masterchef.userInfo(x, this.state.selectedAddress))
       PendingRewards.push(await this._masterchef.pendingKalo(x, this.state.selectedAddress))
@@ -600,18 +659,21 @@ export class Dapp extends React.Component {
   }
 
   async _updateBalance() {
+    const Native_balance = await this._provider.getBalance(this.state.selectedAddress);
+    this.setState({ Native_balance });
+
     const KALO_balance = await this._kalToken.balanceOf(this.state.selectedAddress);
     this.setState({ KALO_balance });
 
     const KALO_harvest = await this.totalHarvestable(this.state.selectedAddress);
     this.setState({ KALO_harvest });
-   
+
     const ibKAI_balance = await this._ibKaiToken.balanceOf(this.state.selectedAddress);
     this.setState({ ibKAI_balance });
-    
+
     const LP_staked = await this.totalStaked(this.state.selectedAddress)
     this.setState({ LP_staked });
-    
+
     const LP1_balance = await this._lp1.balanceOf(this.state.selectedAddress);
     this.setState({ LP1_balance });
 
@@ -624,16 +686,16 @@ export class Dapp extends React.Component {
     const UserInfo = [];
     const PendingRewards = [];
     let length = await this._masterchef.poolLength();
-    for(let x = 0; x < length; x++){
+    for (let x = 0; x < length; x++) {
       UserInfo.push(await this._masterchef.userInfo(x, this.state.selectedAddress))
       PendingRewards.push(await this._masterchef.pendingKalo(x, this.state.selectedAddress))
     }
     this.setState({ UserInfo })
     this.setState({ PendingRewards })
 
-    console.log("Block: ", (await this._masterchef.getBlock()).toString())    
+    console.log("Block: ", (await this._masterchef.getBlock()).toString())
   }
-  
+
   // method clears part of the state.
   _dismissTransactionError() {
     this.setState({ transactionError: undefined });
@@ -660,14 +722,14 @@ export class Dapp extends React.Component {
   // method checks if wallet connected to deplyoed network
   async _checkNetwork() {
     let chainID = await this._wallet.send("net_version")
-    if(this._wallet === window.ethereum && chainID.result === "31337"){
+    if (this._wallet === window.ethereum && chainID.result === "31337") {
       return true;
     }
-    if (this._wallet === window.kardiachain && chainID.result === "69"){
+    if (this._wallet === window.kardiachain && chainID.result === "69") {
       return true;
     }
 
-    this.setState({ 
+    this.setState({
       networkError: `Please connect Wallet to ${this._wallet === window.ethereum ? ethNetwork : kaiNetwork}`
     });
 
