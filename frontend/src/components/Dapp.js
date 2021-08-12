@@ -3,11 +3,11 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import { ethers } from "ethers";
 
-import KalomiraArtifact from "../contracts/Kalomira.json";
-import ibKAIArtifact from "../contracts/ibKAI.json";
-import MockLPArtifact from "../contracts/MockLP.json";
-import MasterChefArtifact from "../contracts/MasterChef.json";
-import contractAddress from "../contracts/contract-address.json";
+import KalomiraArtifact from "../config/abi/Kalomira.json";
+import ibKAIArtifact from "../config/abi/ibKAI.json";
+import mockLPAbi from "../config/abi/MockLP.json";
+import MasterChefArtifact from "../config/abi/MasterChef.json";
+import contractAddress from "../config/constants/contracts.json";
 
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
@@ -18,21 +18,11 @@ import { MintAndRedeem } from "./MintAndRedeem/MintAndRedeem";
 import { Loading } from "./Loading";
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
-//import { NoTokensMessage } from "./NoTokensMessage";
+
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 const ethNetwork = "http://127.0.0.1:8545";
 const kaiNetwork = "https://dev-1.kardiachain.io";
 
-// This component is in charge of doing these things:
-//   1. It connects to the user's wallet
-//   2. Initializes ethers and the Token contract
-//   3. Polls the user KALO_balance to keep it updated.
-//   4. Transfers tokens by sending transactions
-//   5. Renders the whole application
-//
-// Note that (3) and (4) are specific of this sample application, but they show
-// you how to keep your Dapp and contract's state in sync,  and how to send a
-// transaction.
 export class Dapp extends React.Component {
 	constructor(props) {
 		super(props);
@@ -563,7 +553,7 @@ export class Dapp extends React.Component {
 			this._wallet === window.ethereum
 				? contractAddress.Kalomira
 				: "0x6765ed069D4f20e061B6489fB0ae11C6797ABf63",
-			KalomiraArtifact.abi,
+			KalomiraArtifact,
 			this._provider.getSigner(0)
 		);
 
@@ -572,23 +562,23 @@ export class Dapp extends React.Component {
 			this._wallet === window.ethereum
 				? contractAddress.ibKAI
 				: "0x73aBef771479d89a93ACd896772608ae2625e18b",
-			ibKAIArtifact.abi,
+			ibKAIArtifact,
 			this._provider.getSigner(0)
 		);
 
 		this._lp1 = new ethers.Contract(
 			contractAddress.MockLP1,
-			MockLPArtifact.abi,
+			mockLPAbi,
 			this._provider.getSigner(0)
 		);
 		this._lp2 = new ethers.Contract(
 			contractAddress.MockLP2,
-			MockLPArtifact.abi,
+			mockLPAbi,
 			this._provider.getSigner(0)
 		);
 		this._lp3 = new ethers.Contract(
 			contractAddress.MockLP3,
-			MockLPArtifact.abi,
+			mockLPAbi,
 			this._provider.getSigner(0)
 		);
 
@@ -599,7 +589,7 @@ export class Dapp extends React.Component {
 
 		this._masterchef = new ethers.Contract(
 			contractAddress.MasterChef,
-			MasterChefArtifact.abi,
+			MasterChefArtifact,
 			this._provider.getSigner(0)
 		);
 	}
