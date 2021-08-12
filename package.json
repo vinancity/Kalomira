@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "4.2.0",
+    "@openzeppelin/contracts-upgradeable": "4.2.0",
     "kardia-js-sdk": "0.4.6"
   }
 }
