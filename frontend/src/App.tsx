@@ -5,6 +5,7 @@ import { Redirect, Route } from "react-router-dom";
 
 import Home from "./views/Home";
 import Menu from "./components/Menu/Menu";
+import Navbar from "./components/Navbar/Navbar";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -29,17 +30,16 @@ export default function App() {
 	return (
 		<IonApp>
 			<IonReactRouter>
-				<IonSplitPane contentId="main">
-					<Menu />
-					<IonRouterOutlet id="main">
-						<Route exact path="/">
-							<Redirect to="/home" />
-						</Route>
-						<Route exact path="/home">
-							<Home />
-						</Route>
-					</IonRouterOutlet>
-				</IonSplitPane>
+				{/* <Menu /> */}
+				<Navbar />
+				<IonRouterOutlet id="main">
+					<Route exact path="/">
+						<Redirect to="/home" />
+					</Route>
+					<Route exact path="/home">
+						<Home />
+					</Route>
+				</IonRouterOutlet>
 			</IonReactRouter>
 		</IonApp>
 	);
