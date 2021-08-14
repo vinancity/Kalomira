@@ -1,5 +1,22 @@
 //import React from "react";
-import { IonApp, IonRouterOutlet } from "@ionic/react";
+import {
+	IonApp,
+	IonHeader,
+	IonToolbar,
+	IonTitle,
+	IonContent,
+	IonFooter,
+	IonMenu,
+	IonList,
+	IonListHeader,
+	IonMenuToggle,
+	IonIcon,
+	IonLabel,
+	IonPage,
+	IonButtons,
+	IonButton,
+	IonItem,
+} from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
@@ -29,11 +46,12 @@ import "./theme/variables.css";
 export default function App() {
 	return (
 		<IonApp>
-			<IonReactRouter>
-				<Navbar />
-				<IonRouterOutlet id="main">
+			<IonPage className="ion-page" id="main-content">
+				<IonReactRouter>
+					<Navbar />
 					<Route exact path="/">
-						<Redirect to="/home" />
+						// <Redirect to="/home" />
+						//{" "}
 					</Route>
 					<Route exact path="/home">
 						<Home />
@@ -41,8 +59,8 @@ export default function App() {
 					<Route exact path="/mintredeem">
 						<MintAndRedeem />
 					</Route>
-				</IonRouterOutlet>
-			</IonReactRouter>
+				</IonReactRouter>
+			</IonPage>
 		</IonApp>
 	);
 }

@@ -4,34 +4,45 @@ import { useWeb3React } from "@web3-react/core";
 import {
 	IonButtons,
 	IonContent,
-	IonHeader,
-	IonMenuButton,
-	IonPage,
-	IonTitle,
-	IonToolbar,
+	IonGrid,
+	IonRow,
+	IonCol,
+	IonCard,
+	IonCardHeader,
+	IonCardContent,
+	IonCardTitle,
+	IonButton,
 } from "@ionic/react";
 
 export default function Home() {
 	const { account } = useWeb3React();
 	return (
-		<IonPage>
-			<IonHeader>
-				<IonToolbar>
-					<IonButtons slot="start">
-						<IonMenuButton />
-					</IonButtons>
-				</IonToolbar>
-			</IonHeader>
-
-			<IonContent fullscreen>
-				<IonHeader collapse="condense">
-					<IonToolbar>
-						<IonTitle size="large">Dashboard</IonTitle>
-					</IonToolbar>
-				</IonHeader>
-				<h1>Address: {account}</h1>
-				<h2>ETH: {0}</h2>
-			</IonContent>
-		</IonPage>
+		<IonContent className="ion-padding">
+			<IonCard>
+				<IonCardHeader color="light">
+					<IonCardTitle>
+						<IonGrid>
+							<IonRow>
+								<IonCol>
+									<IonButton expand="block" color="dark">
+										<b>Mint</b>
+									</IonButton>
+								</IonCol>
+								<IonCol>
+									<IonButton expand="block" color="dark">
+										<b>Redeem</b>
+									</IonButton>
+								</IonCol>
+							</IonRow>
+						</IonGrid>
+					</IonCardTitle>
+				</IonCardHeader>
+				<IonCardContent>
+					<h1>Address: {account}</h1>
+					<h2>ETH: {0}</h2>
+					<p>home</p>
+				</IonCardContent>
+			</IonCard>
+		</IonContent>
 	);
 }

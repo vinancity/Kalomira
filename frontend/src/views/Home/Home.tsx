@@ -9,29 +9,27 @@ import {
 	IonPage,
 	IonTitle,
 	IonToolbar,
+	IonCard,
+	IonCardHeader,
+	IonCardContent,
+	IonCardTitle,
 } from "@ionic/react";
+import "../../theme/variables.css";
 
 export default function Home() {
 	const { account } = useWeb3React();
 	return (
-		<IonPage>
-			<IonHeader>
-				<IonToolbar>
-					<IonButtons slot="start">
-						<IonMenuButton />
-					</IonButtons>
-				</IonToolbar>
-			</IonHeader>
-
-			<IonContent fullscreen>
-				<IonHeader collapse="condense">
-					<IonToolbar>
-						<IonTitle size="large">Dashboard</IonTitle>
-					</IonToolbar>
-				</IonHeader>
-				<h1>Address: {account}</h1>
-				<h2>ETH: {0}</h2>
-			</IonContent>
-		</IonPage>
+		<IonContent className="ion-padding">
+			<IonCard>
+				<IonCardHeader color="light">
+					<IonCardTitle>Home</IonCardTitle>
+				</IonCardHeader>
+				<IonCardContent>
+					<h1>Address: {account}</h1>
+					<h2>ETH: {0}</h2>
+					<p>home</p>
+				</IonCardContent>
+			</IonCard>
+		</IonContent>
 	);
 }
