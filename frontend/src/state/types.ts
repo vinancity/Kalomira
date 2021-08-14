@@ -1,15 +1,13 @@
 import BigNumber from "bignumber.js";
 
-export interface Profile {
+export interface User {
 	userId: number;
+	nativeBalance: number;
 	isActive: boolean;
-	username: string;
-	hasRegistered: boolean;
 }
 
-export interface ProfileState {
+export interface UserState {
 	isInitialized: boolean;
 	isLoading: boolean;
-	hasRegistered: boolean;
-	data: Profile;
+	data: User;
 }

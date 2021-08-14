@@ -1,10 +1,10 @@
 //import React from "react";
-import { IonApp, IonRouterOutlet, IonSplitPane } from "@ionic/react";
+import { IonApp, IonRouterOutlet } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
 import Home from "./views/Home";
-import Menu from "./components/Menu/Menu";
+import MintAndRedeem from "views/MintAndRedeem";
 import Navbar from "./components/Navbar/Navbar";
 
 /* Core CSS required for Ionic components to work properly */
@@ -30,7 +30,6 @@ export default function App() {
 	return (
 		<IonApp>
 			<IonReactRouter>
-				{/* <Menu /> */}
 				<Navbar />
 				<IonRouterOutlet id="main">
 					<Route exact path="/">
@@ -38,6 +37,9 @@ export default function App() {
 					</Route>
 					<Route exact path="/home">
 						<Home />
+					</Route>
+					<Route exact path="/mintredeem">
+						<MintAndRedeem />
 					</Route>
 				</IonRouterOutlet>
 			</IonReactRouter>

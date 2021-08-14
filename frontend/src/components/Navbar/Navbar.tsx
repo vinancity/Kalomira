@@ -9,7 +9,7 @@ import {
 	IonLabel,
 } from "@ionic/react";
 
-import WalletInfo from "./components/WalletInfo";
+import WalletConnect from "./components/WalletConnect";
 
 import { navItems } from "./NavItem";
 
@@ -32,18 +32,14 @@ export default function Navbar() {
 									routerLink={navItem.url}
 									routerDirection="none"
 								>
-									<IonIcon
-										slot="start"
-										ios={navItem.iosIcon}
-										md={navItem.mdIcon}
-									/>
+									<IonIcon slot="start" ios={navItem.iosIcon} md={navItem.mdIcon} />
 									<IonLabel>{navItem.title}</IonLabel>
 								</IonButton>
 							);
 						})}
 					</IonCol>
 					<IonCol className="ion-text-right">
-						<WalletInfo />
+						<WalletConnect />
 					</IonCol>
 				</IonRow>
 			</IonToolbar>

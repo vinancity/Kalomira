@@ -1,39 +1,35 @@
-import React from "react";
-import {
-	IonHeader,
-	IonToolbar,
-	IonRow,
-	IonCol,
-	IonButton,
-	IonIcon,
-	IonItem,
-	IonLabel,
-} from "@ionic/react";
+import React, { useState, useEffect } from "react";
+import { IonButton, IonLabel, useIonModal } from "@ionic/react";
 
 import useAuth from "../../../hooks/useAuth";
 import { useWeb3React } from "@web3-react/core";
-import { ConnectorNames } from "@pancakeswap/uikit";
+import { ConnectorNames } from "../../../utils/walletTypes";
+import WalletModal from "./WalletModal";
 
-export default function WalletInfo() {
+export default function WalletConnect() {
 	const { login, logout } = useAuth();
 	const { account, active } = useWeb3React();
+	const [addr, setAddress] = useState(account);
+	const [showModal, setShowModal] = useState(false);
 
-	function _login() {
-		login(ConnectorNames.Injected);
+	useEffect(() => {
+		if (account) {
+			setAddress(account);
+		}
+	}, [account]);
+
+	function _login(connector: ConnectorNames) {
+		login(connector);
 	}
 
 	function _logout() {
 		logout();
-		console.log("Logging out");
 	}
 
 	return (
 		<>
 			<IonButton color="dark" strong fill="outline" routerDirection="none">
-				<IonLabel>{`Active: ${active}`}</IonLabel>
-			</IonButton>
-			<IonButton color="dark" strong fill="outline" routerDirection="none">
-				<IonLabel>{`Account: ${account ? account : ""}`}</IonLabel>
+				<IonLabel>{`Account: ${account ? addr : ""}`}</IonLabel>
 			</IonButton>
 
 			{active ? (
@@ -52,11 +48,17 @@ export default function WalletInfo() {
 					strong
 					fill="outline"
 					routerDirection="none"
-					onClick={_login}
+					onClick={() => setShowModal(true)}
 				>
 					<IonLabel id="foo">Connect</IonLabel>
 				</IonButton>
 			)}
+
+			<WalletModal
+				showModal={showModal}
+				setShowModal={setShowModal}
+				login={_login}
+			/>
 		</>
 	);
 }

@@ -9,18 +9,20 @@ import {
 	UserRejectedRequestError as UserRejectedRequestErrorWalletConnect,
 	WalletConnectConnector,
 } from "@web3-react/walletconnect-connector";
-import { ConnectorNames, connectorLocalStorageKey } from "@pancakeswap/uikit";
+import { ConnectorNames } from "../utils/walletTypes";
 import { connectorsByName } from "../utils/web3React";
 import { useAppDispatch } from "../state";
 
 const useAuth = () => {
 	const dispath = useAppDispatch();
-	const { chainId, account, activate, deactivate, active } = useWeb3React();
+	const { activate, deactivate } = useWeb3React();
 
 	const login = useCallback((connectorID: ConnectorNames) => {
 		const connector = connectorsByName[connectorID];
 		if (connector) {
-			activate(connector);
+			activate(connector, (error) => {
+				console.error(error);
+			});
 		}
 	}, []);
 

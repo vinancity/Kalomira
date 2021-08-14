@@ -31,5 +31,9 @@
     "ethers": "^5.0.0",
     "hardhat": "^2.0.4",
     "husky": "^4.2.5"
+  },
+  "dependencies": {
+    "@web3-react/core": "^6.1.9",
+    "react-redux": "^7.2.4"
   }
 }
