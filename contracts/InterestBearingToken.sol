@@ -33,42 +33,33 @@ contract InterestBearingToken is
     constructor() payable
     { }
 
-    function __InterestBearingToken_init(string memory _name, string memory _symbol) external payable {
+    function __InterestBearingToken_init(string memory _name, string memory _symbol) internal {
         ERC20Upgradeable.__ERC20_init(_name, _symbol);
         OwnableUpgradeable.__Ownable_init();
-        _mint(_msgSender(), msg.value); // Need to mint initial amount in order not to check on zero division
     }
-
-    // /**
-    // * @notice Receive native asset accidentally from someone transfer to this contract
-    // */
-    // receive() external payable {
-    //     // For first deposit will use small amount of KAI to register with validator
-    //     if (_underlyingAmount > 0) {
-    //         this.mint(msg.value);
-    //     }
-    // }
 
     /**
      * @dev Allow a user to mint interest bearing token with underlying asset
      */
-    function mint(uint amount) external payable override returns (bool) {
+    function mint(uint amount) external payable override virtual returns (uint256) {
         uint mintAmount = this.getMintAmount(amount);
         _mint(_msgSender(), mintAmount);
         _underlyingAmount = _underlyingAmount.add(amount);
-        _receiveUnderlyingAsset(_msgSender(), amount);
-        return true;
+        bool success = _receiveUnderlyingAsset(_msgSender(), amount);
+        require(success, "insufficient receive amount");
+        return mintAmount;
     }
 
     /**
      * @dev Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
      */
-    function redeem(uint256 amount) external override returns (bool) {
+    function redeem(uint256 amount) external override virtual returns (uint256) {
         require(amount <= balanceOf(_msgSender()), "insufficient balance");
         uint outputAmount = this.getRedeemAmount(amount);
         _burn(_msgSender(), amount);
-        _transferUnderlyingAsset(_msgSender(), outputAmount);
-        return true;
+        bool success = _transferUnderlyingAsset(_msgSender(), outputAmount);
+        require(success, "asset not able to transfer");
+        return outputAmount;
     }
 
     function accrue() external virtual override {
