@@ -1,22 +1,5 @@
 //import React from "react";
-import {
-	IonApp,
-	IonHeader,
-	IonToolbar,
-	IonTitle,
-	IonContent,
-	IonFooter,
-	IonMenu,
-	IonList,
-	IonListHeader,
-	IonMenuToggle,
-	IonIcon,
-	IonLabel,
-	IonPage,
-	IonButtons,
-	IonButton,
-	IonItem,
-} from "@ionic/react";
+import { IonApp, IonPage } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
@@ -50,8 +33,7 @@ export default function App() {
 				<IonReactRouter>
 					<Navbar />
 					<Route exact path="/">
-						// <Redirect to="/home" />
-						//{" "}
+						<Redirect to="/home" />
 					</Route>
 					<Route exact path="/home">
 						<Home />

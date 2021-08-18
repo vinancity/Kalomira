@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { IonButton, IonLabel, useIonModal } from "@ionic/react";
+import { IonButton, IonLabel } from "@ionic/react";
 
-import useAuth from "../../../hooks/useAuth";
+import useAuth from "hooks/useAuth";
 import { useWeb3React } from "@web3-react/core";
-import { ConnectorNames } from "../../../utils/walletTypes";
+import { ConnectorNames } from "utils/walletTypes";
+import truncateAddress from "utils/truncateAddress";
 import WalletModal from "./WalletModal";
 
 export default function WalletConnect() {
 	const { login, logout } = useAuth();
-	const { account, active } = useWeb3React();
+	const { account, active, connector, chainId, library } = useWeb3React();
 	const [addr, setAddress] = useState(account);
 	const [showModal, setShowModal] = useState(false);
 
@@ -16,21 +17,37 @@ export default function WalletConnect() {
 		if (account) {
 			setAddress(account);
 		}
+		const log = async () => {
+			if (connector) {
+				console.log(chainId, library, await connector.getChainId());
+			}
+		};
+		log();
 	}, [account]);
 
-	function _login(connector: ConnectorNames) {
+	const _login = (connector: ConnectorNames) => {
 		login(connector);
-	}
+	};
 
-	function _logout() {
+	const _logout = () => {
 		logout();
-	}
+	};
 
 	return (
 		<>
-			<IonButton color="dark" strong fill="outline" routerDirection="none">
-				<IonLabel>{`Account: ${account ? addr : ""}`}</IonLabel>
-			</IonButton>
+			{active && (
+				<>
+					<IonButton color="dark" strong fill="clear" routerDirection="none">
+						<IonLabel>{`KAI: ${0}`}</IonLabel>
+					</IonButton>
+					<IonButton color="dark" strong fill="clear" routerDirection="none">
+						<IonLabel>{`ibKAI: ${0}`}</IonLabel>
+					</IonButton>
+					<IonButton color="success" strong fill="clear" routerDirection="none">
+						<IonLabel>{`${addr ? truncateAddress(addr, 6) : ""}`}</IonLabel>
+					</IonButton>
+				</>
+			)}
 
 			{active ? (
 				<IonButton
