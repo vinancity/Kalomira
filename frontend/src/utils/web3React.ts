@@ -19,7 +19,7 @@ const walletconnect = new WalletConnectConnector({
 	pollingInterval: POLLING_INTERVAL,
 });
 
-const kaiConnector = new KaiConnector({ supportedChainIds: [69, 0] });
+const kaiConnector = new KaiConnector({ supportedChainIds: [chainId, 69, 0] });
 
 export const connectorsByName: { [connectorName in ConnectorNames]: any } = {
 	[ConnectorNames.Injected]: injected,
