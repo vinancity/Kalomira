@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import BigNumber from "bignumber.js";
+import { getBalanceAmount } from "utils/formatBalance";
 import { BIG_ZERO } from "utils/bigNumber";
 import {
 	IonList,
@@ -10,18 +10,38 @@ import {
 	IonGrid,
 	IonRow,
 	IonCol,
+	IonLabel,
 } from "@ionic/react";
 
-import { useIbKai } from "hooks/useContract";
+import useGetMintAmount from "../hooks/useGetMintAmount";
+import useGetMintRate from "../hooks/useGetMintRate";
+import useMintIbKAi from "../hooks/useMintIbKai";
 
 export default function MintForm() {
-	const [mintAmount, setMintAmount] = useState<BigNumber>(BIG_ZERO);
-	const ibKaiContract = useIbKai();
+	const [depositAmount, setDepositAmount] = useState("");
+	const [mintAmount, setMintAmount] = useState(BIG_ZERO);
+	const [mintRate, setMintRate] = useState(BIG_ZERO);
+	const { onGetMintAmount } = useGetMintAmount();
+	const { onGetMintRate } = useGetMintRate();
+	const { onMint } = useMintIbKAi();
 
-	const calcMintAmt = async (value) => {
+	const fetchMintInfo = async (value) => {
 		if (value) {
-			setMintAmount(value);
+			let mintAmt = getBalanceAmount(await onGetMintAmount(value));
+			let mintRate = getBalanceAmount(await onGetMintRate(value), 27);
+			setDepositAmount(value);
+			setMintAmount(mintAmt);
+			setMintRate(mintRate);
+		} else {
+			setDepositAmount("");
+			setMintAmount(BIG_ZERO);
+			setMintRate(BIG_ZERO);
 		}
+	};
+
+	const handleMint = async () => {
+		console.log(`Depositing ${depositAmount}`);
+		onMint(depositAmount);
 	};
 
 	useEffect(() => {
@@ -42,11 +62,16 @@ export default function MintForm() {
 							<IonInput
 								className="ion-padding"
 								placeholder="0"
-								inputMode="decimal"
 								min="0"
+								inputmode="decimal"
 								clearInput
-								type="number"
-								onIonChange={() => console.log("change")}
+								onIonChange={(e) => fetchMintInfo(e.detail.value)}
+								onKeyPress={(e) => {
+									let regex = /^[0-9]*[.]?[0-9]*$/;
+									if (!regex.test(e.key)) {
+										e.preventDefault();
+									}
+								}}
 								required
 							/>
 						</IonCol>
@@ -63,17 +88,22 @@ export default function MintForm() {
 				<IonGrid>
 					<IonRow>
 						<IonCol>
-							<IonInput className="ion-padding" placeholder="0" readonly />
+							<IonInput
+								className="ion-padding"
+								placeholder={mintAmount.toString()}
+								readonly
+							/>
 						</IonCol>
 						<IonCol className="ion-padding ion-text-right">ibKAI</IonCol>
 					</IonRow>
 				</IonGrid>
 			</IonItem>
 			<div className="ion-padding">
-				<h2>Mint rate: {0}</h2>
-				<h2>Mint fee: {0}</h2>
+				<h2>Mint rate: {mintRate.toString()}</h2>
 			</div>
-			<IonButton expand="full">Mint</IonButton>
+			<IonButton expand="full" onClick={handleMint}>
+				Mint
+			</IonButton>
 			<IonItemDivider />
 		</IonList>
 	);

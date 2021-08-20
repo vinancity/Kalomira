@@ -17,11 +17,10 @@ import MintForm from "./components/MintForm";
 import RedeemForm from "./components/RedeemForm";
 
 export default function Home() {
-	const { account } = useWeb3React();
 	const [mintActive, setMintActive] = useState(true);
 
 	return (
-		<IonContent className="ion-padding">
+		<IonContent className="padded-content">
 			<IonCard>
 				<IonCardHeader color="light">
 					<IonCardTitle>
