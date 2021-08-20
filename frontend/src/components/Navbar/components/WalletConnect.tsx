@@ -1,36 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { IonButton, IonLabel } from "@ionic/react";
-
-import useAuth from "hooks/useAuth";
 import { useWeb3React } from "@web3-react/core";
 import { ConnectorNames } from "utils/walletTypes";
+import { setConnector, clearConnector } from "state/connector";
+import { useDispatch } from "react-redux";
+import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
+import { getFullDisplayBalance } from "utils/formatBalance";
+
+import useAuth from "hooks/useAuth";
 import truncateAddress from "utils/truncateAddress";
 import WalletModal from "./WalletModal";
 
 export default function WalletConnect() {
 	const { login, logout } = useAuth();
-	const { account, active, connector, chainId, library } = useWeb3React();
+	const { account, active } = useWeb3React();
+	const { balance } = useNativeBalance();
+	const { ibKaiBalance } = useIbKaiBalance();
 	const [addr, setAddress] = useState(account);
 	const [showModal, setShowModal] = useState(false);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		if (account) {
 			setAddress(account);
 		}
-		const log = async () => {
-			if (connector) {
-				console.log(chainId, library, await connector.getChainId());
-			}
-		};
-		log();
 	}, [account]);
 
 	const _login = (connector: ConnectorNames) => {
 		login(connector);
+		dispatch(setConnector(connector));
 	};
 
 	const _logout = () => {
 		logout();
+		dispatch(clearConnector());
 	};
 
 	return (
@@ -38,10 +41,18 @@ export default function WalletConnect() {
 			{active && (
 				<>
 					<IonButton color="dark" strong fill="clear" routerDirection="none">
-						<IonLabel>{`KAI: ${0}`}</IonLabel>
+						<IonLabel>{`KAI: ${getFullDisplayBalance(
+							balance,
+							undefined,
+							4
+						)}`}</IonLabel>
 					</IonButton>
 					<IonButton color="dark" strong fill="clear" routerDirection="none">
-						<IonLabel>{`ibKAI: ${0}`}</IonLabel>
+						<IonLabel>{`ibKAI: ${getFullDisplayBalance(
+							ibKaiBalance,
+							undefined,
+							4
+						)}`}</IonLabel>
 					</IonButton>
 					<IonButton color="success" strong fill="clear" routerDirection="none">
 						<IonLabel>{`${addr ? truncateAddress(addr, 6) : ""}`}</IonLabel>

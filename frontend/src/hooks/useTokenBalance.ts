@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import BigNumber from "bignumber.js";
 import { useWeb3React } from "@web3-react/core";
 import { BIG_ZERO } from "utils/bigNumber";
-import { simpleRpcProvider } from "utils/providers";
+import { simpleRpcProvider, kardiaProvider } from "utils/providers";
 import { getErc20Contract, getIbKaiContract } from "utils/contractHelpers";
+import { useIbKAI } from "./useContract";
 import useRefresh from "./useRefresh";
 import useLastUpdated from "./useLastUpdated";
+import { bigIntLiteral } from "@babel/types";
 
 export type UseTokenBalanceState = {
 	balance: BigNumber;
@@ -46,12 +48,43 @@ export const useTokenBalance = (tokenAddress: string) => {
 			fetchBalance();
 		}
 	}, [account, tokenAddress, fastRefresh, SUCCESS, FAILED]);
+
+	return balanceState;
+};
+
+export const useIbKaiBalance = () => {
+	const [fetchStatus, setFetchStatus] = useState(FetchStatus.NOT_FETCHED);
+	const [ibKaiBalance, setBalance] = useState(BIG_ZERO);
+	const { account } = useWeb3React();
+	const { fastRefresh } = useRefresh();
+	const { lastUpdated, setLastUpdated } = useLastUpdated();
+	const ibKaiContract = useIbKAI();
+
+	useEffect(() => {
+		const fetchIbKAIBalance = async () => {
+			try {
+				const ibKAIBalance = await ibKaiContract.balanceOf(account);
+				setBalance(new BigNumber(ibKAIBalance.toString()));
+				setFetchStatus(FetchStatus.SUCCESS);
+			} catch (error) {
+				console.error(error);
+				setFetchStatus(FetchStatus.FAILED);
+			}
+		};
+
+		if (account) {
+			fetchIbKAIBalance();
+		}
+	}, [account, lastUpdated, fastRefresh, setBalance, setFetchStatus]);
+
+	return { ibKaiBalance, fetchStatus, refresh: setLastUpdated };
 };
 
 export const useNativeBalance = () => {
 	const [fetchStatus, setFetchStatus] = useState(FetchStatus.NOT_FETCHED);
 	const [balance, setBalance] = useState(BIG_ZERO);
 	const { account } = useWeb3React();
+	const { fastRefresh } = useRefresh();
 	const { lastUpdated, setLastUpdated } = useLastUpdated();
 
 	useEffect(() => {
@@ -69,7 +102,7 @@ export const useNativeBalance = () => {
 		if (account) {
 			fetchBalance();
 		}
-	}, [account, lastUpdated, setBalance, setFetchStatus]);
+	}, [account, lastUpdated, fastRefresh, setBalance, setFetchStatus]);
 
 	return { balance, fetchStatus, refresh: setLastUpdated };
 };

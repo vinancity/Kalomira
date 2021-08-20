@@ -4,8 +4,9 @@ import { getIbKaiContract, getKaloContract } from "utils/contractHelpers";
 
 import { Contract } from "@ethersproject/contracts";
 import { useWeb3React } from "@web3-react/core";
+import { simpleRpcProvider } from "utils/providers";
 
-export const useIbKai = () => {
+export const useIbKAI = () => {
 	const { library } = useWeb3();
 	return useMemo(() => getIbKaiContract(library.getSigner()), [library]);
 };

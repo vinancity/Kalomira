@@ -1,6 +1,6 @@
 import React from "react";
 import { IonModal, IonButton, IonRow, IonCol } from "@ionic/react";
-import { ConnectorNames } from "../../../utils/walletTypes";
+import { ConnectorNames } from "utils/walletTypes";
 
 export default function WalletModal({ showModal, setShowModal, login }) {
 	return (

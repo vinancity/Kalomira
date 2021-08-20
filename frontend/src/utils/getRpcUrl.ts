@@ -1,14 +1,15 @@
 import sample from "lodash/sample";
 
-// Array of available nodes to connect to
-export const nodes = [
-	process.env.REACT_APP_NODE_1,
-	process.env.REACT_APP_NODE_2,
-	process.env.REACT_APP_NODE_3,
-];
+export const getNodeUrl = () => {
+	return process.env.REACT_APP_NODE_DEFAULT;
+};
 
-const getNodeUrl = () => {
-	return sample(nodes);
+export const getEthereumUrl = () => {
+	return process.env.REACT_APP_NODE_ETH;
+};
+
+export const getKardiaUrl = () => {
+	return process.env.REACT_APP_NODE_KAI;
 };
 
 export default getNodeUrl;

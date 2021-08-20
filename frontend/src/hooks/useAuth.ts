@@ -9,9 +9,9 @@ import {
 	UserRejectedRequestError as UserRejectedRequestErrorWalletConnect,
 	WalletConnectConnector,
 } from "@web3-react/walletconnect-connector";
-import { ConnectorNames } from "../utils/walletTypes";
-import { connectorsByName } from "../utils/web3React";
-import { useAppDispatch } from "../state";
+import { ConnectorNames } from "utils/walletTypes";
+import { connectorsByName } from "utils/web3React";
+import { useAppDispatch } from "state";
 
 const useAuth = () => {
 	const dispath = useAppDispatch();
