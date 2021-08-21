@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { mintIbKAI } from "utils/calls";
 import { useIbKAI } from "hooks/useContract";
 
-const useMintIbKAi = () => {
+const useMintIbKai = () => {
 	const ibKaiContract = useIbKAI();
 
 	const handleMint = useCallback(
@@ -16,4 +16,4 @@ const useMintIbKAi = () => {
 	return { onMint: handleMint };
 };
 
-export default useMintIbKAi;
+export default useMintIbKai;

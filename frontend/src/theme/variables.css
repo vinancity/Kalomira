@@ -76,6 +76,17 @@ http://ionicframework.com/docs/theming/ */
 	--ion-color-light-tint: #f5f6f9;
 }
 
+ion-content {
+	--background: #fff url("./images/background.jpg") no-repeat center center /
+		cover;
+}
+
+.padded-content {
+	--padding-start: 20%;
+	--padding-end: 20%;
+	--padding-top: 7.5%;
+}
+
 @media (prefers-color-scheme: light) {
 	/*
    * Dark Colors

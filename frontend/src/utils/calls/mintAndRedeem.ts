@@ -2,6 +2,7 @@ import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
 import { getDecimalAmount } from "utils/formatBalance";
 import { DEFAULT_GAS_LIMIT, DEFAULT_TOKEN_DECIMAL } from "config";
+import MintAndRedeem from "views/MintAndRedeem";
 
 const options = { gasLimit: DEFAULT_GAS_LIMIT };
 
@@ -14,7 +15,13 @@ export const getMintAmount = async (ibKaiContract, amount) => {
 	return new BigNumber(mintAmount);
 };
 
-export const getRedeemAmount = async () => {};
+export const getRedeemAmount = async (ibKaiContract, amount) => {
+	const returnAmount = new BigNumber(amount)
+		.times(DEFAULT_TOKEN_DECIMAL)
+		.toString();
+	const redeemAmount = await ibKaiContract.getKAIRedeemAmount(returnAmount);
+	return new BigNumber(redeemAmount);
+};
 
 // Returns a BigNumber of mint rate, throws error if too many decimals or >18 digits after decimal
 export const getRateFromDeposit = async (ibKaiContract, amount) => {
@@ -26,17 +33,31 @@ export const getRateFromDeposit = async (ibKaiContract, amount) => {
 	return new BigNumber(mintRate);
 };
 
-export const getRateFromWithdraw = async () => {};
+export const getRateFromWithdraw = async (ibKaiContract, amount) => {
+	const returnAmount = new BigNumber(amount)
+		.times(DEFAULT_TOKEN_DECIMAL)
+		.toString();
+	const redeemRate = await ibKaiContract.getRateFromWithdraw(returnAmount);
+	return new BigNumber(redeemRate);
+};
 
 export const mintIbKAI = async (ibKaiContract, amount) => {
 	const depositAmount = new BigNumber(amount)
 		.times(DEFAULT_TOKEN_DECIMAL)
-		.toNumber();
-	console.log(depositAmount);
+		.toString(16); //Convert to hexidecimal string
+	console.log(depositAmount, 1000000000000000);
 	// if amount is 0, they are dumb
-	const tx = await ibKaiContract.deposit({ value: 1000000000000000 });
+	const tx = await ibKaiContract.deposit({ value: "0x" + depositAmount });
 	const receipt = await tx.wait();
 	return receipt.status;
 };
 
-export const redeemKAI = async () => {};
+export const redeemKAI = async (ibKaiContract, amount) => {
+	const returnAmount = new BigNumber(amount)
+		.times(DEFAULT_TOKEN_DECIMAL)
+		.toString();
+
+	const tx = await ibKaiContract.withdraw(returnAmount);
+	const receipt = await tx.wait();
+	return receipt.status;
+};

@@ -15,7 +15,7 @@ import {
 
 import useGetMintAmount from "../hooks/useGetMintAmount";
 import useGetMintRate from "../hooks/useGetMintRate";
-import useMintIbKAi from "../hooks/useMintIbKai";
+import useMintIbKai from "../hooks/useMintIbKai";
 
 export default function MintForm() {
 	const [depositAmount, setDepositAmount] = useState("");
@@ -23,7 +23,7 @@ export default function MintForm() {
 	const [mintRate, setMintRate] = useState(BIG_ZERO);
 	const { onGetMintAmount } = useGetMintAmount();
 	const { onGetMintRate } = useGetMintRate();
-	const { onMint } = useMintIbKAi();
+	const { onMint } = useMintIbKai();
 
 	const fetchMintInfo = async (value) => {
 		if (value) {
@@ -81,7 +81,7 @@ export default function MintForm() {
 			</IonItem>
 			<IonItemDivider color="primary">
 				<h2>
-					Amount of <b>ibKAI</b> to mint:
+					Amount of <b>ibKAI</b> to be minted:
 				</h2>
 			</IonItemDivider>
 			<IonItem>

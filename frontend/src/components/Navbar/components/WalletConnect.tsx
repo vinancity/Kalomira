@@ -40,21 +40,49 @@ export default function WalletConnect() {
 		<>
 			{active && (
 				<>
-					<IonButton color="dark" strong fill="clear" routerDirection="none">
+					<IonButton
+						color="dark"
+						strong
+						fill="clear"
+						routerDirection="none"
+						onClick={() => {
+							navigator.clipboard.writeText(
+								getFullDisplayBalance(balance, undefined, 18)
+							);
+						}}
+					>
 						<IonLabel>{`KAI: ${getFullDisplayBalance(
 							balance,
 							undefined,
 							4
 						)}`}</IonLabel>
 					</IonButton>
-					<IonButton color="dark" strong fill="clear" routerDirection="none">
+					<IonButton
+						color="dark"
+						strong
+						fill="clear"
+						routerDirection="none"
+						onClick={() => {
+							navigator.clipboard.writeText(
+								getFullDisplayBalance(ibKaiBalance, undefined, 18)
+							);
+						}}
+					>
 						<IonLabel>{`ibKAI: ${getFullDisplayBalance(
 							ibKaiBalance,
 							undefined,
 							4
 						)}`}</IonLabel>
 					</IonButton>
-					<IonButton color="success" strong fill="clear" routerDirection="none">
+					<IonButton
+						color="success"
+						strong
+						fill="clear"
+						routerDirection="none"
+						onClick={() => {
+							navigator.clipboard.writeText(addr);
+						}}
+					>
 						<IonLabel>{`${addr ? truncateAddress(addr, 6) : ""}`}</IonLabel>
 					</IonButton>
 				</>

@@ -5,6 +5,8 @@ import { Redirect, Route } from "react-router-dom";
 
 import Home from "./views/Home";
 import MintAndRedeem from "views/MintAndRedeem";
+import Farms from "views/Farms";
+
 import Navbar from "./components/Navbar/Navbar";
 
 /* Core CSS required for Ionic components to work properly */
@@ -40,6 +42,9 @@ export default function App() {
 					</Route>
 					<Route exact path="/mintredeem">
 						<MintAndRedeem />
+					</Route>
+					<Route exact path="/farms">
+						<Farms />
 					</Route>
 				</IonReactRouter>
 			</IonPage>
