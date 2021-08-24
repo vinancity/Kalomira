@@ -3,11 +3,11 @@ import { IonApp, IonPage } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
-import Home from "./views/Home";
+import Home from "views/Home";
 import MintAndRedeem from "views/MintAndRedeem";
 import Farms from "views/Farms";
 
-import Navbar from "./components/Navbar/Navbar";
+import Navbar from "components/Navbar/Navbar";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";

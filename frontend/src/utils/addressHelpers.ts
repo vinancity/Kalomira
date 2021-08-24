@@ -16,8 +16,12 @@ export const getKaloAddress = () => {
 	return getAddress(addresses.Kalomira);
 };
 
-export const getMasterchef = () => {
+export const getMasterchefAddress = () => {
 	return getAddress(addresses.MasterChef);
+};
+
+export const getMulticallAddress = () => {
+	return getAddress(addresses.Multicall);
 };
 
 export const getLP1Address = () => {

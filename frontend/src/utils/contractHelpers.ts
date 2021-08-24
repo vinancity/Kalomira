@@ -1,13 +1,20 @@
 import { ethers } from "ethers";
 import { simpleRpcProvider } from "./providers";
 
-import { getAddress, getIbKAIAddress } from "./addressHelpers";
+import {
+	getAddress,
+	getIbKAIAddress,
+	getKaloAddress,
+	getMasterchefAddress,
+	getMulticallAddress,
+} from "./addressHelpers";
 
 import erc20Abi from "config/abi/erc20.json";
 import kalomiraAbi from "config/abi/Kalomira.json";
 import ibKaiAbi from "config/abi/ibKAI.json";
 import lpTokenAbi from "config/abi/MockLP.json";
-import masterChef from "config/abi/MasterChef.json";
+import MasterChefAbi from "config/abi/MasterChef.json";
+import MulticallAbi from "config/abi/Multicall.json";
 
 const getContract = (
 	abi: any,
@@ -34,5 +41,17 @@ export const getIbKaiContract = (
 export const getKaloContract = (
 	signer?: ethers.Signer | ethers.providers.Provider
 ) => {
-	return getContract(kalomiraAbi, getKaloContract(), signer);
+	return getContract(kalomiraAbi, getKaloAddress(), signer);
+};
+
+export const getMasterchefContract = (
+	signer?: ethers.Signer | ethers.providers.Provider
+) => {
+	return getContract(MasterChefAbi, getMasterchefAddress(), signer);
+};
+
+export const getMulticallContract = (
+	signer?: ethers.Signer | ethers.providers.Provider
+) => {
+	return getContract(MulticallAbi, getMulticallAddress(), signer);
 };

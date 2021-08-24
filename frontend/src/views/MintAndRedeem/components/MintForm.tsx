@@ -50,7 +50,7 @@ export default function MintForm() {
 
 	return (
 		<IonList>
-			<IonItemDivider color="primary">
+			<IonItemDivider color="dark">
 				<h2>
 					Amount of <b>KAI</b> to deposit:
 				</h2>
@@ -79,7 +79,7 @@ export default function MintForm() {
 					</IonRow>
 				</IonGrid>
 			</IonItem>
-			<IonItemDivider color="primary">
+			<IonItemDivider color="dark">
 				<h2>
 					Amount of <b>ibKAI</b> to be minted:
 				</h2>
@@ -101,7 +101,12 @@ export default function MintForm() {
 			<div className="ion-padding">
 				<h2>Mint rate: {mintRate.toString()}</h2>
 			</div>
-			<IonButton expand="full" onClick={handleMint}>
+			<IonButton
+				expand="full"
+				onClick={handleMint}
+				color="dark"
+				disabled={!mintAmount.toNumber()}
+			>
 				Mint
 			</IonButton>
 			<IonItemDivider />

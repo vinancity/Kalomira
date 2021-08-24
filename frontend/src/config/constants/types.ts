@@ -9,3 +9,9 @@ export interface Token {
 	decimals?: number;
 	projectlink?: string;
 }
+
+export interface FarmConfig {
+	pid: number;
+	lpSymbol: string;
+	lpAddresses: Address;
+}

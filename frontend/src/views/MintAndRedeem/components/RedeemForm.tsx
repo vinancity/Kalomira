@@ -51,7 +51,7 @@ export default function RedeemForm() {
 
 	return (
 		<IonList>
-			<IonItemDivider color="primary">
+			<IonItemDivider color="dark">
 				<h2>
 					Amount of <b>ibKAI</b> to return:
 				</h2>
@@ -80,7 +80,7 @@ export default function RedeemForm() {
 					</IonRow>
 				</IonGrid>
 			</IonItem>
-			<IonItemDivider color="primary">
+			<IonItemDivider color="dark">
 				<h2>
 					Amount of <b>KAI</b> to be redeemed:
 				</h2>
@@ -102,7 +102,12 @@ export default function RedeemForm() {
 			<div className="ion-padding">
 				<h2>Redeem rate: {redeemRate.toString()}</h2>
 			</div>
-			<IonButton expand="full" onClick={handleMint}>
+			<IonButton
+				expand="full"
+				onClick={handleMint}
+				color="dark"
+				disabled={!redeemAmount.toNumber()}
+			>
 				Redeem
 			</IonButton>
 			<IonItemDivider />
