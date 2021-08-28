@@ -6,6 +6,7 @@ import { Redirect, Route } from "react-router-dom";
 import Home from "views/Home";
 import MintAndRedeem from "views/MintAndRedeem";
 import Farms from "views/Farms";
+import NotFound from "views/NotFound";
 
 import Navbar from "components/Navbar/Navbar";
 
@@ -29,25 +30,25 @@ import "@ionic/react/css/display.css";
 import "./theme/variables.css";
 
 export default function App() {
-	return (
-		<IonApp>
-			<IonPage className="ion-page" id="main-content">
-				<IonReactRouter>
-					<Navbar />
-					<Route exact path="/">
-						<Redirect to="/home" />
-					</Route>
-					<Route exact path="/home">
-						<Home />
-					</Route>
-					<Route exact path="/mintredeem">
-						<MintAndRedeem />
-					</Route>
-					<Route exact path="/farms">
-						<Farms />
-					</Route>
-				</IonReactRouter>
-			</IonPage>
-		</IonApp>
-	);
+  return (
+    <IonApp>
+      <IonPage className="ion-page" id="main-content">
+        <IonReactRouter>
+          <Navbar />
+          <Route exact path="/">
+            <Redirect to="/home" />
+          </Route>
+          <Route exact path="/home">
+            <Home />
+          </Route>
+          <Route exact path="/mintredeem">
+            <MintAndRedeem />
+          </Route>
+          <Route exact path="/farms">
+            <Farms />
+          </Route>
+        </IonReactRouter>
+      </IonPage>
+    </IonApp>
+  );
 }

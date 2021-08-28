@@ -1,8 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
+import connectorReducer from "./connector";
+import farmsReducer from "./farms";
 
 const store = configureStore({
-	reducer: {},
+	reducer: {
+		connector: connectorReducer,
+		farms: farmsReducer,
+	},
 });
 
 /**
