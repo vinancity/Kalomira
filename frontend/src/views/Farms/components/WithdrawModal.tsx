@@ -4,35 +4,35 @@ import { getFullDisplayBalance } from "utils/formatBalance";
 
 import BigNumber from "bignumber.js";
 
-export default function DepositModal({ max, lpSymbol, onConfirm, showModal, setShowModal }) {
-  const [stakeAmount, setStakeAmount] = useState("");
+export default function WithdrawModal({ max, lpSymbol, onConfirm, showModal, setShowModal }) {
+  const [unstakeAmount, setUnstakeAmount] = useState("");
   const [pendingTx, setPendingTx] = useState(false);
 
   const fullBalance = useMemo(() => {
     return getFullDisplayBalance(max);
   }, [max]);
 
-  const lpTokensToStake = new BigNumber(stakeAmount);
+  const lpTokensToUntake = new BigNumber(unstakeAmount);
   const fullBalanceNumber = new BigNumber(fullBalance);
 
   const handleChange = useCallback(
     (e) => {
       if (e.currentTarget.validity.valid) {
-        setStakeAmount(e.currentTarget.value.replace(/,/g, "."));
+        setUnstakeAmount(e.currentTarget.value.replace(/,/g, "."));
       }
     },
-    [setStakeAmount]
+    [setUnstakeAmount]
   );
 
   const handleSelectMax = useCallback(() => {
-    setStakeAmount(fullBalance);
-  }, [fullBalance, setStakeAmount]);
+    setUnstakeAmount(fullBalance);
+  }, [fullBalance, setUnstakeAmount]);
 
   const handleConfirm = async () => {
     setPendingTx(true);
     try {
-      console.log("Staking: ", stakeAmount);
-      await onConfirm(stakeAmount);
+      console.log("Unstaking: ", unstakeAmount);
+      await onConfirm(unstakeAmount);
       setShowModal(false);
     } catch (e) {
       console.error(e);
@@ -45,7 +45,7 @@ export default function DepositModal({ max, lpSymbol, onConfirm, showModal, setS
     <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
       <IonGrid>
         <IonRow>
-          <IonCol size="10">{`Balance: ${fullBalance} ${lpSymbol}`}</IonCol>
+          <IonCol>{`Balance: ${fullBalance} ${lpSymbol}`}</IonCol>
           <IonCol>
             <IonButton fill="outline" size="small" onClick={handleSelectMax}>
               Max
@@ -62,13 +62,16 @@ export default function DepositModal({ max, lpSymbol, onConfirm, showModal, setS
             min="0"
             placeholder="0"
             onChange={handleChange}
-            value={stakeAmount}
+            value={unstakeAmount}
           ></input>
 
           <IonButton
             onClick={handleConfirm}
             disabled={
-              pendingTx || !lpTokensToStake.isFinite() || lpTokensToStake.eq(0) || lpTokensToStake.gt(fullBalanceNumber)
+              pendingTx ||
+              !lpTokensToUntake.isFinite() ||
+              lpTokensToUntake.eq(0) ||
+              lpTokensToUntake.gt(fullBalanceNumber)
             }
           >
             Confirm

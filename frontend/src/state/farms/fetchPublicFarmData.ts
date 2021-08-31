@@ -39,7 +39,7 @@ const fetchFarm = async (farm: Farm): Promise<PublicFarmData> => {
 
   return {
     poolWeight: poolWeight.toJSON(),
-    multiplier: `${allocPoint.div(100).toString()}X`,
+    multiplier: `${allocPoint.div(10).toString()}X`,
   };
 };
 

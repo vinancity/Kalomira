@@ -1,15 +1,20 @@
 import React, { useState } from "react";
 import { IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardContent, IonIcon, IonButton } from "@ionic/react";
-
 import { useWeb3React } from "@web3-react/core";
-import { getFullDisplayBalance } from "utils/formatBalance";
+import { getFullDisplayBalance, getDecimalAmount } from "utils/formatBalance";
 import { chevronDown } from "ionicons/icons";
+
+import BigNumber from "bignumber.js";
+
+import HarvestActions from "./Actions/HarvestActions";
 import StakeActions from "./Actions/StakeActions";
 
 export default function FarmCard(props) {
   const { lpSymbol, multiplier, earnings, userData } = props;
   const [showExpand, setShowExpand] = useState(false);
   const { account } = useWeb3React();
+
+  const earningsBN = new BigNumber(earnings);
 
   const toggleExpand = () => {
     setShowExpand(!showExpand);
@@ -29,7 +34,7 @@ export default function FarmCard(props) {
                 </IonRow>
                 <IonRow>
                   <IonCol>{lpSymbol}</IonCol>
-                  <IonCol>{earnings.toFixed(4)}</IonCol>
+                  <IonCol>{earningsBN.toFixed(4)}</IonCol>
                   <IonCol>{multiplier}</IonCol>
                 </IonRow>
               </IonCol>
@@ -47,9 +52,9 @@ export default function FarmCard(props) {
             <IonRow>
               <IonCol>
                 <IonRow>KALO EARNED</IonRow>
-                <IonRow>{getFullDisplayBalance(earnings, undefined, 8)}</IonRow>
+                <IonRow>{earningsBN.toFixed(18)}</IonRow>
                 <IonRow>
-                  <IonButton disabled={!account}>Harvest</IonButton>
+                  <HarvestActions {...props} />
                 </IonRow>
               </IonCol>
               <IonCol>
@@ -60,7 +65,9 @@ export default function FarmCard(props) {
                   </>
                 ) : (
                   <>
-                    <IonRow>{"Connect wallet to farm"}</IonRow>
+                    <IonRow>
+                      <b>{"Connect wallet to farm"}</b>
+                    </IonRow>
                   </>
                 )}
                 <IonRow>

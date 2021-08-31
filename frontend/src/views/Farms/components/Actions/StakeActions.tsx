@@ -12,6 +12,7 @@ import useStakeFarms from "views/Farms/hooks/useStakeFarm";
 import useUnstakeFarms from "views/Farms/hooks/useUnstakeFarm";
 
 import DepositModal from "../DepositModal";
+import WithdrawModal from "../WithdrawModal";
 
 export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, userDataReady }) {
   const dispatch = useAppDispatch();
@@ -25,6 +26,7 @@ export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, u
   const isApproved = !!account && allowance && allowance.gt(0);
   const lpAddress = getAddress(lpAddresses);
   const lpContract = useERC20(lpAddress);
+
   const { onApprove } = useApproveFarm(lpContract);
   const { onStake } = useStakeFarms(pid);
   const { onUnstake } = useUnstakeFarms(pid);
@@ -54,7 +56,7 @@ export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, u
     <div>
       {isApproved ? (
         <div>
-          <IonButton color="danger" disabled={!account}>
+          <IonButton color="danger" disabled={!account} onClick={() => setShowWithdrawModal(true)}>
             Unstake
           </IonButton>
           <IonButton color="success" disabled={!account} onClick={() => setShowDepositModal(true)}>
@@ -72,6 +74,13 @@ export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, u
         onConfirm={handleStake}
         showModal={showDepositModal}
         setShowModal={setShowDepositModal}
+      />
+      <WithdrawModal
+        max={stakedBalance}
+        lpSymbol={lpSymbol}
+        onConfirm={handleUnstake}
+        showModal={showWithdrawModal}
+        setShowModal={setShowWithdrawModal}
       />
     </div>
   );
