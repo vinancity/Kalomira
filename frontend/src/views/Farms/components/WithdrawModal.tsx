@@ -45,7 +45,7 @@ export default function WithdrawModal({ max, lpSymbol, onConfirm, showModal, set
     <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
       <IonGrid>
         <IonRow>
-          <IonCol>{`Balance: ${fullBalance} ${lpSymbol}`}</IonCol>
+          <IonCol size="10">{`Balance: ${fullBalance} ${lpSymbol}`}</IonCol>
           <IonCol>
             <IonButton fill="outline" size="small" onClick={handleSelectMax}>
               Max

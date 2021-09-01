@@ -9,7 +9,6 @@ import { orderBy } from "lodash";
 import isArchivedPid from "utils/farmHelpers";
 
 import { IonContent, IonButton } from "@ionic/react";
-import { homeSharp, chevronDown } from "ionicons/icons";
 
 import FarmCard from "./components/FarmCard";
 

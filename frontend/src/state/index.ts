@@ -4,10 +4,10 @@ import connectorReducer from "./connector";
 import farmsReducer from "./farms";
 
 const store = configureStore({
-	reducer: {
-		connector: connectorReducer,
-		farms: farmsReducer,
-	},
+  reducer: {
+    connector: connectorReducer,
+    farms: farmsReducer,
+  },
 });
 
 /**

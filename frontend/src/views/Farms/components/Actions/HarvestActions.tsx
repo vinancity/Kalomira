@@ -1,14 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { IonButton } from "@ionic/react";
+import { IonButton, IonRow } from "@ionic/react";
 import { useWeb3React } from "@web3-react/core";
 import { useAppDispatch } from "state";
-import { useERC20 } from "hooks/useContract";
-import { useFarmUser } from "state/farms/hooks";
-import { getAddress } from "utils/addressHelpers";
 import { fetchFarmUserDataAsync } from "state/farms";
-import { getBalanceAmount, getFullDisplayBalance } from "utils/formatBalance";
-import BigNumber from "bignumber.js";
+import { getBalanceAmount } from "utils/formatBalance";
 import { BIG_ZERO } from "utils/bigNumber";
+import BigNumber from "bignumber.js";
 
 import useHarvestFarm from "views/Farms/hooks/useHarvestFarm";
 
@@ -29,13 +26,12 @@ export default function HarvestActions({ pid, userData, userDataReady }) {
     displayBalance = earnings.toFixed(18, BigNumber.ROUND_DOWN);
   }
 
-  console.log(earnings, displayBalance);
-
   const handleHarvest = async () => {
     setPendingTx(true);
     try {
       console.log("Harvesting: ", displayBalance);
       await onReward();
+      dispatch(fetchFarmUserDataAsync({ account, pids: [pid] }));
     } catch (e) {
       console.error(e);
     } finally {
@@ -44,8 +40,12 @@ export default function HarvestActions({ pid, userData, userDataReady }) {
   };
 
   return (
-    <IonButton disabled={!account || earnings.eq(0) || pendingTx || !userDataReady} onClick={handleHarvest}>
-      Harvest
-    </IonButton>
+    <div>
+      <IonRow>KALO EARNED</IonRow>
+      <IonRow>{earningsBN.toFixed(18)}</IonRow>
+      <IonButton disabled={!account || earnings.eq(0) || pendingTx || !userDataReady} onClick={handleHarvest}>
+        Harvest
+      </IonButton>
+    </div>
   );
 }

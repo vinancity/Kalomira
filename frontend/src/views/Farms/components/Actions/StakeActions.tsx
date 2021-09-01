@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
-import { IonButton } from "@ionic/react";
+import { IonButton, IonRow } from "@ionic/react";
 import { useWeb3React } from "@web3-react/core";
 import { useAppDispatch } from "state";
 import { useERC20 } from "hooks/useContract";
 import { useFarmUser } from "state/farms/hooks";
 import { getAddress } from "utils/addressHelpers";
 import { fetchFarmUserDataAsync } from "state/farms";
-
+import { getFullDisplayBalance } from "utils/formatBalance";
 import useApproveFarm from "views/Farms/hooks/useApproveFarm";
 import useStakeFarms from "views/Farms/hooks/useStakeFarm";
 import useUnstakeFarms from "views/Farms/hooks/useUnstakeFarm";
@@ -54,6 +54,19 @@ export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, u
 
   return (
     <div>
+      {account ? (
+        <>
+          <IonRow>{`${lpSymbol} STAKED`}</IonRow>
+          <IonRow>{getFullDisplayBalance(stakedBalance, undefined, 8)}</IonRow>
+        </>
+      ) : (
+        <>
+          <IonRow className="ion-padding-top ">
+            <b>{"Connect wallet to farm"}</b>
+          </IonRow>
+        </>
+      )}
+
       {isApproved ? (
         <div>
           <IonButton color="danger" disabled={!account} onClick={() => setShowWithdrawModal(true)}>
@@ -68,6 +81,7 @@ export default function StakeActions({ pid, multiplier, lpSymbol, lpAddresses, u
           Approve
         </IonButton>
       )}
+
       <DepositModal
         max={tokenBalance}
         lpSymbol={lpSymbol}
