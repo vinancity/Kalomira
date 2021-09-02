@@ -1,104 +1,131 @@
-const { default: KardiaClient, KardiaAccount, KAIChain } = require("kardia-js-sdk");
-const { ethers } = require("ethers")
+const { default: KardiaClient } = require("kardia-js-sdk");
+const { BigNumber } = require("bignumber.js");
 
-const deployKardiaContract = async (contract, params = [], contractName) => {
-    const kardiaRPC = "https://dev-1.kardiachain.io";
-    const privateKey =
-    "0xc7b518d8fdfc3046c463e71031dc2edddc2e7a93fd1dc0e130b7f84944fe19b7";
-    
-    const kardiaClient = new KardiaClient({ endpoint: kardiaRPC });
+BigNumber.config({
+  EXPONENTIAL_AT: 1e9,
+  DECIMAL_PLACES: 80,
+});
 
-    const contractInstance = kardiaClient.contract;
-    kardiaClient.contract.updateAbi(contract.abi);
-    kardiaClient.contract.updateByteCode(contract.bytecode);
-
-    const maxGasLimit = 8000000;
-    const preDeploy = contractInstance.deploy({
-        params,
-    });
-    const defaultPayload = await preDeploy.getDefaultTxPayload();
-    const estimateGas = await preDeploy.estimateGas(defaultPayload);
-   
-    //const estimateGas = 20000000;
-    console.log(`Deploying ${contractName}: ${estimateGas} estimateGas`);
-
-    const smcData = await preDeploy.send(
-    privateKey,
-    {
-        gas: maxGasLimit,
-    },
-    true
-    );
-
-    console.log(`Deployed ${contractName} at ${smcData.contractAddress}`);
-
-    return {
-    ...smcData,
-    address: smcData.contractAddress,
-    };
+const getHexFromNum = (number) => {
+  const TOKEN_DECIMALS = new BigNumber(10).pow(18);
+  const bigNum = new BigNumber(number).times(TOKEN_DECIMALS);
+  const hexStr = bigNum.toString(16);
+  return "0x" + hexStr;
 };
 
+const _privateKey = "0xc7b518d8fdfc3046c463e71031dc2edddc2e7a93fd1dc0e130b7f84944fe19b7";
 
-async function main(){
-    
-    const contractsDir = __dirname + "/../frontend/src/contracts";
+const deployKardiaContract = async (contract, params = [], contractName) => {
+  const kardiaRPC = "https://dev-1.kardiachain.io";
+  const privateKey = _privateKey;
 
-    if (!fs.existsSync(contractsDir)) {
-        console.log("DNE")
-    }
+  const kardiaClient = new KardiaClient({ endpoint: kardiaRPC });
 
-    let path = contractsDir + "/Kalomira.json"; 
-    let rawdata = fs.readFileSync(path);
-    let contract = JSON.parse(rawdata);
-    const kal_token = await deployKardiaContract(contract, [], "Kalomira");
+  const contractInstance = kardiaClient.contract;
+  kardiaClient.contract.updateAbi(contract.abi);
+  kardiaClient.contract.updateByteCode(contract.bytecode);
 
-    /*
-    path = contractsDir + "/Kardia.json";
-    rawdata = fs.readFileSync(path);
-    contract = JSON.parse(rawdata);
-    const kai_token = await deployKardiaContract(contract, [], "KardiachainToken");*/
+  const maxGasLimit = 8000000;
+  const preDeploy = contractInstance.deploy({
+    params,
+  });
+  const defaultPayload = await preDeploy.getDefaultTxPayload();
+  const estimateGas = await preDeploy.estimateGas(defaultPayload);
 
-    path = contractsDir + "/ibKAI.json";
-    rawdata = fs.readFileSync(path);
-    contract = JSON.parse(rawdata);    
-    const deposit = 5000000000000000000;
-    const initialSupply = 100000000000000000000;
-    const ibKAI_token = await deployKardiaContract(contract, [deposit, initialSupply], "ibKAI");
+  //const estimateGas = 20000000;
+  console.log(`Deploying ${contractName}: ${estimateGas} estimateGas`);
 
-    path = contractsDir + "/TokenFarm.json";
-    rawdata = fs.readFileSync(path);
-    contract = JSON.parse(rawdata);
-    const farm = await deployKardiaContract(contract, [ibKAI_token.address, kal_token.address], "TokenFarm");
+  const smcData = await preDeploy.send(
+    privateKey,
+    {
+      gas: maxGasLimit,
+    },
+    true
+  );
 
-}
+  console.log(`Deployed ${contractName} at ${smcData.contractAddress}`);
 
-async function main_v2(){
-    const contractsDir = __dirname + "/../frontend/src/contracts";
+  return {
+    ...smcData,
+    address: smcData.contractAddress,
+    contract: contractInstance,
+  };
+};
 
-    if (!fs.existsSync(contractsDir)) {
-        console.log("DNE")
-    }
-}
+async function main() {
+  const fs = require("fs");
+  const contractsDir = __dirname + "/contracts";
 
-async function test() {   
-    const fs = require("fs");
-    const contractsDir = __dirname + "/../frontend/src/contracts"
-    var Web3 = require('web3');
-    var url = 'https://mainnet.infura.io/v3/7aa637dfc4e94d22bfdfe3b1f4401daf';
-    var web3 = new Web3(url);
+  if (!fs.existsSync(contractsDir)) {
+    console.log("DNE");
+  }
 
-    let path = contractsDir + "/Kalomira.json"; 
-    let rawdata = fs.readFileSync(path);
-    let contract = JSON.parse(rawdata);
-    
-    const kal_token = new web3.eth.Contract(contract.abi, contractAddr);
-    
+  let path = contractsDir + "/Kalomira.json";
+  let rawdata = fs.readFileSync(path);
+  let contract = JSON.parse(rawdata);
+  const kal_token = await deployKardiaContract(contract, [], "Kalomira");
+  // let invocation = kal_token.contract.invokeContract("mint", [
+  //   "0x6a66d06332a1ed6a3807298C9Ca81a51e318F846",
+  //   getHexFromNum(100),
+  // ]);
+  // let res = await invocation.send(_privateKey, kal_token.address);
+  // console.log("Tx: ", res);
+
+  path = contractsDir + "/ibKAI.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const deposit = getHexFromNum(10);
+  const initialSupply = getHexFromNum(100);
+  const ibKAI_token = await deployKardiaContract(contract, [deposit, initialSupply], "ibKAI");
+
+  path = contractsDir + "/MockLP.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const lp1_token = await deployKardiaContract(contract, ["ibKAI-KALO", "LP1", initialSupply], "LP1");
+
+  path = contractsDir + "/MockLP.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const lp2_token = await deployKardiaContract(contract, ["ibKAI-DOGE", "LP2", initialSupply], "LP2");
+
+  path = contractsDir + "/MockLP.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const lp3_token = await deployKardiaContract(contract, ["ibKAI-TEST", "LP3", initialSupply], "LP3");
+
+  path = contractsDir + "/Multicall.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const multicall = await deployKardiaContract(contract, [], "Multicall");
+
+  path = contractsDir + "/MasterChef.json";
+  rawdata = fs.readFileSync(path);
+  contract = JSON.parse(rawdata);
+  const kaloPerBlock = getHexFromNum(100);
+  const masterchef = await deployKardiaContract(
+    contract,
+    [kal_token.address, "0xa47d913c5cab3b965784e75924bff115ea15c1cb", kaloPerBlock, 0, 1000],
+    "Masterchef"
+  );
+
+  let invocation = kal_token.contract.invokeContract("_transferOwnership", [masterchef.address]);
+  let res = await invocation.send(_privateKey, kal_token.address);
+  console.log(res);
+
+  invocation = masterchef.contract.invokeContract("add", [20, lp1_token.address, true]);
+  res = await invocation.send(_privateKey, masterchef.address);
+
+  invocation = masterchef.contract.invokeContract("add", [10, lp2_token.address, true]);
+  res = await invocation.send(_privateKey, masterchef.address);
+
+  invocation = masterchef.contract.invokeContract("add", [10, lp3_token.address, true]);
+  res = await invocation.send(_privateKey, masterchef.address);
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
-    console.error("ERROR")
+    console.error("ERROR");
     process.exit(1);
   });
