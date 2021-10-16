@@ -2,25 +2,25 @@ import { createSlice } from "@reduxjs/toolkit";
 import { ConnectorNames } from "utils/walletTypes";
 
 export interface ConnectorState {
-	type: ConnectorNames;
+  type: ConnectorNames;
 }
 
 export const initialState: ConnectorState = {
-	type: undefined,
+  type: undefined,
 };
 
 export const connectorSlice = createSlice({
-	name: "connector",
-	initialState,
-	reducers: {
-		setConnector: (state, action) => {
-			state.type = action.payload;
-		},
+  name: "connector",
+  initialState,
+  reducers: {
+    setConnector: (state, action) => {
+      state.type = action.payload;
+    },
 
-		clearConnector: (state) => {
-			state.type = undefined;
-		},
-	},
+    clearConnector: (state) => {
+      state.type = undefined;
+    },
+  },
 });
 
 export const { setConnector, clearConnector } = connectorSlice.actions;

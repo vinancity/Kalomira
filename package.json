@@ -1,40 +1,76 @@
 {
-  "name": "hardhat-hackathon-boilerplate",
+  "name": "@vinancio/kalos-contracts",
   "version": "1.0.0",
-  "description": "A boilerplate repository to get you started with Hardhat and Ethereum development",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "hardhat test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nomiclabs/hardhat-hackathon-boilerplate.git"
-  },
-  "keywords": [
-    "hardhat",
-    "ethereum",
-    "hackathon"
-  ],
-  "author": "Nomic Labs",
+  "main": "typechain",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nomiclabs/hardhat-hackathon-boilerplate/issues"
+  "scripts": {
+    "compile:v0": "hardhat typechain --config hardhat.config.ts",
+    "size": "hardhat size-contracts",
+    "test": "hardhat test",
+    "tsc": "tsc",
+    "test:factory": "hardhat test ./test/factory.test.ts",
+    "test:treasury": "hardhat test ./test/treasury.test.ts",
+    "test:farm": "hardhat test ./test/farm.test.ts",
+    "test:farmdist": "hardhat test ./test/farmDist.test.ts",
+    "test:ibkai": "hardhat test ./test/ibtoken.test.ts",
+    "testnet": "hardhat console --no-compile --network testnet",
+    "predeploy:testnet": "hardhat typechain --config hardhat.config.ts",
+    "deploy:local": "hardhat --network localhost run scripts/local-deploy.js",
+    "deploy:testnet": "node ./scripts/kai-deploy.js",
+    "deploy:multi": "hardhat --network localhost run scripts/deploy.js",
+    "deploy:hardhat:001": "hardhat --network hardhat deploy --reset --tags ABC",
+    "deploy:mainnet:001": "hardhat --network mainnet deploy --no-compile --reset --tags Tokens",
+    "deploy:testnet:001": "hardhat --network testnet deploy --no-compile --reset --tags Tokens",
+    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
   },
-  "homepage": "https://github.com/nomiclabs/hardhat-hackathon-boilerplate#readme",
   "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.0",
-    "@nomiclabs/hardhat-waffle": "^2.0.0",
-    "chai": "^4.2.0",
-    "ethereum-waffle": "^3.1.1",
-    "ethers": "^5.0.0",
-    "hardhat": "^2.0.4",
-    "husky": "^4.2.5"
+    "@nomiclabs/hardhat-ethers": "2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@pancakeswap-libs/pancake-swap-core": "0.1.0",
+    "@typechain/ethers-v5": "7.0.1",
+    "@typechain/hardhat": "2.3.0",
+    "@types/chai": "^4.2.15",
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.28",
+    "chai": "^4.3.0",
+    "dotenv": "^8.2.0",
+    "ethereum-waffle": "^3.2.2",
+    "ethers": "5.4.6",
+    "hardhat": "2.5.0",
+    "hardhat-contract-sizer": "^2.0.3",
+    "hardhat-ethernal": "0.3.8",
+    "hardhat-typechain": "0.3.5",
+    "prettier": "2.3.2",
+    "prettier-plugin-solidity": "1.0.0-beta.17",
+    "truffle-typings": "1.0.8",
+    "ts-generator": "^0.1.1",
+    "ts-node": "^9.1.1",
+    "typechain": "5.1.2",
+    "typescript": "^4.1.5"
   },
   "dependencies": {
-    "@web3-react/core": "^6.1.9",
-    "bignumber.js": "^9.0.1",
-    "react-redux": "^7.2.4"
-  }
+    "@ethersproject/bignumber": "^5.0.14",
+    "@openzeppelin/contracts": "4.2.0",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "@openzeppelin/contracts-upgradeable": "4.2.0",
+    "@openzeppelin/hardhat-upgrades": "1.9.0",
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "@uniswap/v2-core": "^1.0.1",
+    "chai-bn": "^0.2.1",
+    "ethereumjs-util": "^7.0.10",
+    "hardhat-deploy": "^0.7.0-beta.45",
+    "kardia-js-sdk": "0.4.9",
+    "solidity-coverage": "^0.7.15",
+    "synthetix": "^2.39.2"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "bracketSpacing": true
+  },
+  "files": [
+    "deployements"
+  ]
 }

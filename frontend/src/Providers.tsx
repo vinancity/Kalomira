@@ -6,11 +6,11 @@ import { RefreshContextProvider } from "contexts/RefreshContext";
 import store from "./state/index";
 
 export default function Providers({ children }: any) {
-	return (
-		<Web3ReactProvider getLibrary={getLibrary}>
-			<Provider store={store}>
-				<RefreshContextProvider>{children}</RefreshContextProvider>
-			</Provider>
-		</Web3ReactProvider>
-	);
+  return (
+    <Web3ReactProvider getLibrary={getLibrary}>
+      <Provider store={store}>
+        <RefreshContextProvider>{children}</RefreshContextProvider>
+      </Provider>
+    </Web3ReactProvider>
+  );
 }

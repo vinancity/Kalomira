@@ -8,12 +8,12 @@ import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 // react component. All of the logic is contained in it.
 
 ReactDOM.render(
-	<React.StrictMode>
-		<Providers>
-			<App />
-		</Providers>
-	</React.StrictMode>,
-	document.getElementById("root")
+  <React.StrictMode>
+    <Providers>
+      <App />
+    </Providers>
+  </React.StrictMode>,
+  document.getElementById("root")
 );
 
 serviceWorkerRegistration.register();

@@ -13,14 +13,14 @@ const injected = new EthConnector({ supportedChainIds: [chainId, 1] });
 const kaiConnector = new KaiConnector({ supportedChainIds: [chainId, 69, 0] });
 
 export const connectorsByName: { [connectorName in ConnectorNames] } = {
-	[ConnectorNames.Injected]: injected,
-	[ConnectorNames.WalletConnect]: undefined,
-	[ConnectorNames.KAI]: kaiConnector,
-	[ConnectorNames.BSC]: undefined,
+  [ConnectorNames.Injected]: injected,
+  [ConnectorNames.WalletConnect]: undefined,
+  [ConnectorNames.KAI]: kaiConnector,
+  [ConnectorNames.BSC]: undefined,
 };
 
 export const getLibrary = (provider): ethers.providers.Web3Provider => {
-	const library = new ethers.providers.Web3Provider(provider);
-	library.pollingInterval = POLLING_INTERVAL;
-	return library;
+  const library = new ethers.providers.Web3Provider(provider);
+  library.pollingInterval = POLLING_INTERVAL;
+  return library;
 };

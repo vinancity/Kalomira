@@ -7,22 +7,22 @@ import { useWeb3React } from "@web3-react/core";
  * Recreate web3 instance only if the provider change
  */
 const useWeb3 = () => {
-	const { library, chainId, ...web3React } = useWeb3React();
-	const refEth = useRef(library);
-	const [provider, setprovider] = useState(library || simpleRpcProvider);
+  const { library, chainId, ...web3React } = useWeb3React();
+  const refEth = useRef(library);
+  const [provider, setprovider] = useState(library || simpleRpcProvider);
 
-	useEffect(() => {
-		if (library !== refEth.current) {
-			setprovider(library || simpleRpcProvider);
-			refEth.current = library;
-		}
-	}, [library]);
+  useEffect(() => {
+    if (library !== refEth.current) {
+      setprovider(library || simpleRpcProvider);
+      refEth.current = library;
+    }
+  }, [library]);
 
-	return {
-		library: provider,
-		chainId: chainId ?? parseInt(process.env.REACT_APP_CHAIN_ID, 10),
-		...web3React,
-	};
+  return {
+    library: provider,
+    chainId: chainId ?? parseInt(process.env.REACT_APP_CHAIN_ID, 10),
+    ...web3React,
+  };
 };
 
 export default useWeb3;
