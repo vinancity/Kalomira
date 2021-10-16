@@ -1,4 +1,9 @@
 node_modules
+
+.openzeppelin/
+.env
+.vscode
 artifacts
 cache
-scripts/contracts/
+deployments
+typechain
