@@ -42,7 +42,7 @@ export default function HarvestActions({ pid, userData, userDataReady }) {
   return (
     <div>
       <IonRow>KALO EARNED</IonRow>
-      <IonRow>{earnings.toFixed(8)}</IonRow>
+      <IonRow>{earnings.toFixed(18)}</IonRow>
       <IonButton disabled={!account || earnings.eq(0) || pendingTx || !userDataReady} onClick={handleHarvest}>
         Harvest
       </IonButton>
