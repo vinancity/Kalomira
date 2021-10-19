@@ -1,17 +1,17 @@
-import '@openzeppelin/hardhat-upgrades';
-import 'hardhat-contract-sizer';
-import '@nomiclabs/hardhat-waffle';
-import '@typechain/ethers-v5';
-import '@typechain/hardhat';
-import 'hardhat-deploy';
-import 'solidity-coverage';
+import "@openzeppelin/hardhat-upgrades";
+import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-waffle";
+import "@typechain/ethers-v5";
+import "@typechain/hardhat";
+import "hardhat-deploy";
+import "solidity-coverage";
 
-import { config as dotEnvConfig } from 'dotenv';
+import { config as dotEnvConfig } from "dotenv";
 
 dotEnvConfig();
 
 module.exports = {
-  defaultNetwork: 'hardhat',
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       chainId: 31337,
@@ -22,15 +22,15 @@ module.exports = {
       accounts: [
         {
           privateKey: process.env.LOCAL_PRIVATE_KEY_1,
-          balance: '10000000000000000000000',
+          balance: "10000000000000000000000",
         },
         {
           privateKey: process.env.LOCAL_PRIVATE_KEY_2,
-          balance: '10000000000000000000000',
+          balance: "10000000000000000000000",
         },
         {
           privateKey: process.env.LOCAL_PRIVATE_KEY_3,
-          balance: '10000000000000000000000',
+          balance: "10000000000000000000000",
         },
         // {
         //   privateKey: process.env.LOCAL_PRIVATE_KEY_4,
@@ -55,36 +55,36 @@ module.exports = {
     },
   },
   solidity: {
-    version: '0.8.2',
+    version: "0.8.2",
     settings: {
       optimizer: {
         enabled: true,
         runs: 100,
       },
-      evmVersion: 'istanbul',
+      evmVersion: "istanbul",
       outputSelection: {
-        '*': {
-          '': ['ast'],
-          '*': [
-            'evm.bytecode.object',
-            'evm.deployedBytecode.object',
-            'abi',
-            'evm.bytecode.sourceMap',
-            'evm.deployedBytecode.sourceMap',
-            'metadata',
+        "*": {
+          "": ["ast"],
+          "*": [
+            "evm.bytecode.object",
+            "evm.deployedBytecode.object",
+            "abi",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.sourceMap",
+            "metadata",
           ],
         },
       },
     },
   },
   paths: {
-    sources: './contracts',
-    tests: './test',
-    cache: './cache',
-    artifacts: './artifacts',
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
   },
   typechain: {
-    outDir: './typechain',
-    target: 'ethers-v5',
+    outDir: "./frontend/src/typechain",
+    target: "ethers-v5",
   },
 };
