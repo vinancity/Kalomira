@@ -1,0 +1,10 @@
+ion-content {
+  --background: #fff url("./images/background.jpg") no-repeat center center / cover;
+}
+
+.padded-content {
+  --padding-start: 20%;
+  --padding-end: 20%;
+  --padding-top: calc(10vh);
+  --height: calc(100vh - 64px);
+}

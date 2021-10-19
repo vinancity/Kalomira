@@ -14,7 +14,7 @@ import { connectorsByName } from "utils/web3React";
 import { useAppDispatch } from "state";
 
 const useAuth = () => {
-  const dispath = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { activate, deactivate } = useWeb3React();
 
   const login = useCallback((connectorID: ConnectorNames) => {

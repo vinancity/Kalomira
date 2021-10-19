@@ -1,9 +1,74 @@
 {
-  "Multicall": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-  "Kalomira": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  "ibKAI": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-  "MockLP1": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-  "MockLP2": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-  "MockLP3": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-  "MasterChef": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+  "KALOS_TOKEN": {
+    "0": "",
+    "31337": "0x874cBC39F185d30b61ca9694EDd76D519ff67C0a"
+  },
+  "IBKAI_TOKEN": {
+    "0": "",
+    "31337": "0x80BbC2Ccd92106CD5f4D9A7980365fe83DE26d92"
+  },
+  "KLS_TOKEN": {
+    "0": "",
+    "31337": "0xC26A4b631D3E81FC9Db443c8752275847C51BE91"
+  },
+  "WKAI_TOKEN": {
+    "0": "",
+    "31337": ""
+  },
+  "USDT_TOKEN": {
+    "0": "",
+    "31337": ""
+  },
+  "FEE_PROVIDER": {
+    "0": "",
+    "31337": "0xC2692BCab546fCfBDf480f46e23D60aDefA24919"
+  },
+  "FACTORY": {
+    "0": "",
+    "31337": "0xf605Fb4574D978a378E07A872466943c7b1485E2"
+  },
+  "DISTRIBUTOR": {
+    "0": "",
+    "31337": ""
+  },
+  "EPOCH": {
+    "0": "",
+    "31337": ""
+  },
+  "FARM_DISTRIBUTOR": {
+    "0": "",
+    "31337": ""
+  },
+  "MASTER_CHEF": {
+    "0": "",
+    "31337": "0xc0C8F55b2b96c3aFBF20B9cf5b4da38499D3Bd0b"
+  },
+  "TREASURY": {
+    "0": "",
+    "31337": "0x08D120530B05feb74016c12dd1dC23857ec6d670"
+  },
+  "VALIDATOR": {
+    "0": "",
+    "31337": ""
+  },
+  "VOLUME_COUNTER": {
+    "0": "",
+    "31337": ""
+  },
+  "DEX_ROUTER": {
+    "0": "",
+    "31337": ""
+  },
+  "DEX_FACTORY": {
+    "0": "",
+    "31337": ""
+  },
+  "ADDRESS_PROVIDER": {
+    "0": "",
+    "31337": "0x17cCDace8198FA8375D4A8c20aAf5ae0FbFBcECA"
+  },
+  "MULTICALL": {
+    "0": "",
+    "31337": "0xbd46e255a29338B3056C532abdE54816fA9Cc737"
+  }
 }

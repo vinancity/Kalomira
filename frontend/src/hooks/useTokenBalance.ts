@@ -4,10 +4,9 @@ import { useWeb3React } from "@web3-react/core";
 import { BIG_ZERO } from "utils/bigNumber";
 import { simpleRpcProvider, kardiaProvider } from "utils/providers";
 import { getErc20Contract, getIbKaiContract } from "utils/contractHelpers";
-import { useIbKAI } from "./useContract";
+import { useIbKAI, useKalo, useERC20 } from "./useContract";
 import useRefresh from "./useRefresh";
 import useLastUpdated from "./useLastUpdated";
-import { bigIntLiteral } from "@babel/types";
 
 export type UseTokenBalanceState = {
   balance: BigNumber;
@@ -28,12 +27,12 @@ export const useTokenBalance = (tokenAddress: string) => {
   });
   const { account } = useWeb3React();
   const { fastRefresh } = useRefresh();
+  const ERC20Contract = useERC20(tokenAddress);
 
   useEffect(() => {
     const fetchBalance = async () => {
-      const contract = getErc20Contract(tokenAddress);
       try {
-        const result = await contract.balanceOf(account);
+        const result = await ERC20Contract.balanceOf(account);
         setBalanceState({
           balance: new BigNumber(result.toString()),
           fetchStatus: SUCCESS,

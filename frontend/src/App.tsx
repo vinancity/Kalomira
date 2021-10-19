@@ -28,6 +28,7 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import "./theme/styles.css";
 
 export default function App() {
   return (
