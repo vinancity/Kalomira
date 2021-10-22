@@ -1,10 +1,79 @@
-ion-content {
-  --background: #fff url("./images/background.jpg") no-repeat center center / cover;
-}
+@import "./variables.css";
 
 .padded-content {
-  --padding-start: 20%;
-  --padding-end: 20%;
-  --padding-top: calc(10vh);
+  --padding-start: 10vw;
+  --padding-end: 10vw;
+  --padding-top: calc(5vh);
   --height: calc(100vh - 64px);
+}
+
+.navbar-button {
+  margin: 0;
+  --background-hover: var(--background-activated);
+}
+
+.navbar-logo {
+  --background-hover: (var(--background));
+  --background-activated: var(--background);
+  --ripple-color: transparent;
+}
+
+.Trade .popover-content {
+  position: absolute;
+  top: 50px !important;
+  left: 277.75px !important;
+}
+
+.Stake .popover-content {
+  position: absolute;
+  top: 50px !important;
+  left: 380.562px !important;
+}
+
+.More .popover-content {
+  position: absolute;
+  top: 50px !important;
+  left: 482.604px !important;
+}
+
+.modal .modal-wrapper {
+  height: 400px;
+  width: 400px;
+  border-radius: 25px;
+}
+
+.modal-wallet .modal-wrapper {
+  height: 450px;
+  width: 400px;
+  border-radius: 25px;
+}
+
+.modal-wallet .ion-page {
+  padding: 45px 15px 5px 15px !important;
+}
+
+.logout-btn {
+  align-self: center;
+  width: 50%;
+}
+
+.address-label {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.address-wallet {
+  color: var(--ion-color-primary);
+  align-items: center;
+  background-color: white;
+  border-radius: 5px;
+  position: relative;
+  padding: 5px 5px 5px 10px;
+  margin: 5px 0px 15px 0px;
+}
+
+.circle-btn {
+  --border-radius: 100%;
+  width: 35px;
+  height: 35px;
 }
