@@ -1,8 +1,8 @@
 import "@openzeppelin/test-helpers";
+import contracts from "../frontend/src/config/constants/contracts";
 
-import { Kalos__factory } from "../typechain";
+import { Kalos__factory, Treasury__factory } from "../typechain";
 import { network, ethers } from "hardhat";
-import fs from "fs";
 
 async function main() {
   if (network.name === "hardhat") {
@@ -13,23 +13,16 @@ async function main() {
     );
   }
 
-  const addressesFile = __dirname + "/../frontend/src/config/constants/contracts.json";
-
-  if (!fs.existsSync(addressesFile)) {
-    console.error("You need to deploy your contract first");
-    return;
-  }
-
-  const addressJson = fs.readFileSync(addressesFile);
-  const address = JSON.parse(addressJson.toString());
-
-  const kalo = address["KALOS_TOKEN"]["31337"];
-  console.log(kalo);
+  const kalo = contracts.KALOS_TOKEN["31337"];
+  const treasury = contracts.TREASURY["31337"];
 
   const [sender] = await ethers.getSigners();
 
-  const deployer = Kalos__factory.connect(kalo, sender);
-  await deployer.mint("0xf5ED67Ca714A69C241a3eA5C7AFB7C07E30aF480", ethers.utils.parseEther("7.5"));
+  const kaloAsDeployer = Kalos__factory.connect(kalo, sender);
+  await kaloAsDeployer.mint("0xf5ED67Ca714A69C241a3eA5C7AFB7C07E30aF480", ethers.utils.parseEther("7.5"));
+  const treasuryAsDeployer = Treasury__factory.connect(treasury, sender);
+  await treasuryAsDeployer.resetWeek(0);
+  await treasuryAsDeployer.mintKLS("0xf5ED67Ca714A69C241a3eA5C7AFB7C07E30aF480", ethers.utils.parseEther("5"));
 }
 
 main()
