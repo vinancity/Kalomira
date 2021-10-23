@@ -1,14 +1,16 @@
 //import React from "react";
-import { IonApp, IonPage } from "@ionic/react";
+import { IonApp, IonPage, IonFooter } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
 import Home from "views/Home";
+import Dashboard from "views/Dashboard";
 import MintAndRedeem from "views/MintAndRedeem";
 import Farms from "views/Farms";
 import NotFound from "views/NotFound";
 
 import Navbar from "components/Navbar/Navbar";
+import Footer from "components/Footer/Footer";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -42,12 +44,19 @@ export default function App() {
           <Route exact path="/home">
             <Home />
           </Route>
+          <Route exact path="/dashboard">
+            <Dashboard />
+          </Route>
           <Route exact path="/mintredeem">
             <MintAndRedeem />
           </Route>
           <Route exact path="/farms">
             <Farms />
           </Route>
+          <Route exact path="/more">
+            <NotFound />
+          </Route>{" "}
+          <Footer></Footer>
         </IonReactRouter>
       </IonPage>
     </IonApp>

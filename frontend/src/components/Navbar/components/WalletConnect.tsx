@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { IonButton, IonLabel } from "@ionic/react";
+import { useState, useEffect } from "react";
+import { IonButton, IonLabel, IonIcon } from "@ionic/react";
 import { useWeb3React } from "@web3-react/core";
 import { ConnectorNames } from "utils/walletTypes";
 import { setConnector, clearConnector } from "state/connector";
 import { useDispatch } from "react-redux";
-import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
-import { getFullDisplayBalance } from "utils/formatBalance";
+import { link } from "ionicons/icons";
 
 import useAuth from "hooks/useAuth";
 import truncateAddress from "utils/truncateAddress";
 import ConnectWalletButton from "components/ConnectWalletButton";
-import WalletModal from "./WalletModal";
+import ChainModal from "./modal/ChainModal";
+import ProviderModal from "./modal/ProviderModal";
+import WalletModal from "./modal/WalletModal";
 
 export default function WalletConnect() {
   const { login, logout } = useAuth();
   const { account, active } = useWeb3React();
-  const { balance } = useNativeBalance();
-  const { ibKaiBalance } = useIbKaiBalance();
   const [addr, setAddress] = useState(account);
-  const [showModal, setShowModal] = useState(false);
+  const [showChains, setShowChains] = useState(false);
+  const [showProviders, setShowProviders] = useState(false);
+  const [showWallet, setShowWallet] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -39,50 +40,36 @@ export default function WalletConnect() {
 
   return (
     <>
+      <IonButton
+        className="circle-btn ion-no-padding ion-margin-end"
+        onClick={() => {
+          setShowChains(true);
+        }}
+      >
+        <IonIcon ios={link} md={link} className="" />
+      </IonButton>
       {active ? (
         <>
           <IonButton
-            color="dark"
             strong
-            fill="clear"
+            fill="solid"
             routerDirection="none"
             onClick={() => {
-              navigator.clipboard.writeText(getFullDisplayBalance(balance, undefined, 18));
-            }}
-          >
-            <IonLabel>{`KAI: ${getFullDisplayBalance(balance, undefined, 4)}`}</IonLabel>
-          </IonButton>
-          <IonButton
-            color="dark"
-            strong
-            fill="clear"
-            routerDirection="none"
-            onClick={() => {
-              navigator.clipboard.writeText(getFullDisplayBalance(ibKaiBalance, undefined, 18));
-            }}
-          >
-            <IonLabel>{`ibKAI: ${getFullDisplayBalance(ibKaiBalance, undefined, 4)}`}</IonLabel>
-          </IonButton>
-          <IonButton
-            color="success"
-            strong
-            fill="clear"
-            routerDirection="none"
-            onClick={() => {
-              navigator.clipboard.writeText(addr);
+              setShowWallet(true);
             }}
           >
             <IonLabel>{`${addr ? truncateAddress(addr, 6) : ""}`}</IonLabel>
           </IonButton>
-          <IonButton color="dark" strong fill="outline" routerDirection="none" onClick={_logout}>
+          <IonButton strong fill="outline" routerDirection="none" onClick={_logout}>
             <IonLabel id="foo">Disconnect</IonLabel>
           </IonButton>
         </>
       ) : (
-        <ConnectWalletButton setShowModal={setShowModal} />
+        <ConnectWalletButton setShowModal={setShowProviders} />
       )}
-
-      <WalletModal showModal={showModal} setShowModal={setShowModal} login={_login} />
+      <ChainModal showModal={showChains} setShowModal={setShowChains} />
+      <WalletModal showModal={showWallet} setShowModal={setShowWallet} logout={logout} />
+      <ProviderModal showModal={showProviders} setShowModal={setShowProviders} login={_login} />
     </>
   );
 }
