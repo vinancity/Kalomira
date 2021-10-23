@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { IonContent, IonCard, IonCardHeader, IonCardContent, IonCardTitle } from "@ionic/react";
 import { useNativeBalance, useIbKaiBalance, useTokenBalance } from "hooks/useTokenBalance";
@@ -9,9 +8,8 @@ import { useTreasury } from "hooks/useContract";
 export default function Home() {
   const { account } = useWeb3React();
   const { balance } = useNativeBalance();
-  // const { ibKaiBalance } = useIbKaiBalance();
-  const ibKaiBalance = useTokenBalance(getIbKAIAddress()).balance;
-  const kaloBalance = useTokenBalance(getKaloAddress()).balance;
+  const { balance: ibKaiBalance } = useTokenBalance(getIbKAIAddress());
+  const { balance: kaloBalance } = useTokenBalance(getKaloAddress());
 
   return (
     <IonContent className="padded-content">
