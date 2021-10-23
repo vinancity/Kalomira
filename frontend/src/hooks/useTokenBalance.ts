@@ -3,8 +3,7 @@ import BigNumber from "bignumber.js";
 import { useWeb3React } from "@web3-react/core";
 import { BIG_ZERO } from "utils/bigNumber";
 import { simpleRpcProvider, kardiaProvider } from "utils/providers";
-import { getErc20Contract, getIbKaiContract } from "utils/contractHelpers";
-import { useIbKAI, useKalo, useERC20 } from "./useContract";
+import { useIbKAI, useERC20, useKLS } from "./useContract";
 import useRefresh from "./useRefresh";
 import useLastUpdated from "./useLastUpdated";
 
@@ -46,9 +45,38 @@ export const useTokenBalance = (tokenAddress: string) => {
     if (account) {
       fetchBalance();
     }
-  }, [account, tokenAddress, fastRefresh, SUCCESS, FAILED]);
+  }, [account, tokenAddress, fastRefresh, ERC20Contract, SUCCESS, FAILED]);
 
   return balanceState;
+};
+
+// TODO: retrieve weekly balance
+export const useKLSBalance = () => {
+  const [fetchStatus, setFetchStatus] = useState(FetchStatus.NOT_FETCHED);
+  const [klsBalance, setBalance] = useState(BIG_ZERO);
+  const { account } = useWeb3React();
+  const { slowRefresh } = useRefresh();
+  const { lastUpdated, setLastUpdated } = useLastUpdated();
+  const klsContract = useKLS();
+
+  useEffect(() => {
+    const fetchKLSBalance = async () => {
+      try {
+        const klsBalance = await klsContract.balanceOf_(account);
+        setBalance(new BigNumber(klsBalance.toString()));
+        setFetchStatus(FetchStatus.SUCCESS);
+      } catch (error) {
+        console.error(error);
+        setFetchStatus(FetchStatus.FAILED);
+      }
+    };
+
+    if (account) {
+      fetchKLSBalance();
+    }
+  }, [account, lastUpdated, slowRefresh, klsContract, setBalance, setFetchStatus]);
+
+  return { klsBalance, fetchStatus, refresh: setLastUpdated };
 };
 
 export const useIbKaiBalance = () => {
@@ -74,7 +102,7 @@ export const useIbKaiBalance = () => {
     if (account) {
       fetchIbKAIBalance();
     }
-  }, [account, lastUpdated, fastRefresh, setBalance, setFetchStatus]);
+  }, [account, lastUpdated, fastRefresh, ibKaiContract, setBalance, setFetchStatus]);
 
   return { ibKaiBalance, fetchStatus, refresh: setLastUpdated };
 };
