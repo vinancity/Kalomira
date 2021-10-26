@@ -35,7 +35,7 @@ export default function StatsCard() {
           <IonCol className="ion-no-padding ion-text-right">
             <CardTitle>$123,456,789</CardTitle>
           </IonCol>
-          <IonCol className="ion-no-padding ion-text-right ion-margin-start" size="auto">
+          <IonCol className="ion-no-padding ion-text-right ion-margin-start ion-align-self-end" size="auto">
             <DollarLabel>TVL</DollarLabel>
           </IonCol>
         </IonRow>

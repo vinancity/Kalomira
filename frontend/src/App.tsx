@@ -1,5 +1,5 @@
 //import React from "react";
-import { IonApp, IonPage, IonFooter } from "@ionic/react";
+import { IonApp, IonPage } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Redirect, Route } from "react-router-dom";
 
@@ -39,7 +39,7 @@ export default function App() {
         <IonReactRouter>
           <Navbar />
           <Route exact path="/">
-            <Redirect to="/home" />
+            <Redirect to="/dashboard" />
           </Route>
           <Route exact path="/home">
             <Home />
@@ -50,12 +50,21 @@ export default function App() {
           <Route exact path="/mintredeem">
             <MintAndRedeem />
           </Route>
+          <Route exact path="/liquidity">
+            <NotFound />
+          </Route>
           <Route exact path="/farms">
             <Farms />
           </Route>
+          <Route exact path="/pools">
+            <NotFound />
+          </Route>
+          <Route exact path="/treasury">
+            <NotFound />
+          </Route>
           <Route exact path="/more">
             <NotFound />
-          </Route>{" "}
+          </Route>
           <Footer></Footer>
         </IonReactRouter>
       </IonPage>

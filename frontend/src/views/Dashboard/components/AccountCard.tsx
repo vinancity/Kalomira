@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { IonGrid, IonRow, IonCol, IonAvatar, IonLabel, IonCardHeader, IonCardContent, IonButton } from "@ionic/react";
-import { Address, AddressWrapper } from "components/Navbar/components/modal/WalletModal";
+import { Address, AddressWrapper } from "components/Modal/WalletModal";
 import { DashboardCard, CardTitle } from "../Dashboard";
 import { TokenItem } from "components/Navbar/components/WalletTokenData";
 
@@ -8,6 +8,8 @@ import { formatAddress } from "utils/truncateAddress";
 import { getFullDisplayBalance } from "utils/formatBalance";
 import { useNativeBalance, useTokenBalance, useKLSBalance } from "hooks/useTokenBalance";
 import { getKaloAddress, getIbKAIAddress } from "utils/addressHelpers";
+
+import ConnectWalletButton from "components/ConnectWalletButton";
 
 export const TextLabel = styled(IonLabel)`
   font-size: 1.25rem;
@@ -29,7 +31,13 @@ export default function AccountCard({ account }) {
               <IonLabel>View your staking pools:</IonLabel>
             </IonCol>
             <IonCol>
-              <IonButton expand="block">View</IonButton>
+              {account ? (
+                <IonButton expand="block" routerLink="/pools">
+                  View
+                </IonButton>
+              ) : (
+                <ConnectWalletButton style={{ display: "block" }} />
+              )}
             </IonCol>
           </IonRow>
         </IonGrid>

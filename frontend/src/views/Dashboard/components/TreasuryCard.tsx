@@ -1,19 +1,48 @@
 import styled from "styled-components";
-import { IonGrid, IonRow, IonCol, IonItem, IonLabel } from "@ionic/react";
-import { Header, AmountLabel, DollarLabel } from "../Dashboard";
+import { IonGrid, IonRow, IonCol, IonButton, IonCardHeader } from "@ionic/react";
+import { Header, AmountLabel, DollarLabel, DashboardCard, CardTitle, CardContent } from "../Dashboard";
+import ConnectWalletButton from "components/ConnectWalletButton";
 
-export default function TreasuryCard() {
+const Content = styled(IonGrid)`
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+`;
+
+export default function TreasuryCard({ account }) {
   return (
-    <IonGrid className="ion-margin-top">
-      <IonRow>
-        <Header>USDT to collect:</Header>
-      </IonRow>
-      <IonRow>
-        <AmountLabel>$123.546</AmountLabel>
-      </IonRow>
-      <IonRow>
-        <DollarLabel>$123.546</DollarLabel>
-      </IonRow>
-    </IonGrid>
+    <DashboardCard>
+      <IonCardHeader color="light">
+        <CardTitle>Treasury</CardTitle>
+      </IonCardHeader>
+      <CardContent>
+        <Content className="ion-margin-top">
+          <IonRow style={{ flexGrow: "1" }}>
+            <IonCol>
+              <IonRow>
+                <Header>USDT to collect:</Header>
+              </IonRow>
+              <IonRow>
+                <AmountLabel>{account ? "$123.546" : "$0.00"}</AmountLabel>
+              </IonRow>
+              <IonRow>
+                <DollarLabel>{account ? "$123.54" : "$0.00"}</DollarLabel>
+              </IonRow>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              {account ? (
+                <IonButton expand="block" routerLink="/treasury">
+                  Collect
+                </IonButton>
+              ) : (
+                <ConnectWalletButton style={{ display: "block" }} />
+              )}
+            </IonCol>
+          </IonRow>
+        </Content>
+      </CardContent>
+    </DashboardCard>
   );
 }

@@ -6,7 +6,6 @@ import {
   IonCardHeader,
   IonCardContent,
   IonCardTitle,
-  IonButton,
   IonLabel,
   IonGrid,
   IonRow,
@@ -25,6 +24,10 @@ export const CardTitle = styled(IonCardTitle)`
 export const DashboardCard = styled(IonCard)`
   border-radius: 15px;
   height: 100%;
+`;
+
+export const CardContent = styled(IonCardContent)`
+  height: calc(100% - 15%);
 `;
 
 export const Header = styled(IonLabel)`
@@ -59,38 +62,10 @@ export default function Dashboard() {
             <AccountCard account={account} />
           </IonCol>
           <IonCol>
-            <DashboardCard>
-              <IonCardHeader color="light">
-                <CardTitle>Farms</CardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <FarmsCard />
-                <IonGrid>
-                  <IonRow className="ion-margin-top ion-align-items-center">
-                    <IonCol>
-                      <IonButton expand="block">Harvest</IonButton>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </DashboardCard>
+            <FarmsCard account={account} />
           </IonCol>
           <IonCol>
-            <DashboardCard>
-              <IonCardHeader color="light">
-                <CardTitle>Treasury</CardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <TreasuryCard />
-                <IonGrid>
-                  <IonRow className="ion-margin-top ion-align-items-center">
-                    <IonCol>
-                      <IonButton expand="block">Collect</IonButton>
-                    </IonCol>
-                  </IonRow>
-                </IonGrid>
-              </IonCardContent>
-            </DashboardCard>
+            <TreasuryCard account={account} />
           </IonCol>
         </IonRow>
       </IonGrid>
