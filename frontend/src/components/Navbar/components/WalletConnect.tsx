@@ -1,75 +1,34 @@
-import { useState, useEffect } from "react";
 import { IonButton, IonLabel, IonIcon } from "@ionic/react";
 import { useWeb3React } from "@web3-react/core";
-import { ConnectorNames } from "utils/walletTypes";
-import { setConnector, clearConnector } from "state/connector";
-import { useDispatch } from "react-redux";
+import useWalletModal from "hooks/useWalletModal";
 import { link } from "ionicons/icons";
 
 import useAuth from "hooks/useAuth";
 import truncateAddress from "utils/truncateAddress";
 import ConnectWalletButton from "components/ConnectWalletButton";
-import ChainModal from "./modal/ChainModal";
-import ProviderModal from "./modal/ProviderModal";
-import WalletModal from "./modal/WalletModal";
 
 export default function WalletConnect() {
   const { login, logout } = useAuth();
   const { account, active } = useWeb3React();
-  const [addr, setAddress] = useState(account);
-  const [showChains, setShowChains] = useState(false);
-  const [showProviders, setShowProviders] = useState(false);
-  const [showWallet, setShowWallet] = useState(false);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (account) {
-      setAddress(account);
-    }
-  }, [account]);
-
-  const _login = (connector: ConnectorNames) => {
-    login(connector);
-    dispatch(setConnector(connector));
-  };
-
-  const _logout = () => {
-    logout();
-    dispatch(clearConnector());
-  };
+  const { onPresentAccountModal, onPresentChainModal } = useWalletModal(login, logout, account);
 
   return (
     <>
-      <IonButton
-        className="circle-btn ion-no-padding ion-margin-end"
-        onClick={() => {
-          setShowChains(true);
-        }}
-      >
+      <IonButton className="circle-btn ion-no-padding ion-margin-end" onClick={onPresentChainModal}>
         <IonIcon ios={link} md={link} className="" />
       </IonButton>
       {active ? (
         <>
-          <IonButton
-            strong
-            fill="solid"
-            routerDirection="none"
-            onClick={() => {
-              setShowWallet(true);
-            }}
-          >
-            <IonLabel>{`${addr ? truncateAddress(addr, 6) : ""}`}</IonLabel>
+          <IonButton strong fill="solid" routerDirection="none" onClick={onPresentAccountModal}>
+            <IonLabel>{`${account ? truncateAddress(account, 6) : ""}`}</IonLabel>
           </IonButton>
-          <IonButton strong fill="outline" routerDirection="none" onClick={_logout}>
+          <IonButton strong fill="outline" routerDirection="none" onClick={logout}>
             <IonLabel id="foo">Disconnect</IonLabel>
           </IonButton>
         </>
       ) : (
-        <ConnectWalletButton setShowModal={setShowProviders} />
+        <ConnectWalletButton />
       )}
-      <ChainModal showModal={showChains} setShowModal={setShowChains} />
-      <WalletModal showModal={showWallet} setShowModal={setShowWallet} logout={logout} />
-      <ProviderModal showModal={showProviders} setShowModal={setShowProviders} login={_login} />
     </>
   );
 }

@@ -1,10 +1,9 @@
 import { IonModal, IonButton, IonRow, IonCol, IonGrid, IonLabel, IonItem } from "@ionic/react";
-import { useWeb3React } from "@web3-react/core";
 
 import truncateAddress from "utils/truncateAddress";
 import styled from "styled-components";
 
-import WalletTokenData from "../WalletTokenData";
+import WalletTokenData from "../Navbar/components/WalletTokenData";
 
 export const Label = styled(IonLabel)`
   font-size: 1.5rem;
@@ -27,11 +26,9 @@ export const AddressWrapper = styled(IonItem)`
   --background: var(--ion-color-light-tint);
 `;
 
-export default function WalletModal({ showModal, setShowModal, logout }) {
-  const { account } = useWeb3React();
-
+export default function WalletModal({ account, logout, onDismiss = () => null }) {
   return (
-    <IonModal cssClass="modal-wallet" isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+    <IonModal cssClass="modal-wallet" isOpen={true} onDidDismiss={onDismiss}>
       <IonGrid className="ion-no-margin">
         <IonRow>
           <IonCol>
@@ -58,7 +55,7 @@ export default function WalletModal({ showModal, setShowModal, logout }) {
         className="ion-margin logout-btn"
         onClick={() => {
           logout();
-          setShowModal(false);
+          onDismiss();
         }}
       >
         Logout
