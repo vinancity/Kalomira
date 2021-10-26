@@ -42,6 +42,10 @@
   border-radius: 25px;
 }
 
+.modal .ion-page {
+  justify-content: center;
+}
+
 .modal-wallet .modal-wrapper {
   height: 450px;
   width: 400px;
