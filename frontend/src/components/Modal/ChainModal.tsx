@@ -7,10 +7,11 @@ export default function ChainModal({ onDismiss = () => null }) {
     <IonModal cssClass="modal" isOpen={true} onDidDismiss={onDismiss}>
       {ChainItems.map((chainItem) => {
         return (
-          <IonRow className="ion-text-center ion-padding">
+          <IonRow key={chainItem} className="ion-text-center ion-padding">
             <IonCol>
               <IonButton
                 fill="outline"
+                color="dark"
                 strong
                 onClick={() => {
                   onDismiss();

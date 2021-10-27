@@ -1,16 +1,5 @@
 import styled from "styled-components";
-import {
-  IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardContent,
-  IonCardTitle,
-  IonButton,
-  IonLabel,
-  IonGrid,
-  IonRow,
-  IonCol,
-} from "@ionic/react";
+import { IonCard, IonCardHeader, IonCardContent, IonLabel, IonGrid, IonRow, IonCol } from "@ionic/react";
 
 import { CardTitle, DollarLabel } from "../Dashboard";
 
@@ -58,16 +47,16 @@ export default function StatsCard() {
           </IonRow>
           <IonRow>
             <IonCol className="">
-              <StatsAmountLabel>$0.00</StatsAmountLabel>
+              <StatsAmountLabel>{`$1,234,567.89`}</StatsAmountLabel>
             </IonCol>
             <IonCol>
-              <StatsAmountLabel>0</StatsAmountLabel>
+              <StatsAmountLabel>{`987,654,321`}</StatsAmountLabel>
             </IonCol>
             <IonCol>
-              <StatsAmountLabel>0</StatsAmountLabel>
+              <StatsAmountLabel>{`100`}</StatsAmountLabel>
             </IonCol>
             <IonCol>
-              <StatsAmountLabel>0</StatsAmountLabel>
+              <StatsAmountLabel>{`12`}</StatsAmountLabel>
             </IonCol>
           </IonRow>
         </IonGrid>

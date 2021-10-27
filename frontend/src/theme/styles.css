@@ -5,6 +5,7 @@
   --padding-end: 10vw;
   --padding-top: calc(5vh);
   --height: calc(100vh - 64px);
+  --background: var(--ion-color-secondary);
 }
 
 .navbar-button {

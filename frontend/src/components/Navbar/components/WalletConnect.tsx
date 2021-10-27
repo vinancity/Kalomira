@@ -14,20 +14,27 @@ export default function WalletConnect() {
 
   return (
     <>
-      <IonButton className="circle-btn ion-no-padding ion-margin-end" onClick={onPresentChainModal}>
+      <IonButton className="circle-btn ion-no-padding ion-margin-end" color="primary" onClick={onPresentChainModal}>
         <IonIcon ios={link} md={link} className="" />
       </IonButton>
       {active ? (
         <>
-          <IonButton strong fill="solid" routerDirection="none" onClick={onPresentAccountModal}>
+          <IonButton strong fill="solid" color="primary" routerDirection="none" onClick={onPresentAccountModal}>
             <IonLabel>{`${account ? truncateAddress(account, 6) : ""}`}</IonLabel>
           </IonButton>
-          <IonButton strong fill="outline" routerDirection="none" onClick={logout}>
+          <IonButton
+            style={{ paddingRight: "7px" }}
+            strong
+            fill="outline"
+            color="dark"
+            routerDirection="none"
+            onClick={logout}
+          >
             <IonLabel id="foo">Disconnect</IonLabel>
           </IonButton>
         </>
       ) : (
-        <ConnectWalletButton />
+        <ConnectWalletButton style={{ paddingRight: "7px" }} />
       )}
     </>
   );

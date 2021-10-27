@@ -5,16 +5,16 @@ export default function Footer() {
     let systemDark = window.matchMedia("(prefers-color-scheme: dark)");
     systemDark.addListener(colorTest);
     if (event.detail.checked) {
-      document.body.setAttribute("data-theme", "dark");
-    } else {
       document.body.setAttribute("data-theme", "light");
+    } else {
+      document.body.setAttribute("data-theme", "dark");
     }
   };
   function colorTest(systemInitiatedDark) {
     if (systemInitiatedDark.matches) {
-      document.body.setAttribute("data-theme", "dark");
-    } else {
       document.body.setAttribute("data-theme", "light");
+    } else {
+      document.body.setAttribute("data-theme", "dark");
     }
   }
   return (
@@ -23,7 +23,9 @@ export default function Footer() {
         <IonGrid>
           <IonRow>
             <IonCol>
-              <IonToggle onIonChange={(e) => toggleTheme(e)}>Light/Dark</IonToggle>
+              <IonToggle checked onIonChange={(e) => toggleTheme(e)}>
+                Light/Dark
+              </IonToggle>
             </IonCol>
           </IonRow>
         </IonGrid>

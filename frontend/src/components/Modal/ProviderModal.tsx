@@ -6,7 +6,7 @@ export default function ProviderModal({ login, onDismiss = () => null }) {
     <IonModal cssClass="modal" isOpen={true} onDidDismiss={onDismiss}>
       {ProviderItems.map((providerItem) => {
         return (
-          <IonRow className="ion-text-center ion-padding">
+          <IonRow key={providerItem.name} className="ion-text-center ion-padding">
             <IonCol>
               <IonButton
                 onClick={() => {

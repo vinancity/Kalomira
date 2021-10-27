@@ -1,16 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import styled from "styled-components";
-import {
-  IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardContent,
-  IonCardTitle,
-  IonLabel,
-  IonGrid,
-  IonRow,
-  IonCol,
-} from "@ionic/react";
+import { IonContent, IonCard, IonCardContent, IonCardTitle, IonLabel, IonGrid, IonRow, IonCol } from "@ionic/react";
 import AccountCard from "./components/AccountCard";
 import FarmsCard from "./components/FarmsCard";
 import TreasuryCard from "./components/TreasuryCard";
@@ -27,7 +17,7 @@ export const DashboardCard = styled(IonCard)`
 `;
 
 export const CardContent = styled(IonCardContent)`
-  height: calc(100% - 15%);
+  height: 84.5%;
 `;
 
 export const Header = styled(IonLabel)`
@@ -52,12 +42,18 @@ export const Container = styled.div`
   height: 100%;
 `;
 
+export const FlexGrid = styled(IonGrid)`
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+`;
+
 export default function Dashboard() {
   const { account } = useWeb3React();
   return (
     <IonContent className="padded-content">
-      <IonGrid className="ion-no-padding">
-        <IonRow>
+      <FlexGrid className="ion-no-padding">
+        <IonRow className="ion-margin-bottom">
           <IonCol>
             <AccountCard account={account} />
           </IonCol>
@@ -68,10 +64,12 @@ export default function Dashboard() {
             <TreasuryCard account={account} />
           </IonCol>
         </IonRow>
-      </IonGrid>
-      <IonCol>
-        <StatsCard />
-      </IonCol>
+        <IonRow className="ion-margin-top">
+          <IonCol>
+            <StatsCard />
+          </IonCol>
+        </IonRow>
+      </FlexGrid>
     </IonContent>
   );
 }

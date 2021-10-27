@@ -27,7 +27,7 @@ export const PopoverMenu = ({ navItem }) => {
           animated={false}
           onDidDismiss={() => setShowPopover({ showPopover: false, event: undefined })}
         >
-          <IonList>
+          <IonList lines="none">
             {Object.keys(menuItems).map((menuItem, index) => {
               return (
                 <IonItem button routerLink={menuItems[menuItem]} key={index}>

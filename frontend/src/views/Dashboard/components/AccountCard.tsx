@@ -32,7 +32,7 @@ export default function AccountCard({ account }) {
             </IonCol>
             <IonCol>
               {account ? (
-                <IonButton expand="block" routerLink="/pools">
+                <IonButton expand="block" fill="solid" routerLink="/pools">
                   View
                 </IonButton>
               ) : (

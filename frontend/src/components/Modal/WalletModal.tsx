@@ -15,11 +15,10 @@ export const Label = styled(IonLabel)`
 export const Address = styled(IonLabel)`
   font-size: 1rem;
   font-weight: bold;
-  margin-left: 4px;
 `;
 
 export const AddressWrapper = styled(IonItem)`
-  --min-height: 50px;
+  --min-height: 40px;
   margin: 10px 0px 10px 0px;
   border-radius: 8px;
   --border-style: none;
