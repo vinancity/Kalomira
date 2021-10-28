@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >0.8.0;
 
-import 'hardhat/console.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/utils/math/Math.sol';
+import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
-import '../libraries/WadRayMath.sol';
-import './IInterestBearingToken.sol';
+import "../libraries/WadRayMath.sol";
+import "./IInterestBearingToken.sol";
 
 contract InterestBearingTokenStorage {
   uint256 _underlyingAmount;
@@ -42,11 +42,11 @@ contract InterestBearingToken is
    */
   function _mintAsset(address account, uint256 amount) internal virtual returns (uint256) {
     uint256 mintAmount = this.getMintAmount(amount);
-    console.log('mint amount: %s', mintAmount);
+    console.log("mint amount: %s", mintAmount);
     _mint(account, mintAmount);
     _underlyingAmount = _underlyingAmount.add(amount);
     bool success = _receiveUnderlyingAsset(account, amount);
-    require(success, 'insufficient receive amount');
+    require(success, "insufficient receive amount");
     return mintAmount;
   }
 
@@ -54,11 +54,11 @@ contract InterestBearingToken is
    * @dev Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
    */
   function _redeemAsset(address account, uint256 amount) internal virtual returns (uint256) {
-    require(amount <= balanceOf(account), 'insufficient balance');
+    require(amount <= balanceOf(account), "insufficient balance");
     uint256 outputAmount = this.getRedeemAmount(amount);
     _burn(account, amount);
     bool success = _transferUnderlyingAsset(_msgSender(), outputAmount);
-    require(success, 'asset not able to transfer');
+    require(success, "asset not able to transfer");
     return outputAmount;
   }
 
@@ -67,6 +67,9 @@ contract InterestBearingToken is
   }
 
   function getMintAmount(uint256 amount) external view override returns (uint256) {
+    if (amount == 0) {
+      return 0;
+    }
     uint256 rate = _getRateFromDeposit(amount);
     uint256 subRate = WadRayMath.ray().sub(rate);
     uint256 supply = totalSupply();
@@ -78,6 +81,9 @@ contract InterestBearingToken is
   }
 
   function getRedeemAmount(uint256 ibKaiAmount) external view override returns (uint256) {
+    if (ibKaiAmount == 0) {
+      return 0;
+    }
     uint256 rate = _getRateFromWithdraw(ibKaiAmount);
     uint256 redeemAmount = rate.rayMul(_totalUnderlyingAmount());
     return redeemAmount;

@@ -148,6 +148,9 @@ describe("Factory", () => {
       const afterMintFees = await feeProvider.calcFee(ethers.utils.parseEther("1"), true);
       const remainingAmt = afterMintFees[0];
       const feeAmt = afterMintFees[1];
+      console.log((await factory.getOutputAmount(0)).toString());
+      console.log((await ibkaiToken.getMintAmount(ethers.utils.parseEther("1"))).toString());
+      console.log(remainingAmt.toString());
 
       // fee 2.5% of the mint amount (0.025 * 1 ETH)
       expect(feeAmt).to.eq(ethers.utils.parseEther("0.025"));
