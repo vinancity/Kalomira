@@ -1,10 +1,11 @@
 @import "./variables.css";
 
 .padded-content {
-  --padding-start: 10vw;
-  --padding-end: 10vw;
-  --padding-top: calc(5vh);
-  --height: calc(100vh - 64px);
+  --padding-start: 10%;
+  --padding-end: 10%;
+  --padding-top: (2%);
+  --padding-bottom: (2%);
+  --height: calc(100% - 64px);
   --background: var(--ion-color-secondary);
 }
 

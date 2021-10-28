@@ -52,7 +52,7 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-danger-tint: #ed576b;
 
   /** dark **/
-  --ion-color-dark: #004568;
+  --ion-color-dark: #0a405c;
   --ion-color-dark-rgb: 34, 36, 40;
   --ion-color-dark-contrast: #ffffff;
   --ion-color-dark-contrast-rgb: 255, 255, 255;
@@ -60,7 +60,7 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-dark-tint: #00244d;
 
   /** medium **/
-  --ion-color-medium: #606a85;
+  --ion-color-medium: #486472;
   --ion-color-medium-rgb: 146, 148, 156;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
@@ -72,12 +72,12 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-light-rgb: 244, 245, 248;
   --ion-color-light-contrast: var(--ion-color-dark);
   --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d7d8da;
-  --ion-color-light-tint: #82d5ff;
+  --ion-color-light-shade: #a3ddfa;
+  --ion-color-light-tint: #ace3ff;
 }
 
 ion-modal {
-  --ion-background-color: var(--ion-color-step-950);
+  --ion-background-color: #cef0ff;
 }
 
 body {

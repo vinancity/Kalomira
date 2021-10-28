@@ -48,7 +48,6 @@ export const PopoverMenu = ({ navItem }) => {
         onMouseOver={(e: any) => {}}
         onMouseLeave={(e: any) => {}}
         onClick={(e: any) => {
-          console.log(e);
           e.persist();
           setShowPopover({ showPopover: true, event: e });
         }}

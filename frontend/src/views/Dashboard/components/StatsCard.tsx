@@ -46,7 +46,7 @@ export default function StatsCard() {
             </IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="">
+            <IonCol>
               <StatsAmountLabel>{`$1,234,567.89`}</StatsAmountLabel>
             </IonCol>
             <IonCol>

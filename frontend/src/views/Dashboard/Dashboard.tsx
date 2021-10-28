@@ -43,7 +43,6 @@ export const Container = styled.div`
 `;
 
 export const FlexGrid = styled(IonGrid)`
-  height: 100%;
   display: flex;
   flex-flow: column;
 `;
