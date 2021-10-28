@@ -10,10 +10,10 @@ const Wrapper = styled(IonGrid)`
   flex-flow: column;
 `;
 
-export default function NotFound() {
+export default function Loading() {
   return (
     <IonContent className="padded-content">
-      <Wrapper>NotFound</Wrapper>
+      <Wrapper>Loading...</Wrapper>
     </IonContent>
   );
 }
