@@ -25,9 +25,9 @@ export const getUSDTAddress = () => {
   return getAddress(addresses.USDT_TOKEN);
 };
 
-// export const getFeeProvider = () => {
-//   return getAddress(addresses.FEE_PROVIDER);
-// };
+export const getFeeProviderAddress = () => {
+  return getAddress(addresses.FEE_PROVIDER);
+};
 
 export const getFactoryAddress = () => {
   return getAddress(addresses.FACTORY);
