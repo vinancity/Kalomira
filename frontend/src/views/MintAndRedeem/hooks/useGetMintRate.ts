@@ -1,23 +1,39 @@
-import { useCallback } from "react";
-import { getRateFromDeposit } from "utils/calls";
-import { useIbKAI } from "hooks/useContract";
+import { useState, useEffect } from "react";
+import { useFeeProvider } from "hooks/useContract";
+import { BIG_ZERO } from "utils/bigNumber";
+import BigNumber from "bignumber.js";
+
+enum FetchStatus {
+  NOT_FETCHED = "not-fetched",
+  SUCCESS = "success",
+  FAILED = "failed",
+}
 
 const useGetMintRate = () => {
-  const ibKaiContract = useIbKAI();
+  const [fetchStatus, setFetchStatus] = useState(FetchStatus.NOT_FETCHED);
+  const [mintRate, setMintRate] = useState(BIG_ZERO);
+  const [mintPct, setMintPct] = useState(BIG_ZERO);
+  const feeProviderContract = useFeeProvider();
 
-  const handleGetMintRate = useCallback(
-    async (amount: string) => {
+  useEffect(() => {
+    const fetchMintRate = async () => {
       try {
-        const mintRate = await getRateFromDeposit(ibKaiContract, amount);
-        return mintRate;
-      } catch (e) {
-        console.error("GetMintRate", e);
+        const rate = new BigNumber((await feeProviderContract.mintFee()).toString());
+        const basisPoint = new BigNumber((await feeProviderContract.basisPoint()).toString());
+        const mintRate = rate.dividedBy(basisPoint);
+        setFetchStatus(FetchStatus.SUCCESS);
+        setMintRate(mintRate); // decimal rate
+        setMintPct(mintRate.times(new BigNumber(100))); // percent rate
+      } catch (error) {
+        console.error("GetMintRate", error);
+        setFetchStatus(FetchStatus.FAILED);
       }
-    },
-    [ibKaiContract]
-  );
+    };
 
-  return { onGetMintRate: handleGetMintRate };
+    fetchMintRate();
+  }, [feeProviderContract, setMintRate, setFetchStatus]);
+
+  return { fetchStatus, mintRate, mintPct };
 };
 
 export default useGetMintRate;

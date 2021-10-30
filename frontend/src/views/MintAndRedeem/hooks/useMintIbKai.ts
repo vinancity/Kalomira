@@ -1,16 +1,22 @@
 import { useCallback } from "react";
-import { mintIbKAI } from "utils/calls";
-import { useIbKAI } from "hooks/useContract";
+import { useFactory } from "hooks/useContract";
+import { DEFAULT_TOKEN_DECIMAL } from "config";
+import BigNumber from "bignumber.js";
 
 const useMintIbKai = () => {
-  const ibKaiContract = useIbKAI();
+  const factoryContract = useFactory();
 
   const handleMint = useCallback(
     async (amount: string) => {
-      const txHash = await mintIbKAI(ibKaiContract, amount);
-      console.info(txHash);
+      try {
+        const amountBN = new BigNumber(amount).times(DEFAULT_TOKEN_DECIMAL).toString();
+        const txHash = await factoryContract.mint({ value: amountBN });
+        return txHash;
+      } catch (error) {
+        return false;
+      }
     },
-    [ibKaiContract]
+    [factoryContract]
   );
 
   return { onMint: handleMint };
