@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >0.8.0;
 
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import 'hardhat/console.sol';
-import './IFactory.sol';
-import '../fee/IFeeProvider.sol';
-import '../address/IAddressProvider.sol';
-import '../address/WithAddressProvider.sol';
-import '../../token/IBKaiTokenInterface.sol';
-import '../../token/IInterestBearingToken.sol';
+import "hardhat/console.sol";
+import "./IFactory.sol";
+import "../fee/IFeeProvider.sol";
+import "../address/IAddressProvider.sol";
+import "../address/WithAddressProvider.sol";
+import "../../token/IBKaiTokenInterface.sol";
+import "../../token/IInterestBearingToken.sol";
 
 contract FactoryState {
   address _config;
@@ -29,7 +29,7 @@ contract Factory is IFactory, FactoryState, WithAddressProvider, OwnableUpgradea
   }
 
   receive() external payable {
-    console.log('factory got paid', msg.value);
+    console.log("factory got paid", msg.value);
   }
 
   /**
@@ -37,7 +37,7 @@ contract Factory is IFactory, FactoryState, WithAddressProvider, OwnableUpgradea
    */
   function mint() external payable override {
     uint256 value = msg.value;
-    require(value > 1000, 'mint value to small');
+    require(value > 1000, "mint value to small");
     address ibKAI = IAddressProvider(_addressProvider).getIBKAIToken();
     address feeProvider = IAddressProvider(_addressProvider).getFeeProvider();
 
@@ -87,24 +87,40 @@ contract Factory is IFactory, FactoryState, WithAddressProvider, OwnableUpgradea
   }
 
   /**
-   * @dev Input KAI, compute output ibKAI
+   * @dev Input KAI, compute output ibKAI (mint)
    */
   function getOutputAmount(uint256 inputAmount) external view override returns (uint256) {
-    return IInterestBearingToken(IAddressProvider(this.addressProvider()).getIBKAIToken()).getMintAmount(inputAmount);
+    // return IInterestBearingToken(IAddressProvider(this.addressProvider()).getIBKAIToken()).getMintAmount(inputAmount);
+    (uint256 outputIbKAI, ) = IFeeProvider(IAddressProvider(this.addressProvider()).getFeeProvider()).calcFee(
+      inputAmount,
+      true
+    );
+    return outputIbKAI;
   }
 
   /**
-   * @dev Input ibKAI, compute output KAI
+   * @dev Input ibKAI, compute output KAI (redeem)
    */
   function getInputAmount(uint256 outputAmount) external view override returns (uint256) {
-    return
-      IInterestBearingToken(IAddressProvider(this.addressProvider()).getIBKAIToken()).getRedeemAmount(outputAmount);
+    // return IInterestBearingToken(IAddressProvider(this.addressProvider()).getIBKAIToken()).getRedeemAmount(outputAmount);
+    (uint256 outputKAI, ) = IFeeProvider(IAddressProvider(this.addressProvider()).getFeeProvider()).calcFee(
+      outputAmount,
+      false
+    );
+    return outputKAI;
+  }
+
+  /**
+   * @dev Input desired output amount, compute required input amount (mint or redeem)
+   */
+  function fromOutputAmount(uint256 outputAmount, bool isMint) external view returns (uint256) {
+    return IFeeProvider(IAddressProvider(this.addressProvider()).getFeeProvider()).calcAmount(outputAmount, isMint);
   }
 
   function _sendValue(address recipient, uint256 amount) internal {
-    require(address(this).balance >= amount, 'Address: insufficient balance');
+    require(address(this).balance >= amount, "Address: insufficient balance");
 
-    (bool success, ) = recipient.call{ value: amount }('');
-    require(success, 'Address: unable to send value, recipient may have reverted');
+    (bool success, ) = recipient.call{ value: amount }("");
+    require(success, "Address: unable to send value, recipient may have reverted");
   }
 }

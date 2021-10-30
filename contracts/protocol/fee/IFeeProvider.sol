@@ -11,9 +11,13 @@ interface IFeeProvider {
 
   function calcFee(uint256 amount, bool isMintOrRedeem) external view returns (uint256, uint256);
 
+  function calcAmount(uint256 outputAmount, bool isMint) external view returns (uint256);
+
   function sendFee(uint256 amount) external;
 
   function mintFee() external view returns (uint256);
 
   function redeemFee() external view returns (uint256);
+
+  function basisPoint() external view returns (uint256);
 }
