@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { InputChangeEventDetail } from "@ionic/core";
-import { IonGrid, IonRow, IonCol, IonButton, IonIcon, IonInput, IonAvatar } from "@ionic/react";
+import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonAvatar, IonImg } from "@ionic/react";
 import { arrowDown } from "ionicons/icons";
 import styled from "styled-components";
 import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
@@ -11,9 +11,10 @@ import { InputGrid } from "../MintAndRedeem";
 import ConnectWalletButton from "components/ConnectWalletButton";
 
 import useDebounce from "hooks/useDebounce";
-import useGetMintOutput from "../hooks/useGetMintOutput";
+import useGetMintAmount from "../hooks/useGetMintAmount";
 import useApproveIbKAI from "../hooks/useApproveIbKAI";
 import useMintIbKai from "../hooks/useMintIbKai";
+import { useExchangeAllowance } from "state/exchange/hooks";
 
 const NumericalInput = styled(IonInput)`
   // --background: var(--ion-card-background);
@@ -32,13 +33,15 @@ export default function MintCard({ account }) {
   const [pendingTx, setPendingTx] = useState(false);
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
-  const [approved, setApproved] = useState(false);
   const { balance } = useNativeBalance();
   const { ibKaiBalance } = useIbKaiBalance();
-  const { onGetMintOutput } = useGetMintOutput();
+  const { onGetMintAmount } = useGetMintAmount();
   const { onApprove } = useApproveIbKAI();
   const { onMint } = useMintIbKai();
+  const allowance = useExchangeAllowance();
   const debouncedFromValue = useDebounce(fromValue, 300);
+
+  const isApproved = account && allowance && allowance.isGreaterThan(0);
 
   const inputRegex = RegExp(`^[0-9]*(?:[.])?[0-9]{0,18}$`);
   const handleMax = () => {
@@ -52,20 +55,13 @@ export default function MintCard({ account }) {
 
   const handleMint = async () => {
     setPendingTx(true);
-    const tx = await onMint(fromValue);
-    if (tx) {
-      setApproved(true);
-    }
+    await onMint(fromValue);
     setPendingTx(false);
   };
 
   const handleApprove = async () => {
     setPendingTx(true);
-    const tx = await onApprove();
-    console.log(tx);
-    if (tx) {
-      setApproved(true);
-    }
+    await onApprove();
     setPendingTx(false);
   };
 
@@ -78,7 +74,7 @@ export default function MintCard({ account }) {
   // Call mint query after debounce completes
   useEffect(() => {
     const fetchMintOutput = async () => {
-      const toAmount = await onGetMintOutput(debouncedFromValue);
+      const toAmount = await onGetMintAmount(debouncedFromValue);
       if (toAmount.isZero()) {
         setToValue("");
       } else {
@@ -87,7 +83,7 @@ export default function MintCard({ account }) {
     };
 
     fetchMintOutput();
-  }, [debouncedFromValue, onGetMintOutput]);
+  }, [debouncedFromValue, onGetMintAmount]);
 
   return (
     <>
@@ -118,7 +114,7 @@ export default function MintCard({ account }) {
                 </IonCol>
                 <IonCol size="auto" className="ion-text-center">
                   <IonAvatar style={{ transform: "scale(0.8)" }}>
-                    <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
                   </IonAvatar>
                 </IonCol>
                 <IonCol size="1.5" className="ion-text-center">
@@ -150,7 +146,7 @@ export default function MintCard({ account }) {
                 </IonCol>
                 <IonCol size="auto">
                   <IonAvatar style={{ transform: "scale(0.8)" }}>
-                    <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
                   </IonAvatar>
                 </IonCol>
                 <IonCol size="1.5" className="ion-text-center">
@@ -165,12 +161,12 @@ export default function MintCard({ account }) {
       <IonRow style={{}}>
         <IonCol>
           {account ? (
-            approved ? (
+            isApproved ? (
               <IonButton expand="block" disabled={!toValue || pendingTx} onClick={handleMint}>
                 Mint
               </IonButton>
             ) : (
-              <IonButton expand="block" disabled={approved || pendingTx} onClick={handleApprove}>
+              <IonButton expand="block" disabled={isApproved || pendingTx} onClick={handleApprove}>
                 Enable
               </IonButton>
             )

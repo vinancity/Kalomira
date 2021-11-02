@@ -26,7 +26,12 @@ export interface FarmsState {
   userDataLoaded: boolean;
 }
 
+export interface ExchangeState {
+  allowance: string;
+}
+
 export interface State {
   connector: any;
   farms: FarmsState;
+  exchange: ExchangeState;
 }

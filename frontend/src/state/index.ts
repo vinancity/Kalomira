@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import connectorReducer from "./connector";
 import farmsReducer from "./farms";
+import exchangeReducer from "./exchange";
 
 const store = configureStore({
   reducer: {
-    connector: connectorReducer,
+    // connector: connectorReducer,
     farms: farmsReducer,
+    exchange: exchangeReducer,
   },
 });
 

@@ -1,104 +1,182 @@
-import React, { useState, useEffect } from "react";
-import { getBalanceAmount } from "utils/formatBalance";
-import { BIG_ZERO } from "utils/bigNumber";
-import { IonList, IonItem, IonItemDivider, IonInput, IonButton, IonGrid, IonRow, IonCol, IonLabel } from "@ionic/react";
+import { useEffect, useState } from "react";
+import { InputChangeEventDetail } from "@ionic/core";
+import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonAvatar, IonImg } from "@ionic/react";
+import { arrowDown } from "ionicons/icons";
+import styled from "styled-components";
+import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
+import { getFullDisplayBalance, getBalanceAmount } from "utils/formatBalance";
 
+import { InputWrapper } from "../MintAndRedeem";
+import { InputGrid } from "../MintAndRedeem";
+import ConnectWalletButton from "components/ConnectWalletButton";
+
+import useDebounce from "hooks/useDebounce";
 import useGetRedeemAmount from "../hooks/useGetRedeemAmount";
-import useGetRedeemRate from "../hooks/useGetRedeemRate";
+import useApproveIbKAI from "../hooks/useApproveIbKAI";
 import useRedeemKai from "../hooks/useRedeemKai";
+import { useExchangeAllowance } from "state/exchange/hooks";
 
-export default function RedeemForm() {
-  const [returnAmount, setReturnAmount] = useState("");
-  const [redeemAmount, setRedeemAmount] = useState(BIG_ZERO);
-  const [redeemRate, setRedeemRate] = useState(BIG_ZERO);
+const NumericalInput = styled(IonInput)`
+  // --background: var(--ion-card-background);
+  --color: var(--ion-color-dark);
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 8px;
+`;
+
+const Divider = styled(IonRow)`
+  margin: 10px 0px;
+  height: 30px;
+`;
+
+export default function RedeemCard({ account }) {
   const [pendingTx, setPendingTx] = useState(false);
+  const [fromValue, setFromValue] = useState("");
+  const [toValue, setToValue] = useState("");
+  const { balance } = useNativeBalance();
+  const { ibKaiBalance } = useIbKaiBalance();
   const { onGetRedeemAmount } = useGetRedeemAmount();
-  const { onGetRedeemRate } = useGetRedeemRate();
+  const { onApprove } = useApproveIbKAI();
   const { onRedeem } = useRedeemKai();
+  const allowance = useExchangeAllowance();
+  const debouncedFromValue = useDebounce(fromValue, 300);
 
-  const fetchMintInfo = async (value) => {
-    if (value) {
-      let redeemAmt = getBalanceAmount(await onGetRedeemAmount(value));
-      let redeemRate = getBalanceAmount(await onGetRedeemRate(value), 27);
-      setReturnAmount(value);
-      setRedeemAmount(redeemAmt);
-      setRedeemRate(redeemRate);
-    } else {
-      setReturnAmount("");
-      setRedeemAmount(BIG_ZERO);
-      setRedeemRate(BIG_ZERO);
+  const isApproved = account && allowance && allowance.isGreaterThan(0);
+
+  const inputRegex = RegExp(`^[0-9]*(?:[.])?[0-9]{0,18}$`);
+  const handleMax = () => {
+    setFromValue(getFullDisplayBalance(ibKaiBalance));
+  };
+  const handleKeyPress = (e) => {
+    if (!inputRegex.test(fromValue + e.key)) {
+      e.preventDefault();
     }
   };
 
   const handleRedeem = async () => {
     setPendingTx(true);
-    try {
-      console.log(`Returning ${returnAmount}`);
-      await onRedeem(returnAmount);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setPendingTx(false);
-    }
+    const tx = await onRedeem(fromValue);
+    console.log(tx);
+    setPendingTx(false);
   };
 
+  const handleApprove = async () => {
+    setPendingTx(true);
+    const tx = await onApprove();
+    console.log(tx);
+    setPendingTx(false);
+  };
+
+  const handleFromChange = (e: CustomEvent<InputChangeEventDetail>) => {
+    if (inputRegex.test(e.detail.value)) {
+      e.preventDefault();
+      setFromValue(e.detail.value);
+    }
+  };
+  // Call mint query after debounce completes
   useEffect(() => {
-    console.log(redeemAmount.toString());
-  }, [redeemAmount]);
+    const fetchMintOutput = async () => {
+      const toAmount = await onGetRedeemAmount(debouncedFromValue);
+      if (toAmount.isZero()) {
+        setToValue("");
+      } else {
+        setToValue(getBalanceAmount(toAmount).toString());
+      }
+    };
+
+    fetchMintOutput();
+  }, [debouncedFromValue, onGetRedeemAmount]);
 
   return (
-    <IonList>
-      <IonItemDivider color="dark">
-        <h2>
-          Amount of <b>ibKAI</b> to return:
-        </h2>
-      </IonItemDivider>
-      <IonItem>
-        <IonGrid>
-          <IonRow>
-            <IonCol>
-              <IonInput
-                className="ion-padding"
-                placeholder="0"
-                min="0"
-                inputmode="decimal"
-                clearInput
-                onIonChange={(e) => fetchMintInfo(e.detail.value)}
-                onKeyPress={(e) => {
-                  let regex = /^[0-9]*[.]?[0-9]*$/;
-                  if (!regex.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
-                required
-              />
-            </IonCol>
-            <IonCol className="ion-padding ion-text-right">KAI</IonCol>
-          </IonRow>
-        </IonGrid>
-      </IonItem>
-      <IonItemDivider color="dark">
-        <h2>
-          Amount of <b>KAI</b> to be redeemed:
-        </h2>
-      </IonItemDivider>
-      <IonItem>
-        <IonGrid>
-          <IonRow>
-            <IonCol>
-              <IonInput className="ion-padding" placeholder={redeemAmount.toString()} readonly />
-            </IonCol>
-            <IonCol className="ion-padding ion-text-right">ibKAI</IonCol>
-          </IonRow>
-        </IonGrid>
-      </IonItem>
-      <div className="ion-padding">
-        <h2>Redeem rate: {redeemRate.toString()}</h2>
-      </div>
-      <IonButton expand="full" onClick={handleRedeem} color="dark" disabled={!redeemAmount.toNumber() || pendingTx}>
-        Redeem
-      </IonButton>
-      <IonItemDivider />
-    </IonList>
+    <>
+      <IonRow style={{ marginTop: "35px" }}>
+        <IonCol>
+          <InputWrapper>
+            <InputGrid className="ion-align-self-start">
+              <IonRow className="ion-align-items-center ion-margin-bottom">
+                <IonCol>From</IonCol>
+                <IonCol size="auto">
+                  <IonButton className="ion-no-margin" onClick={handleMax}>
+                    MAX
+                  </IonButton>
+                </IonCol>
+                <IonCol size="auto" className="ion-text-end ion-margin-start">
+                  {account ? `Balance: ${getFullDisplayBalance(ibKaiBalance, undefined, 4)}` : `Balance: 0.0000`}
+                </IonCol>
+              </IonRow>
+              <IonRow className="ion-align-items-center" style={{ flexGrow: 1 }}>
+                <IonCol>
+                  <NumericalInput
+                    placeholder="0.000"
+                    value={fromValue}
+                    onKeyPress={(e) => handleKeyPress(e)}
+                    onIonChange={(e) => handleFromChange(e)}
+                    autofocus={true}
+                  />
+                </IonCol>
+                <IonCol size="auto" className="ion-text-center">
+                  <IonAvatar style={{ transform: "scale(0.8)" }}>
+                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+                  </IonAvatar>
+                </IonCol>
+                <IonCol size="1.5" className="ion-text-center">
+                  ibKAI
+                </IonCol>
+              </IonRow>
+            </InputGrid>
+          </InputWrapper>
+        </IonCol>
+      </IonRow>
+
+      <Divider className="ion-align-items-center ion-justify-content-center">
+        <IonIcon md={arrowDown} style={{ height: "100%", width: "100%" }}></IonIcon>
+      </Divider>
+
+      <IonRow style={{ marginBottom: "35px" }}>
+        <IonCol>
+          <InputWrapper>
+            <InputGrid className="ion-align-self-start">
+              <IonRow className="ion-align-items-center ion-margin-bottom">
+                <IonCol>To</IonCol>
+                <IonCol className="ion-text-end">
+                  {account ? `Balance: ${getFullDisplayBalance(balance, undefined, 4)}` : `Balance: 0.0000`}
+                </IonCol>
+              </IonRow>
+              <IonRow className="ion-align-items-center" style={{ flexGrow: 1 }}>
+                <IonCol>
+                  <NumericalInput placeholder="0.000" value={toValue} readonly />
+                </IonCol>
+                <IonCol size="auto">
+                  <IonAvatar style={{ transform: "scale(0.8)" }}>
+                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+                  </IonAvatar>
+                </IonCol>
+                <IonCol size="1.5" className="ion-text-center">
+                  KAI
+                </IonCol>
+              </IonRow>
+            </InputGrid>
+          </InputWrapper>
+        </IonCol>
+      </IonRow>
+
+      <IonRow>
+        <IonCol>
+          {account ? (
+            isApproved ? (
+              <IonButton expand="block" disabled={!toValue || pendingTx} onClick={handleRedeem}>
+                Redeem
+              </IonButton>
+            ) : (
+              <IonButton expand="block" disabled={isApproved || pendingTx} onClick={handleApprove}>
+                Enable
+              </IonButton>
+            )
+          ) : (
+            <ConnectWalletButton style={{ display: "block" }} />
+          )}
+        </IonCol>
+      </IonRow>
+    </>
   );
 }

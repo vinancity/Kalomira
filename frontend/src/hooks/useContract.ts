@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import useWeb3 from "./useWeb3";
 import {
-  getAddress,
   getIbKAIAddress,
   getKaloAddress,
   getKLSAddress,
@@ -35,7 +34,6 @@ export const useIbKAI = () => {
   const { library } = useWeb3();
   const address = getIbKAIAddress();
   return useMemo(() => {
-    console.log(library);
     const ibKaiContract = ibKaiFactory.connect(address, library.getSigner());
     return ibKaiContract;
   }, [address, library]);

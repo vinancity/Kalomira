@@ -1,16 +1,23 @@
 import { useCallback } from "react";
-import { redeemKAI } from "utils/calls";
-import { useIbKAI } from "hooks/useContract";
+import { useFactory } from "hooks/useContract";
+import { DEFAULT_TOKEN_DECIMAL } from "config";
+import BigNumber from "bignumber.js";
 
 const useRedeemKai = () => {
-  const ibKaiContract = useIbKAI();
+  const factoryContract = useFactory();
 
   const handleRedeem = useCallback(
     async (amount: string) => {
-      const txHash = await redeemKAI(ibKaiContract, amount);
-      console.info(txHash);
+      try {
+        const amountBN = new BigNumber(amount).times(DEFAULT_TOKEN_DECIMAL).toString();
+        const txHash = await factoryContract.redeem(amountBN);
+        return txHash;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
     },
-    [ibKaiContract]
+    [factoryContract]
   );
 
   return { onRedeem: handleRedeem };

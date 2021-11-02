@@ -13,6 +13,7 @@ const useMintIbKai = () => {
         const txHash = await factoryContract.mint({ value: amountBN });
         return txHash;
       } catch (error) {
+        console.error(error);
         return false;
       }
     },

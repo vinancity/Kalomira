@@ -1,5 +1,3 @@
-import sample from "lodash/sample";
-
 export const getNodeUrl = () => {
   return process.env.REACT_APP_NODE_DEFAULT;
 };

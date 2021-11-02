@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import styled from "styled-components";
 import {
@@ -14,8 +14,11 @@ import {
 } from "@ionic/react";
 
 import MintCard from "./components/MintCard";
+import RedeemCard from "./components/RedeemCard";
 
 import useGetMintRate from "./hooks/useGetMintRate";
+import useGetRedeemRate from "./hooks/useGetRedeemRate";
+import { usePollExchangeAllowance } from "state/exchange/hooks";
 
 export const Card = styled(IonCard)`
   border-radius: 15px;
@@ -25,9 +28,10 @@ export const Card = styled(IonCard)`
 
 export const SubCard = styled(IonCard)`
   border-radius: 15px;
-  min-height: 150px;
+  min-height: 125px;
   width: 500px;
   padding: 20px;
+  font-size: 1.25rem;
 `;
 
 export const FlexGrid = styled(IonGrid)`
@@ -40,6 +44,7 @@ export const FlexGrid = styled(IonGrid)`
 export const InputGrid = styled(IonGrid)`
   display: flex;
   flex-flow: column;
+  justify-content: space-evenly;
   height: 100%;
   padding: 15px 02px 10px 0px;
 `;
@@ -76,12 +81,15 @@ export const SegmentButton = styled(IonSegmentButton)`
 `;
 
 export default function MintAndRedeem() {
-  const [isMint, setMint] = useState("mint");
-  const { mintRate, mintPct } = useGetMintRate();
+  const [isMint, setMint] = useState(true);
+  const { mintPct } = useGetMintRate();
+  const { redeemPct } = useGetRedeemRate();
   const { account } = useWeb3React();
 
+  usePollExchangeAllowance();
+
   const handleChange = (value: string) => {
-    value === "mint" ? setMint("mint") : setMint("redeem");
+    value === "mint" ? setMint(true) : setMint(false);
   };
 
   return (
@@ -95,7 +103,7 @@ export default function MintAndRedeem() {
                   <IonCol>
                     <Segment
                       mode="md"
-                      value={isMint}
+                      value={isMint ? "mint" : "redeem"}
                       onIonChange={(e) => {
                         handleChange(e.detail.value);
                       }}
@@ -105,23 +113,37 @@ export default function MintAndRedeem() {
                     </Segment>
                   </IonCol>
                 </IonRow>
-                <MintCard account={account} />
+                {isMint ? <MintCard account={account} /> : <RedeemCard account={account} />}
               </IonGrid>
             </Card>
           </IonRow>
           <IonRow>
             <SubCard>
-              {isMint === "mint" ? (
-                <>
-                  <div>{`Mint Rate: ${mintPct}% | ${mintRate}`}</div>
-                  <div>{`Mint Fee: 123`}</div>
-                </>
-              ) : (
-                <>
-                  <div>{`Redeem Rate: ${mintPct}% | ${mintRate}`}</div>
-                  <div>{`Redeem Fee: 123`}</div>
-                </>
-              )}
+              <InputGrid>
+                {isMint ? (
+                  <>
+                    <IonRow>
+                      <IonCol>{`Mint Rate:`}</IonCol>
+                      <IonCol className="ion-text-end">{`${mintPct}%`}</IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <IonCol>{`Mint Fee:`}</IonCol>
+                      <IonCol className="ion-text-end">{`123`}</IonCol>
+                    </IonRow>
+                  </>
+                ) : (
+                  <>
+                    <IonRow>
+                      <IonCol>{`Redeem Rate:`}</IonCol>
+                      <IonCol className="ion-text-end">{`${redeemPct}%`}</IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <IonCol>{`Redeem Fee:`}</IonCol>
+                      <IonCol className="ion-text-end">{`123`}</IonCol>
+                    </IonRow>
+                  </>
+                )}
+              </InputGrid>
             </SubCard>
           </IonRow>
         </IonGrid>
