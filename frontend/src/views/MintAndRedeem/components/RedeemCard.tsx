@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
-import { InputChangeEventDetail } from "@ionic/core";
-import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonAvatar, IonImg } from "@ionic/react";
-import { arrowDown } from "ionicons/icons";
-import styled from "styled-components";
 import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
 import { getFullDisplayBalance, getBalanceAmount } from "utils/formatBalance";
-
-import { InputWrapper } from "../MintAndRedeem";
-import { InputGrid } from "../MintAndRedeem";
-import ConnectWalletButton from "components/ConnectWalletButton";
-
+import { useExchangeAllowance } from "state/exchange/hooks";
+import { fetchExchangeAllowanceAsync } from "state/exchange";
+import { useAppDispatch } from "state";
 import useDebounce from "hooks/useDebounce";
 import useGetRedeemAmount from "../hooks/useGetRedeemAmount";
 import useApproveIbKAI from "../hooks/useApproveIbKAI";
 import useRedeemKai from "../hooks/useRedeemKai";
-import { useExchangeAllowance } from "state/exchange/hooks";
 
-const NumericalInput = styled(IonInput)`
-  // --background: var(--ion-card-background);
-  --color: var(--ion-color-dark);
-  font-size: 2rem;
-  font-weight: bold;
-  border-radius: 8px;
-`;
+import styled from "styled-components";
+import { IonRow, IonCol, IonButton, IonIcon } from "@ionic/react";
+import { arrowDown } from "ionicons/icons";
+import { Input } from "components/Input/Input";
+import ConnectWalletButton from "components/ConnectWalletButton";
 
 const Divider = styled(IonRow)`
   margin: 10px 0px;
@@ -30,6 +21,7 @@ const Divider = styled(IonRow)`
 `;
 
 export default function RedeemCard({ account }) {
+  const dispatch = useAppDispatch();
   const [pendingTx, setPendingTx] = useState(false);
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
@@ -43,36 +35,31 @@ export default function RedeemCard({ account }) {
 
   const isApproved = account && allowance && allowance.isGreaterThan(0);
 
-  const inputRegex = RegExp(`^[0-9]*(?:[.])?[0-9]{0,18}$`);
   const handleMax = () => {
     setFromValue(getFullDisplayBalance(ibKaiBalance));
-  };
-  const handleKeyPress = (e) => {
-    if (!inputRegex.test(fromValue + e.key)) {
-      e.preventDefault();
-    }
   };
 
   const handleRedeem = async () => {
     setPendingTx(true);
-    const tx = await onRedeem(fromValue);
-    console.log(tx);
+    await onRedeem(fromValue);
     setPendingTx(false);
   };
 
   const handleApprove = async () => {
-    setPendingTx(true);
-    const tx = await onApprove();
-    console.log(tx);
-    setPendingTx(false);
-  };
-
-  const handleFromChange = (e: CustomEvent<InputChangeEventDetail>) => {
-    if (inputRegex.test(e.detail.value)) {
-      e.preventDefault();
-      setFromValue(e.detail.value);
+    try {
+      setPendingTx(true);
+      await onApprove();
+      dispatch(fetchExchangeAllowanceAsync({ account }));
+      setPendingTx(false);
+    } catch (error) {
+      console.error(error);
     }
   };
+
+  const onUserInput = (nextInput: string) => {
+    setFromValue(nextInput);
+  };
+
   // Call mint query after debounce completes
   useEffect(() => {
     const fetchMintOutput = async () => {
@@ -91,7 +78,7 @@ export default function RedeemCard({ account }) {
     <>
       <IonRow style={{ marginTop: "35px" }}>
         <IonCol>
-          <InputWrapper>
+          {/* <InputWrapper>
             <InputGrid className="ion-align-self-start">
               <IonRow className="ion-align-items-center ion-margin-bottom">
                 <IonCol>From</IonCol>
@@ -124,7 +111,16 @@ export default function RedeemCard({ account }) {
                 </IonCol>
               </IonRow>
             </InputGrid>
-          </InputWrapper>
+          </InputWrapper> */}
+          <Input
+            value={fromValue}
+            label1="From"
+            label2={account ? `Balance: ${getFullDisplayBalance(ibKaiBalance, undefined, 4)}` : "Balance: 0.0000"}
+            tokenLabel="ibKAI"
+            onUserInput={onUserInput}
+            withMax={true}
+            onMax={handleMax}
+          />
         </IonCol>
       </IonRow>
 
@@ -134,7 +130,7 @@ export default function RedeemCard({ account }) {
 
       <IonRow style={{ marginBottom: "35px" }}>
         <IonCol>
-          <InputWrapper>
+          {/* <InputWrapper>
             <InputGrid className="ion-align-self-start">
               <IonRow className="ion-align-items-center ion-margin-bottom">
                 <IonCol>To</IonCol>
@@ -156,7 +152,15 @@ export default function RedeemCard({ account }) {
                 </IonCol>
               </IonRow>
             </InputGrid>
-          </InputWrapper>
+          </InputWrapper> */}
+          <Input
+            value={toValue}
+            label1="To"
+            label2={account ? `Balance: ${getFullDisplayBalance(balance, undefined, 4)}` : "Balance: 0.0000"}
+            tokenLabel="KAI"
+            readonly={true}
+            withMax={false}
+          />
         </IonCol>
       </IonRow>
 

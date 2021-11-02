@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
-import { InputChangeEventDetail } from "@ionic/core";
-import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonAvatar, IonImg } from "@ionic/react";
-import { arrowDown } from "ionicons/icons";
-import styled from "styled-components";
 import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
 import { getFullDisplayBalance, getBalanceAmount } from "utils/formatBalance";
-
-import { InputWrapper } from "../MintAndRedeem";
-import { InputGrid } from "../MintAndRedeem";
-import ConnectWalletButton from "components/ConnectWalletButton";
-
+import { useExchangeAllowance } from "state/exchange/hooks";
+import { fetchExchangeAllowanceAsync } from "state/exchange";
+import { useAppDispatch } from "state";
 import useDebounce from "hooks/useDebounce";
 import useGetMintAmount from "../hooks/useGetMintAmount";
 import useApproveIbKAI from "../hooks/useApproveIbKAI";
 import useMintIbKai from "../hooks/useMintIbKai";
-import { useExchangeAllowance } from "state/exchange/hooks";
 
-const NumericalInput = styled(IonInput)`
-  // --background: var(--ion-card-background);
-  --color: var(--ion-color-dark);
-  font-size: 2rem;
-  font-weight: bold;
-  border-radius: 8px;
-`;
+import styled from "styled-components";
+import { IonRow, IonCol, IonButton, IonIcon } from "@ionic/react";
+import { arrowDown } from "ionicons/icons";
+import { Input } from "components/Input/Input";
+import ConnectWalletButton from "components/ConnectWalletButton";
 
 const Divider = styled(IonRow)`
   margin: 10px 0px;
@@ -30,6 +21,7 @@ const Divider = styled(IonRow)`
 `;
 
 export default function MintCard({ account }) {
+  const dispatch = useAppDispatch();
   const [pendingTx, setPendingTx] = useState(false);
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
@@ -43,14 +35,8 @@ export default function MintCard({ account }) {
 
   const isApproved = account && allowance && allowance.isGreaterThan(0);
 
-  const inputRegex = RegExp(`^[0-9]*(?:[.])?[0-9]{0,18}$`);
   const handleMax = () => {
     setFromValue(getFullDisplayBalance(balance));
-  };
-  const handleKeyPress = (e) => {
-    if (!inputRegex.test(fromValue + e.key)) {
-      e.preventDefault();
-    }
   };
 
   const handleMint = async () => {
@@ -60,16 +46,18 @@ export default function MintCard({ account }) {
   };
 
   const handleApprove = async () => {
-    setPendingTx(true);
-    await onApprove();
-    setPendingTx(false);
+    try {
+      setPendingTx(true);
+      await onApprove();
+      dispatch(fetchExchangeAllowanceAsync({ account }));
+      setPendingTx(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleFromChange = (e: CustomEvent<InputChangeEventDetail>) => {
-    if (inputRegex.test(e.detail.value)) {
-      e.preventDefault();
-      setFromValue(e.detail.value);
-    }
+  const onUserInput = (nextInput: string) => {
+    setFromValue(nextInput);
   };
   // Call mint query after debounce completes
   useEffect(() => {
@@ -89,40 +77,15 @@ export default function MintCard({ account }) {
     <>
       <IonRow style={{ marginTop: "35px" }}>
         <IonCol>
-          <InputWrapper>
-            <InputGrid className="ion-align-self-start">
-              <IonRow className="ion-align-items-center ion-margin-bottom">
-                <IonCol>From</IonCol>
-                <IonCol size="auto">
-                  <IonButton className="ion-no-margin" onClick={handleMax}>
-                    MAX
-                  </IonButton>
-                </IonCol>
-                <IonCol size="auto" className="ion-text-end ion-margin-start">
-                  {account ? `Balance: ${getFullDisplayBalance(balance, undefined, 4)}` : `Balance: 0.0000`}
-                </IonCol>
-              </IonRow>
-              <IonRow className="ion-align-items-center" style={{ flexGrow: 1 }}>
-                <IonCol>
-                  <NumericalInput
-                    placeholder="0.000"
-                    value={fromValue}
-                    onKeyPress={(e) => handleKeyPress(e)}
-                    onIonChange={(e) => handleFromChange(e)}
-                    autofocus={true}
-                  />
-                </IonCol>
-                <IonCol size="auto" className="ion-text-center">
-                  <IonAvatar style={{ transform: "scale(0.8)" }}>
-                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
-                  </IonAvatar>
-                </IonCol>
-                <IonCol size="1.5" className="ion-text-center">
-                  KAI
-                </IonCol>
-              </IonRow>
-            </InputGrid>
-          </InputWrapper>
+          <Input
+            value={fromValue}
+            label1="From"
+            label2={account ? `Balance: ${getFullDisplayBalance(balance, undefined, 4)}` : "Balance: 0.0000"}
+            tokenLabel="KAI"
+            onUserInput={onUserInput}
+            withMax={true}
+            onMax={handleMax}
+          />
         </IonCol>
       </IonRow>
 
@@ -132,29 +95,14 @@ export default function MintCard({ account }) {
 
       <IonRow style={{ marginBottom: "35px" }}>
         <IonCol>
-          <InputWrapper>
-            <InputGrid className="ion-align-self-start">
-              <IonRow className="ion-align-items-center ion-margin-bottom">
-                <IonCol>To</IonCol>
-                <IonCol className="ion-text-end">
-                  {account ? `Balance: ${getFullDisplayBalance(ibKaiBalance, undefined, 4)}` : `Balance: 0.0000`}
-                </IonCol>
-              </IonRow>
-              <IonRow className="ion-align-items-center" style={{ flexGrow: 1 }}>
-                <IonCol>
-                  <NumericalInput placeholder="0.000" value={toValue} readonly />
-                </IonCol>
-                <IonCol size="auto">
-                  <IonAvatar style={{ transform: "scale(0.8)" }}>
-                    <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
-                  </IonAvatar>
-                </IonCol>
-                <IonCol size="1.5" className="ion-text-center">
-                  ibKAI
-                </IonCol>
-              </IonRow>
-            </InputGrid>
-          </InputWrapper>
+          <Input
+            value={toValue}
+            label1="To"
+            label2={account ? `Balance: ${getFullDisplayBalance(ibKaiBalance, undefined, 4)}` : "Balance: 0.0000"}
+            tokenLabel="ibKAI"
+            readonly={true}
+            withMax={false}
+          />
         </IonCol>
       </IonRow>
 
