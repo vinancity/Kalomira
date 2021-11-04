@@ -84,7 +84,6 @@ contract FeeProvider is IFeeProvider, FeeProviderState, WithAddressProvider, Own
     (uint256 leftAmount, uint256 feeAmount) = calcFee(amount, isMint);
     address ibKAI = IAddressProvider(_addressProvider).getIBKAIToken();
     IERC20(ibKAI).transferFrom(_msgSender(), address(this), feeAmount);
-    // SafeERC20.safeApprove(IERC20(ibKAI), IAddressProvider(_addressProvider).getTreasury(), feeAmount);
     sendFee(feeAmount);
     return (leftAmount, feeAmount);
   }

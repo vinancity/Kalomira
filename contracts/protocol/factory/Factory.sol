@@ -48,7 +48,6 @@ contract Factory is IFactory, FactoryState, WithAddressProvider, OwnableUpgradea
     }
 
     uint256 mintedAmount = IBKaiTokenInterface(ibKAI).mint{ value: value }(address(this), value);
-    //SafeERC20.safeApprove(IERC20(ibKAI), feeProvider, mintedAmount);
     (uint256 leftAmount, ) = IFeeProvider(feeProvider).chargeFee(mintedAmount, true);
     SafeERC20.safeTransfer(IERC20(ibKAI), _msgSender(), leftAmount);
   }

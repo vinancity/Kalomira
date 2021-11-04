@@ -57,6 +57,7 @@ contract InterestBearingToken is
     require(amount <= balanceOf(account), "insufficient balance");
     uint256 outputAmount = this.getRedeemAmount(amount);
     _burn(account, amount);
+    _underlyingAmount = _underlyingAmount.sub(amount);
     bool success = _transferUnderlyingAsset(_msgSender(), outputAmount);
     require(success, "asset not able to transfer");
     return outputAmount;
@@ -88,10 +89,6 @@ contract InterestBearingToken is
     uint256 redeemAmount = rate.rayMul(_totalUnderlyingAmount());
     return redeemAmount;
   }
-
-  // function getUnderlyingAmount() external view override returns (uint256) {
-  //   return _underlyingAmount;
-  // }
 
   function _totalUnderlyingAmount() internal view returns (uint256) {
     return _underlyingAmount.add(_pendingAcrueAmount());
