@@ -9,7 +9,6 @@ const useApproveIbKAI = () => {
 
   const handleApprove = useCallback(async () => {
     try {
-      // const tx = await lpContract.approve(masterChefContract.address, ethers.constants.MaxUint256);
       const tx = await ibKaiContract.approve(factoryAddress, ethers.constants.MaxUint256);
       const receipt = await tx.wait();
       return receipt.status;

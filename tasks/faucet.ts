@@ -19,10 +19,10 @@ async function main() {
   const [sender] = await ethers.getSigners();
 
   const kaloAsDeployer = Kalos__factory.connect(kalo, sender);
-  await kaloAsDeployer.mint("0xf5ED67Ca714A69C241a3eA5C7AFB7C07E30aF480", ethers.utils.parseEther("7.5"));
+  await kaloAsDeployer.mint("0xa47d913c5CAB3B965784e75924BFf115eA15C1CB", ethers.utils.parseEther("7.5"));
   const treasuryAsDeployer = Treasury__factory.connect(treasury, sender);
   await treasuryAsDeployer.resetWeek(0);
-  await treasuryAsDeployer.mintKLS("0xf5ED67Ca714A69C241a3eA5C7AFB7C07E30aF480", ethers.utils.parseEther("5"));
+  await treasuryAsDeployer.mintKLS("0xa47d913c5CAB3B965784e75924BFf115eA15C1CB", ethers.utils.parseEther("5"));
 }
 
 main()

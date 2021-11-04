@@ -16,7 +16,7 @@ const useGetRedeemRate = () => {
   const feeProviderContract = useFeeProvider();
 
   useEffect(() => {
-    const fetchMintRate = async () => {
+    const fetchRedeemRate = async () => {
       try {
         const rate = new BigNumber((await feeProviderContract.redeemFee()).toString());
         const basisPoint = new BigNumber((await feeProviderContract.basisPoint()).toString());
@@ -30,7 +30,7 @@ const useGetRedeemRate = () => {
       }
     };
 
-    fetchMintRate();
+    fetchRedeemRate();
   }, [feeProviderContract, setRedeemRate, setFetchStatus]);
 
   return { fetchStatus, redeemRate, redeemPct };

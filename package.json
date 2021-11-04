@@ -8,7 +8,7 @@
     "size": "hardhat size-contracts",
     "test": "hardhat test",
     "tsc": "tsc",
-    "task:faucet": "hardhat --network localhost run scripts/faucet.ts",
+    "task:faucet": "hardhat --network localhost run tasks/faucet.ts",
     "test:factory": "hardhat test ./test/factory.test.ts",
     "test:treasury": "hardhat test ./test/treasury.test.ts",
     "test:farm": "hardhat test ./test/farm.test.ts",

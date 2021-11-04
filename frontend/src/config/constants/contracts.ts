@@ -1,14 +1,14 @@
 export default {
   KALOS_TOKEN: {
-    "0": "",
+    "0": "0x27005Ba99A43Bae222C7b1B93fd784574250b3BB",
     "31337": "0x874cBC39F185d30b61ca9694EDd76D519ff67C0a",
   },
   IBKAI_TOKEN: {
-    "0": "",
+    "0": "0x38c5a8c3ebBCB2486D0c0B1f35ca54b60c8d79D3",
     "31337": "0x80BbC2Ccd92106CD5f4D9A7980365fe83DE26d92",
   },
   KLS_TOKEN: {
-    "0": "",
+    "0": "0xAEC64f2D8Fd3929ae085ff2a05484400AEB0eb61",
     "31337": "0xC26A4b631D3E81FC9Db443c8752275847C51BE91",
   },
   WKAI_TOKEN: {
@@ -20,11 +20,11 @@ export default {
     "31337": "",
   },
   FEE_PROVIDER: {
-    "0": "",
+    "0": "0xC2dF31e2a70b5Ab4a6ED99BD8f8eA148CEa8E718",
     "31337": "0xC2692BCab546fCfBDf480f46e23D60aDefA24919",
   },
   FACTORY: {
-    "0": "",
+    "0": "0xeE7f9FD8059FeA12781B8054ee140B8CB299266A",
     "31337": "0xf605Fb4574D978a378E07A872466943c7b1485E2",
   },
   DISTRIBUTOR: {
@@ -40,11 +40,11 @@ export default {
     "31337": "",
   },
   MASTER_CHEF: {
-    "0": "",
+    "0": "0x5822D1339CE04B84F366F7f50A0F4555457925dA",
     "31337": "0xc0C8F55b2b96c3aFBF20B9cf5b4da38499D3Bd0b",
   },
   TREASURY: {
-    "0": "",
+    "0": "0x46b89668C35d8c5671f4de3b750691535a84d682",
     "31337": "0x08D120530B05feb74016c12dd1dC23857ec6d670",
   },
   VALIDATOR: {
@@ -64,7 +64,7 @@ export default {
     "31337": "",
   },
   ADDRESS_PROVIDER: {
-    "0": "",
+    "0": "0x4901F067Ebb8834a1EAE5DB4E33FB1D483BCdb1F",
     "31337": "0x17cCDace8198FA8375D4A8c20aAf5ae0FbFBcECA",
   },
   MULTICALL: {

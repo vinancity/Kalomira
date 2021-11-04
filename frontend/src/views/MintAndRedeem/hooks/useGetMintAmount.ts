@@ -11,7 +11,6 @@ const useGetMintAmount = () => {
       try {
         if (amount === "") amount = "0";
         const amountBN = new BigNumber(amount).times(DEFAULT_TOKEN_DECIMAL).toString();
-        console.log(new BigNumber(amount).times(DEFAULT_TOKEN_DECIMAL).toString());
         const mintAmount = await factoryContract.getOutputAmount(amountBN);
         return new BigNumber(mintAmount.toString());
       } catch (e) {
