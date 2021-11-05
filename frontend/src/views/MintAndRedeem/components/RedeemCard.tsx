@@ -20,13 +20,13 @@ const Divider = styled(IonRow)`
   height: 30px;
 `;
 
-export default function RedeemCard({ account }) {
+export default function RedeemCard({ account, afterFetch }) {
   const dispatch = useAppDispatch();
   const [pendingTx, setPendingTx] = useState(false);
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
-  const { balance } = useNativeBalance();
-  const { ibKaiBalance } = useIbKaiBalance();
+  const { balance, refresh: refreshNative } = useNativeBalance();
+  const { ibKaiBalance, refresh: refreshIbKai } = useIbKaiBalance();
   const { onGetRedeemAmount } = useGetRedeemAmount();
   const { onApprove } = useApproveIbKAI();
   const { onRedeem } = useRedeemKai();
@@ -43,6 +43,8 @@ export default function RedeemCard({ account }) {
     setPendingTx(true);
     await onRedeem(fromValue);
     setPendingTx(false);
+    refreshNative();
+    refreshIbKai();
   };
 
   const handleApprove = async () => {
@@ -69,6 +71,7 @@ export default function RedeemCard({ account }) {
       } else {
         setToValue(getBalanceAmount(toAmount).toString());
       }
+      afterFetch(fromValue, getBalanceAmount(toAmount).toString());
     };
 
     fetchMintOutput();
