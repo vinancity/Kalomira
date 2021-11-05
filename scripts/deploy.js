@@ -260,7 +260,11 @@ async function main2() {
       await invoke(smcAddressProvider, "setAddress", inputs, true);
     }
   }
+  const Multicall = await getContractArtifact("libraries", "Multicall");
+  const smcMulticall = await deployKardiaContract(Multicall, [], "Masterchef");
+
   protocolContracts["ADDRESS_PROVIDER"] = smcAddressProvider.address;
+  protocolContracts["MULTICALL"] = smcMulticall.address;
   console.log(JSON.stringify(protocolContracts, null, 2));
 
   /**
@@ -315,7 +319,7 @@ async function main(deployLocal = true, deployTestnet = false) {
   const tsPath = join(__dirname, "../frontend/src/config/constants", `contracts.ts`);
   fs.writeFileSync(tsPath, `export default ${JSON.stringify(contractAddresses, null, 2)}`, { encoding: "utf-8" });
 }
-main(1, 0)
+main(0, 1)
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
