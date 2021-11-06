@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useFactory } from "hooks/useContract";
-import { DEFAULT_TOKEN_DECIMAL } from "config";
+import { DEFAULT_TOKEN_DECIMAL, DEFAULT_GAS_LIMIT } from "config";
 import BigNumber from "bignumber.js";
 
 const useRedeemKai = () => {
@@ -10,11 +10,10 @@ const useRedeemKai = () => {
     async (amount: string) => {
       try {
         const amountBN = new BigNumber(amount).times(DEFAULT_TOKEN_DECIMAL).toString();
-        const txHash = await factoryContract.redeem(amountBN);
-        return txHash;
+        const txHash = await factoryContract.redeem(amountBN, { gasLimit: DEFAULT_GAS_LIMIT });
+        console.info(txHash);
       } catch (error) {
         console.error(error);
-        return false;
       }
     },
     [factoryContract]

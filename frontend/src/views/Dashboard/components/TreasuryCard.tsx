@@ -23,7 +23,7 @@ export default function TreasuryCard({ account }) {
                 <Header>USDT to collect:</Header>
               </IonRow>
               <IonRow>
-                <AmountLabel>{account ? "$123.546" : "$0.00"}</AmountLabel>
+                <AmountLabel>{account ? "$123.5467" : "$0.0000"}</AmountLabel>
               </IonRow>
               <IonRow>
                 <DollarLabel>{account ? "$123.54" : "$0.00"}</DollarLabel>

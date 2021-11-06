@@ -7,5 +7,5 @@ BigNumber.config({
 });
 
 export const DEFAULT_TOKEN_DECIMAL = BIG_TEN.pow(18);
-export const DEFAULT_GAS_LIMIT = 200000;
+export const DEFAULT_GAS_LIMIT = 3000000;
 export const DEFAULT_GAS_PRICE = 5;

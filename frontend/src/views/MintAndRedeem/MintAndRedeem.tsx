@@ -12,7 +12,7 @@ import {
   IonSegmentButton,
   IonLabel,
 } from "@ionic/react";
-
+import BigNumber from "bignumber.js";
 import MintCard from "./components/MintCard";
 import RedeemCard from "./components/RedeemCard";
 
@@ -34,14 +34,7 @@ export const SubCard = styled(IonCard)`
   font-size: 1.25rem;
 `;
 
-export const FlexGrid = styled(IonGrid)`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-flow: column;
-`;
-
-export const InputGrid = styled(IonGrid)`
+export const SubCardContent = styled(IonGrid)`
   display: flex;
   flex-flow: column;
   justify-content: space-evenly;
@@ -49,18 +42,11 @@ export const InputGrid = styled(IonGrid)`
   padding: 15px 02px 10px 0px;
 `;
 
-export const AmountLabel = styled(IonLabel)`
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--ion-color-dark);
-`;
-
-export const InputWrapper = styled(IonItem)`
-  --min-height: 130px;
-  margin: 5px 0px 5px 0px;
-  border-radius: 8px;
-  --background: var(--ion-color-light-tint);
-  --border-style: none;
+export const FlexGrid = styled(IonGrid)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
 `;
 
 export const Segment = styled(IonSegment)`
@@ -82,6 +68,7 @@ export const SegmentButton = styled(IonSegmentButton)`
 
 export default function MintAndRedeem() {
   const [isMint, setMint] = useState(true);
+  const [feeAmount, setFeeAmount] = useState("0.0000");
   const { mintPct } = useGetMintRate();
   const { redeemPct } = useGetRedeemRate();
   const { account } = useWeb3React();
@@ -90,6 +77,12 @@ export default function MintAndRedeem() {
 
   const handleChange = (value: string) => {
     value === "mint" ? setMint(true) : setMint(false);
+    setFeeAmount("0.0000");
+  };
+
+  const calcFeeAmount = (input: string, output: string) => {
+    const feeAmt = new BigNumber(input).minus(new BigNumber(output));
+    setFeeAmount(feeAmt.isNaN() ? "0.0000" : feeAmt.toFixed(4));
   };
 
   return (
@@ -113,13 +106,17 @@ export default function MintAndRedeem() {
                     </Segment>
                   </IonCol>
                 </IonRow>
-                {isMint ? <MintCard account={account} /> : <RedeemCard account={account} />}
+                {isMint ? (
+                  <MintCard account={account} afterFetch={calcFeeAmount} />
+                ) : (
+                  <RedeemCard account={account} afterFetch={calcFeeAmount} />
+                )}
               </IonGrid>
             </Card>
           </IonRow>
           <IonRow>
             <SubCard>
-              <InputGrid>
+              <SubCardContent>
                 {isMint ? (
                   <>
                     <IonRow>
@@ -128,7 +125,7 @@ export default function MintAndRedeem() {
                     </IonRow>
                     <IonRow>
                       <IonCol>{`Mint Fee:`}</IonCol>
-                      <IonCol className="ion-text-end">{`123`}</IonCol>
+                      <IonCol className="ion-text-end">{`${feeAmount}`}</IonCol>
                     </IonRow>
                   </>
                 ) : (
@@ -139,11 +136,11 @@ export default function MintAndRedeem() {
                     </IonRow>
                     <IonRow>
                       <IonCol>{`Redeem Fee:`}</IonCol>
-                      <IonCol className="ion-text-end">{`123`}</IonCol>
+                      <IonCol className="ion-text-end">{`${feeAmount}`}</IonCol>
                     </IonRow>
                   </>
                 )}
-              </InputGrid>
+              </SubCardContent>
             </SubCard>
           </IonRow>
         </IonGrid>

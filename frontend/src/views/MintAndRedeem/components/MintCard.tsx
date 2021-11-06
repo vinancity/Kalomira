@@ -20,13 +20,13 @@ const Divider = styled(IonRow)`
   height: 30px;
 `;
 
-export default function MintCard({ account }) {
+export default function MintCard({ account, afterFetch }) {
   const dispatch = useAppDispatch();
   const [pendingTx, setPendingTx] = useState(false);
   const [fromValue, setFromValue] = useState("");
   const [toValue, setToValue] = useState("");
-  const { balance } = useNativeBalance();
-  const { ibKaiBalance } = useIbKaiBalance();
+  const { balance, refresh: refreshNative } = useNativeBalance();
+  const { ibKaiBalance, refresh: refreshIbKai } = useIbKaiBalance();
   const { onGetMintAmount } = useGetMintAmount();
   const { onApprove } = useApproveIbKAI();
   const { onMint } = useMintIbKai();
@@ -41,26 +41,35 @@ export default function MintCard({ account }) {
 
   const handleMint = async () => {
     setPendingTx(true);
-    await onMint(fromValue);
-    setPendingTx(false);
+    try {
+      await onMint(fromValue);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setPendingTx(false);
+      refreshNative();
+      refreshIbKai();
+    }
   };
 
   const handleApprove = async () => {
+    setPendingTx(true);
     try {
-      setPendingTx(true);
       await onApprove();
       dispatch(fetchExchangeAllowanceAsync({ account }));
-      setPendingTx(false);
     } catch (error) {
       console.error(error);
+    } finally {
+      setPendingTx(false);
     }
   };
 
   const onUserInput = (nextInput: string) => {
     setFromValue(nextInput);
   };
-  // Call mint query after debounce completes
+
   useEffect(() => {
+    let isMounted = true;
     const fetchMintOutput = async () => {
       const toAmount = await onGetMintAmount(debouncedFromValue);
       if (toAmount.isZero()) {
@@ -68,9 +77,15 @@ export default function MintCard({ account }) {
       } else {
         setToValue(getBalanceAmount(toAmount).toString());
       }
+      afterFetch(fromValue, getBalanceAmount(toAmount).toString());
     };
 
-    fetchMintOutput();
+    if (isMounted) {
+      fetchMintOutput();
+    }
+    return () => {
+      isMounted = false;
+    };
   }, [debouncedFromValue, onGetMintAmount]);
 
   return (

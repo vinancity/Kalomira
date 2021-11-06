@@ -16,7 +16,7 @@ export const InputGrid = styled(IonGrid)`
   flex-flow: column;
   justify-content: space-evenly;
   height: 100%;
-  padding: 15px 02px 10px 0px;
+  padding: 15px 0px 10px;
 `;
 
 export const Input = memo(function InnerInput({

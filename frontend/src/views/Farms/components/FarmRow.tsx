@@ -1,11 +1,16 @@
 import React, { useState } from "react";
+import styled from "styled-components";
 import { IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardContent } from "@ionic/react";
 
-import CardHeader from "./CardHeader";
+import RowHeader from "./RowHeader";
 import HarvestActions from "./Actions/HarvestActions";
 import StakeActions from "./Actions/StakeActions";
 
-export default function FarmCard(props) {
+const ContentGrid = styled(IonGrid)`
+  padding: 20px 0px 5px;
+`;
+
+export default function FarmRow(props) {
   const [showExpand, setShowExpand] = useState(false);
   const toggleExpand = () => {
     setShowExpand(!showExpand);
@@ -13,14 +18,18 @@ export default function FarmCard(props) {
 
   return (
     <div>
-      <IonCard>
+      <IonCard style={{ borderRadius: "8px" }}>
         <IonCardHeader color="light">
-          <CardHeader {...props} toggleExpand={toggleExpand} />
+          <RowHeader {...props} toggleExpand={toggleExpand} />
         </IonCardHeader>
 
         <IonCardContent hidden={!showExpand}>
-          <IonGrid>
+          <ContentGrid>
             <IonRow>
+              <IonCol>
+                <IonRow>asdfasdf</IonRow>
+                <IonRow>asdfasdf</IonRow>
+              </IonCol>
               <IonCol>
                 <HarvestActions {...props} />
               </IonCol>
@@ -28,7 +37,7 @@ export default function FarmCard(props) {
                 <StakeActions {...props} />
               </IonCol>
             </IonRow>
-          </IonGrid>
+          </ContentGrid>
         </IonCardContent>
       </IonCard>
     </div>

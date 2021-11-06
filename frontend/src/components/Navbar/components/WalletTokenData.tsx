@@ -1,4 +1,4 @@
-import { IonCol, IonAvatar, IonItem } from "@ionic/react";
+import { IonCol, IonAvatar, IonItem, IonImg } from "@ionic/react";
 import { useNativeBalance, useTokenBalance, useKLSBalance } from "hooks/useTokenBalance";
 import { getKaloAddress } from "utils/addressHelpers";
 import { getFullDisplayBalance } from "utils/formatBalance";
@@ -21,21 +21,21 @@ export default function WalletTokenData() {
     <>
       <TokenItem>
         <IonAvatar>
-          <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+          <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
         </IonAvatar>
         <IonCol className="ion-padding-start">Balance</IonCol>
         <IonCol className="ion-text-right">{getFullDisplayBalance(balance, undefined, 4)}</IonCol>
       </TokenItem>
       <TokenItem>
         <IonAvatar>
-          <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+          <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
         </IonAvatar>
         <IonCol className="ion-padding-start">KALO</IonCol>
         <IonCol className="ion-text-right">{getFullDisplayBalance(kaloBalance, undefined, 4)}</IonCol>
       </TokenItem>
       <TokenItem>
         <IonAvatar>
-          <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+          <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
         </IonAvatar>
         <IonCol className="ion-padding-start">KLS</IonCol>
         <IonCol className="ion-text-right">{getFullDisplayBalance(klsBalance, undefined, 4)}</IonCol>
