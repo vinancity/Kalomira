@@ -1,5 +1,15 @@
 import styled from "styled-components";
-import { IonGrid, IonRow, IonCol, IonAvatar, IonLabel, IonCardHeader, IonCardContent, IonButton } from "@ionic/react";
+import {
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonAvatar,
+  IonImg,
+  IonLabel,
+  IonCardHeader,
+  IonCardContent,
+  IonButton,
+} from "@ionic/react";
 import { Address, AddressWrapper } from "components/Modal/WalletModal";
 import { DashboardCard, CardTitle } from "../Dashboard";
 import { TokenItem } from "components/Navbar/components/WalletTokenData";
@@ -66,37 +76,31 @@ function AccountData({ account }) {
         <IonCol>
           <TokenItem>
             <IonAvatar>
-              <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+              <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
             </IonAvatar>
             <IonCol className="ion-padding-start">Balance</IonCol>
-            <IonCol className="ion-text-right">
-              {account ? getFullDisplayBalance(nativeBalance, undefined, 4) : ""}
-            </IonCol>
+            <IonCol className="ion-text-right">{account && getFullDisplayBalance(nativeBalance, undefined, 4)}</IonCol>
           </TokenItem>
           <TokenItem>
             <IonAvatar>
-              <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+              <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
             </IonAvatar>
             <IonCol className="ion-padding-start">KALO</IonCol>
-            <IonCol className="ion-text-right">
-              {account ? getFullDisplayBalance(kaloBalance, undefined, 4) : ""}
-            </IonCol>
+            <IonCol className="ion-text-right">{account && getFullDisplayBalance(kaloBalance, undefined, 4)}</IonCol>
           </TokenItem>
           <TokenItem>
             <IonAvatar>
-              <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+              <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
             </IonAvatar>
             <IonCol className="ion-padding-start">KLS (?)</IonCol>
-            <IonCol className="ion-text-right">{account ? getFullDisplayBalance(klsBalance, undefined, 4) : ""}</IonCol>
+            <IonCol className="ion-text-right">{account && getFullDisplayBalance(klsBalance, undefined, 4)}</IonCol>
           </TokenItem>
           <TokenItem>
             <IonAvatar>
-              <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
+              <IonImg src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" />
             </IonAvatar>
             <IonCol className="ion-padding-start">ibKAI</IonCol>
-            <IonCol className="ion-text-right">
-              {account ? getFullDisplayBalance(ibkaiBalance, undefined, 4) : ""}
-            </IonCol>
+            <IonCol className="ion-text-right">{account && getFullDisplayBalance(ibkaiBalance, undefined, 4)}</IonCol>
           </TokenItem>
         </IonCol>
       </IonRow>

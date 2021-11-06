@@ -15,7 +15,7 @@ export default function WalletConnect() {
   return (
     <>
       <IonButton className="circle-btn ion-no-padding ion-margin-end" color="primary" onClick={onPresentChainModal}>
-        <IonIcon ios={link} md={link} className="" />
+        <IonIcon ios={link} md={link} />
       </IonButton>
       {active ? (
         <>

@@ -68,8 +68,8 @@ export default function MintCard({ account, afterFetch }) {
     setFromValue(nextInput);
   };
 
-  // Call mint query after debounce completes
   useEffect(() => {
+    let isMounted = true;
     const fetchMintOutput = async () => {
       const toAmount = await onGetMintAmount(debouncedFromValue);
       if (toAmount.isZero()) {
@@ -80,7 +80,12 @@ export default function MintCard({ account, afterFetch }) {
       afterFetch(fromValue, getBalanceAmount(toAmount).toString());
     };
 
-    fetchMintOutput();
+    if (isMounted) {
+      fetchMintOutput();
+    }
+    return () => {
+      isMounted = false;
+    };
   }, [debouncedFromValue, onGetMintAmount]);
 
   return (
