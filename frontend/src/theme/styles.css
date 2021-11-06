@@ -1,8 +1,8 @@
 @import "./variables.css";
 
 .padded-content {
-  --padding-start: 10%;
-  --padding-end: 10%;
+  --padding-start: 15%;
+  --padding-end: 15%;
   --padding-top: (2%);
   --padding-bottom: (2%);
   --height: calc(100% - 64px);
@@ -55,7 +55,7 @@
 }
 
 .modal-wallet .ion-page {
-  padding: 45px 15px 5px 15px !important;
+  padding: 45px 15px 5px !important;
 }
 
 .logout-btn {
