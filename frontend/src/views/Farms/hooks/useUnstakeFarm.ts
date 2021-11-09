@@ -1,13 +1,16 @@
 import { useCallback } from "react";
-import { unstakeFarm } from "utils/calls";
 import { useMasterchef } from "hooks/useContract";
+import { DEFAULT_GAS_LIMIT } from "config";
 
 const useUnstakeFarms = (pid: number) => {
   const masterChefContract = useMasterchef();
 
   const handleUnstake = useCallback(
     async (amount: string) => {
-      await unstakeFarm(masterChefContract, pid, amount);
+      const txHash = await masterChefContract.withdraw(pid, amount, {
+        gasLimit: DEFAULT_GAS_LIMIT,
+      });
+      console.info(txHash);
     },
     [masterChefContract, pid]
   );
