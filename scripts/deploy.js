@@ -89,7 +89,6 @@ async function main1() {
     DEX_FACTORY: "",
   };
   for (const key in protocolContracts) {
-    // const inputs = [ethers.utils.formatBytes32String(key), protocolContracts[key]];
     if (protocolContracts[key] != "") {
       await smcAddressProvider.setAddress(ethers.utils.formatBytes32String(key), protocolContracts[key]);
     }
@@ -101,12 +100,14 @@ async function main1() {
 
   protocolContracts["ADDRESS_PROVIDER"] = smcAddressProvider.address;
   protocolContracts["MULTICALL"] = smcMulticall.address;
+
   /**
    * Deployment tasks
    */
   await smcKLS.transferOwnership(smcTreasury.address);
   await smcIbKAI.transferOwnership(smcFactory.address);
   await smcTreasury.resetWeek(0);
+
   // mint 2.5 billion KALO to masterchef for farming
   return protocolContracts;
 }
