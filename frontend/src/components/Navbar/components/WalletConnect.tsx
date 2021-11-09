@@ -1,4 +1,5 @@
 import { IonButton, IonLabel, IonIcon } from "@ionic/react";
+import styled from "styled-components";
 import { useWeb3React } from "@web3-react/core";
 import useWalletModal from "hooks/useWalletModal";
 import { link } from "ionicons/icons";
@@ -7,6 +8,13 @@ import useAuth from "hooks/useAuth";
 import truncateAddress from "utils/truncateAddress";
 import ConnectWalletButton from "components/ConnectWalletButton";
 
+const ChainButton = styled(IonButton)`
+  --border-radius: 100%;
+  width: 35px;
+  height: 35px;
+  margin-right: 16px;
+`;
+
 export default function WalletConnect() {
   const { login, logout } = useAuth();
   const { account, active } = useWeb3React();
@@ -14,9 +22,9 @@ export default function WalletConnect() {
 
   return (
     <>
-      <IonButton className="circle-btn ion-no-padding ion-margin-end" color="primary" onClick={onPresentChainModal}>
+      <ChainButton className="ion-no-padding" color="primary" onClick={onPresentChainModal}>
         <IonIcon ios={link} md={link} />
-      </IonButton>
+      </ChainButton>
       {active ? (
         <>
           <IonButton strong fill="solid" color="primary" routerDirection="none" onClick={onPresentAccountModal}>

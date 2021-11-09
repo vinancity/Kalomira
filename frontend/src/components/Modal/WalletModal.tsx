@@ -1,9 +1,37 @@
-import { IonModal, IonButton, IonRow, IonCol, IonGrid, IonLabel, IonItem } from "@ionic/react";
-
-import truncateAddress from "utils/truncateAddress";
+import {
+  IonModal,
+  IonButton,
+  IonRow,
+  IonCol,
+  IonGrid,
+  IonLabel,
+  IonItem,
+  IonCardHeader,
+  IonCardTitle,
+} from "@ionic/react";
 import styled from "styled-components";
+import truncateAddress from "utils/truncateAddress";
 
 import WalletTokenData from "../Navbar/components/WalletTokenData";
+
+const Modal = styled(IonModal)`
+  --height: 450px;
+  --width: 400px;
+  --border-radius: 25px;
+  .ion-page {
+    padding: 0px 15px 5px !important;
+  }
+`;
+
+const Header = styled(IonCardHeader)`
+  margin: 0px -15px;
+`;
+
+const CardTitle = styled(IonCardTitle)`
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 0px 13px;
+`;
 
 export const Label = styled(IonLabel)`
   font-size: 1.5rem;
@@ -19,16 +47,25 @@ export const Address = styled(IonLabel)`
 
 export const AddressWrapper = styled(IonItem)`
   --min-height: 40px;
-  margin: 10px 0px 10px 0px;
+  margin: 10px 0px;
   border-radius: 8px;
   --border-style: none;
   --background: var(--ion-color-light-tint);
 `;
 
+const Logout = styled(IonButton)`
+  align-self: center;
+  width: 50%;
+  margin-bottom: 15px;
+`;
+
 export default function WalletModal({ account, logout, onDismiss = () => null }) {
   return (
-    <IonModal cssClass="modal-wallet" isOpen={true} onDidDismiss={onDismiss}>
-      <IonGrid className="ion-no-margin">
+    <Modal isOpen={true} onDidDismiss={onDismiss}>
+      <Header color="light">
+        <CardTitle>Your Wallet</CardTitle>
+      </Header>
+      <IonGrid className="ion-no-margin ion-padding-top">
         <IonRow>
           <IonCol>
             <Label>Address</Label>
@@ -49,16 +86,15 @@ export default function WalletModal({ account, logout, onDismiss = () => null })
         </IonRow>
       </IonGrid>
 
-      <IonButton
+      <Logout
         expand="block"
-        className="ion-margin logout-btn"
         onClick={() => {
           logout();
           onDismiss();
         }}
       >
         Logout
-      </IonButton>
-    </IonModal>
+      </Logout>
+    </Modal>
   );
 }

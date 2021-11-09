@@ -29,6 +29,12 @@ const LabelColumn = styled(IonCol)`
   justify-content: center;
 `;
 
+const ExpandButton = styled(IonButton)`
+  --border-radius: 100%;
+  width: 35px;
+  height: 35px;
+`;
+
 export default function RowHeader(props) {
   const { lpSymbol, multiplier, earnings, userData, toggleExpand } = props;
   const earningsBN = new BigNumber(earnings);
@@ -52,48 +58,18 @@ export default function RowHeader(props) {
             <HeaderLabel>Multiplier</HeaderLabel>
           </IonRow>
           <IonRow>
-            <SubLabel>{lpSymbol}</SubLabel>
             <SubLabel>{getFullDisplayBalance(earningsBN, undefined, 4)}</SubLabel>
+            <SubLabel>{`$0.00`}</SubLabel>
             <SubLabel>{multiplier || "0x"}</SubLabel>
           </IonRow>
         </LabelColumn>
 
         <IonCol size="auto" className="ion-margin-start">
-          <IonButton
-            className="circle-btn ion-no-padding ion-no-margin"
-            fill="clear"
-            color="dark"
-            shape="round"
-            onClick={() => toggleExpand()}
-          >
+          <ExpandButton className="ion-no-padding" fill="clear" color="dark" onClick={toggleExpand}>
             <IonIcon md={chevronDown}></IonIcon>
-          </IonButton>
+          </ExpandButton>
         </IonCol>
       </IonRow>
     </IonGrid>
   );
-}
-
-{
-  /* <IonRow>
-            <IonCol>Farm</IonCol>
-            <IonCol>Earned</IonCol>
-            <IonCol>Multiplier</IonCol>
-          </IonRow>
-          <IonRow>
-            <IonCol>{lpSymbol}</IonCol>
-            <IonCol>{getFullDisplayBalance(earningsBN, undefined, 4)}</IonCol>
-            <IonCol>{multiplier}</IonCol>
-          </IonRow>
-        </IonCol>
-        <IonCol size="1">
-          <IonButton
-            className="circle-btn ion-no-padding"
-            fill="clear"
-            color="dark"
-            shape="round"
-            onClick={() => toggleExpand()}
-          >
-            <IonIcon md={chevronDown}></IonIcon>
-          </IonButton> */
 }

@@ -41,10 +41,11 @@ const Label = styled(IonLabel)`
 const AmountLabel = styled(IonLabel)`
   font-size: 3rem;
   font-weight: bold;
+  line-height: 3rem;
 `;
 
 const SubLabel = styled(IonLabel)`
-  color: var(--ion-color-medium-tint) !important;
+  color: var(--ion-color-medium-tint);
 `;
 
 const Button = styled(IonButton)`
@@ -70,7 +71,7 @@ export default function HeaderCard({ account, totalHarvest, onHarvestAll }) {
         <ContentWrapper>
           <IonRow>
             <IonCol className="ion-no-padding">
-              <IonRow>
+              <IonRow className="ion-margin-bottom ion-padding-bottom">
                 <Label>Total KALO to harvest:</Label>
               </IonRow>
               <IonRow>
