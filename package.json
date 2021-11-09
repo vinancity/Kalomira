@@ -4,6 +4,7 @@
   "main": "typechain",
   "license": "MIT",
   "scripts": {
+    "postinstall": "hardhat typechain --config hardhat.config.ts",
     "compile:v0": "hardhat typechain --config hardhat.config.ts",
     "size": "hardhat size-contracts",
     "test": "hardhat test",

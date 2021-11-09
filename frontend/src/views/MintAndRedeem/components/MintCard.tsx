@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNativeBalance, useIbKaiBalance } from "hooks/useTokenBalance";
 import { getFullDisplayBalance, getBalanceAmount } from "utils/formatBalance";
 import { useExchangeAllowance } from "state/exchange/hooks";
@@ -35,9 +35,9 @@ export default function MintCard({ account, afterFetch }) {
 
   const isApproved = account && allowance && allowance.isGreaterThan(0);
 
-  const handleMax = () => {
+  const handleMax = useCallback(() => {
     setFromValue(getFullDisplayBalance(balance));
-  };
+  }, [balance]);
 
   const handleMint = async () => {
     setPendingTx(true);

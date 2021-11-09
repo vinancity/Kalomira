@@ -52,15 +52,3 @@ export const getMasterchefAddress = () => {
 export const getMulticallAddress = () => {
   return getAddress(addresses.MULTICALL);
 };
-
-// export const getLP1Address = () => {
-//   return getAddress(addresses.MockLP1);
-// };
-
-// export const getLP2Address = () => {
-//   return getAddress(addresses.MockLP2);
-// };
-
-// export const getLP3Address = () => {
-//   return getAddress(addresses.MockLP3);
-// };

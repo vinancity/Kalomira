@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
-import { IonButton, IonRow } from "@ionic/react";
+import { useState } from "react";
+import styled from "styled-components";
+import { IonButton, IonRow, IonCol, IonLabel } from "@ionic/react";
 import { useWeb3React } from "@web3-react/core";
 import { useAppDispatch } from "state";
 import { fetchFarmUserDataAsync } from "state/farms";
@@ -8,6 +9,27 @@ import { BIG_ZERO } from "utils/bigNumber";
 import BigNumber from "bignumber.js";
 
 import useHarvestFarm from "views/Farms/hooks/useHarvestFarm";
+
+const FlexColumn = styled(IonCol)`
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+`;
+
+const Label = styled(IonLabel)`
+  font-weight: bold;
+`;
+
+const AmountLabel = styled(IonLabel)`
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.5rem;
+`;
+
+const SubLabel = styled(IonLabel)`
+  font-size: 1rem;
+  color: var(--ion-color-medium-tint);
+`;
 
 export default function HarvestActions({ pid, userData, userDataReady }) {
   const dispatch = useAppDispatch();
@@ -40,12 +62,23 @@ export default function HarvestActions({ pid, userData, userDataReady }) {
   };
 
   return (
-    <div>
-      <IonRow>KALO EARNED</IonRow>
-      <IonRow>{earnings.toFixed(18)}</IonRow>
-      <IonButton disabled={!account || earnings.eq(0) || pendingTx || !userDataReady} onClick={handleHarvest}>
-        Harvest
-      </IonButton>
-    </div>
+    <IonRow style={{ height: "100%" }}>
+      <IonCol className="ion-no-padding">
+        <IonRow className="ion-margin-bottom">
+          <Label>KALO EARNED</Label>
+        </IonRow>
+        <IonRow>
+          <AmountLabel>{earnings.toFixed(6)}</AmountLabel>
+        </IonRow>
+        <IonRow>
+          <SubLabel>{`$0.00`}</SubLabel>
+        </IonRow>
+      </IonCol>
+      <FlexColumn className="ion-no-padding">
+        <IonButton disabled={!account || earnings.eq(0) || pendingTx || !userDataReady} onClick={handleHarvest}>
+          Harvest
+        </IonButton>
+      </FlexColumn>
+    </IonRow>
   );
 }
