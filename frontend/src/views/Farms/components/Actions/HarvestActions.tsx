@@ -68,10 +68,10 @@ export default function HarvestActions({ pid, userData, userDataReady }) {
           <Label>KALO EARNED</Label>
         </IonRow>
         <IonRow>
-          <AmountLabel>{earnings.toFixed(6)}</AmountLabel>
+          <AmountLabel>{account ? earnings.toFixed(6) : "0.000000"}</AmountLabel>
         </IonRow>
         <IonRow>
-          <SubLabel>{`$0.00`}</SubLabel>
+          <SubLabel>{account ? `$0.00` : `$0.00`}</SubLabel>
         </IonRow>
       </IonCol>
       <FlexColumn className="ion-no-padding">
