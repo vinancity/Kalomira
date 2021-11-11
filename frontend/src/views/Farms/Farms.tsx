@@ -51,7 +51,7 @@ export default function Farms() {
   const isInactive = false;
   const isActive = !isInactive && !isArchived;
 
-  // usePollFarmsWithUserData();
+  usePollFarmsWithUserData();
 
   // Users with no wallet connected should see 0 as Earned amount
   // Connected users should see loading indicator until first userData has loaded

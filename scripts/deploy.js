@@ -3,7 +3,7 @@ const { join } = require("path");
 const fs = require("fs");
 require("dotenv").config();
 
-async function main1() {
+async function deploy_local() {
   if (network.name === "hardhat") {
     console.warn(
       "You are trying to deploy a contract to the Hardhat Network, which" +
@@ -61,15 +61,6 @@ async function main1() {
   );
   await smcMasterchef.deployed();
 
-  // const LP1 = await ethers.getContractFactory('MockLP');
-  // lp1 = await LP1.deploy('ibKAI-KALO', 'LP1', getBigNumber(100));
-  // await lp1.deployed();
-
-  // await kaloToken._transferOwnership(masterchef.address);
-  // await masterchef.add(20, lp1.address, true);
-  // await masterchef.add(10, lp2.address, true);
-  // await masterchef.add(10, lp3.address, true);
-
   const protocolContracts = {
     KALOS_TOKEN: smcKalos.address,
     IBKAI_TOKEN: smcIbKAI.address,
@@ -102,6 +93,28 @@ async function main1() {
   protocolContracts["MULTICALL"] = smcMulticall.address;
 
   /**
+   * Deploy LP tokens
+   */
+
+  const LP1 = await ethers.getContractFactory("MockLP");
+  smcLP1 = await LP1.deploy("ibKAI-KALO", "LP1");
+  await smcLP1.deployed();
+
+  const LP2 = await ethers.getContractFactory("MockLP");
+  smcLP2 = await LP2.deploy("ibKAI-DOGE", "LP2");
+  await smcLP2.deployed();
+
+  const LP3 = await ethers.getContractFactory("MockLP");
+  smcLP3 = await LP3.deploy("ibKAI-TEST", "LP3");
+  await smcLP3.deployed();
+
+  const lpContracts = {
+    IBKAI_KALO: smcLP1.address,
+    IBKAI_DOGE: smcLP2.address,
+    IBKAI_TEST: smcLP3.address,
+  };
+
+  /**
    * Deployment tasks
    */
   await smcKLS.transferOwnership(smcTreasury.address);
@@ -109,8 +122,15 @@ async function main1() {
   await smcTreasury.resetWeek(0);
 
   // mint 2.5 billion KALO to masterchef for farming
-  return protocolContracts;
+  await smcKalos.mint(smcMasterchef.address, ethers.utils.parseEther("2500000000"));
+  await smcMasterchef.add(40, smcLP1.address, true);
+  await smcMasterchef.add(20, smcLP2.address, true);
+  await smcMasterchef.add(10, smcLP3.address, true);
+
+  return [protocolContracts, lpContracts];
 }
+
+// ===================================================================================
 
 const _privateKey = process.env.PRIVATE_KEY;
 const _wallet = process.env.PUBLIC_KEY;
@@ -197,7 +217,8 @@ async function invoke(deployedContract, method, calldata, waitUntilMined = true)
   return tx;
 }
 
-async function main2() {
+async function deploy_testnet() {
+  const ethers = require("ethers");
   /**
    * Deploy and intialize contracts
    */
@@ -230,7 +251,11 @@ async function main2() {
   await initialize(smcIbKAI, [smcAddressProvider.address]);
 
   const MasterChef = await getContractArtifact("farm", "MasterChef");
-  const smcMasterchef = await deployKardiaContract(MasterChef, [], "Masterchef");
+  const smcMasterchef = await deployKardiaContract(
+    MasterChef,
+    [smcKalos.address, "0xa47d913c5CAB3B965784e75924BFf115eA15C1CB", ethers.utils.parseEther("100"), 0, 4344083],
+    "Masterchef"
+  );
   // no init
 
   // Set addresses
@@ -253,7 +278,6 @@ async function main2() {
     DEX_FACTORY: "",
   };
 
-  const ethers = require("ethers");
   // wire addresses
   for (const key in protocolContracts) {
     const inputs = [ethers.utils.formatBytes32String(key), protocolContracts[key]];
@@ -269,13 +293,38 @@ async function main2() {
   console.log(JSON.stringify(protocolContracts, null, 2));
 
   /**
+   * Deploy LP tokens
+   */
+
+  const LP1 = await getContractArtifact("mock", "MockLP");
+  const smcLP1 = await deployKardiaContract(LP1, ["ibKAI-KALO", "LP1"], "LP1");
+
+  const LP2 = await getContractArtifact("mock", "MockLP");
+  const smcLP2 = await deployKardiaContract(LP2, ["ibKAI-DOGE", "LP2"], "LP2");
+
+  const LP3 = await getContractArtifact("mock", "MockLP");
+  const smcLP3 = await deployKardiaContract(LP3, ["ibKAI-TEST", "LP3"], "LP3");
+
+  const lpContracts = {
+    IBKAI_KALO: smcLP1.address,
+    IBKAI_DOGE: smcLP2.address,
+    IBKAI_TEST: smcLP3.address,
+  };
+
+  /**
    * Deployment tasks
    */
   await invoke(smcKLS, "transferOwnership", [smcTreasury.address]);
   await invoke(smcIbKAI, "transferOwnership", [smcFactory.address]);
   await invoke(smcTreasury, "resetWeek", [0]);
 
-  return protocolContracts;
+  // mint 2.5 billion KALO to masterchef for farming
+  await invoke(smcKalos, "mint", [smcMasterchef.address, ethers.utils.parseEther("2500000000")]);
+  await invoke(smcMasterchef, "add", [40, smcLP1.address, true]);
+  await invoke(smcMasterchef, "add", [20, smcLP2.address, true]);
+  await invoke(smcMasterchef, "add", [10, smcLP3.address, true]);
+
+  return [protocolContracts, lpContracts];
 }
 
 async function main(deployLocal = true, deployTestnet = false) {
@@ -299,28 +348,51 @@ async function main(deployLocal = true, deployTestnet = false) {
     ADDRESS_PROVIDER: {},
     MULTICALL: {},
   };
-  var localAddresses = {};
+
+  const lpAddresses = {
+    IBKAI_KALO: {},
+    IBKAI_DOGE: {},
+    IBKAI_TEST: {},
+  };
+
+  let localAddresses = {};
   if (deployLocal) {
-    localAddresses = await main1();
+    localAddresses = await deploy_local();
   }
-  var testnetAddresses = {};
+  let testnetAddresses = {};
   if (deployTestnet) {
-    testnetAddresses = await main2();
+    testnetAddresses = await deploy_testnet();
   }
 
   for (key in contractAddresses) {
-    contractAddresses[key]["31337"] = localAddresses[key] || "";
-    contractAddresses[key]["0"] = testnetAddresses[key] || "";
+    contractAddresses[key]["31337"] = localAddresses[0][key] || "";
+    contractAddresses[key]["0"] = testnetAddresses[0][key] || "";
+  }
+
+  for (key in lpAddresses) {
+    lpAddresses[key]["31337"] = localAddresses[1][key] || "";
+    lpAddresses[key]["0"] = testnetAddresses[1][key] || "";
   }
 
   console.log(JSON.stringify(contractAddresses, null, 2));
-  const writePath = join(__dirname, "../frontend/src/config/constants", `contracts.json`);
-  fs.writeFileSync(writePath, JSON.stringify(contractAddresses, null, 2), { encoding: "utf-8" });
+  console.log(JSON.stringify(lpAddresses, null, 2));
 
-  const tsPath = join(__dirname, "../frontend/src/config/constants", `contracts.ts`);
-  fs.writeFileSync(tsPath, `export default ${JSON.stringify(contractAddresses, null, 2)}`, { encoding: "utf-8" });
+  const writePath_contract = join(__dirname, "../frontend/src/config/constants", `contracts.json`);
+  fs.writeFileSync(writePath_contract, JSON.stringify(contractAddresses, null, 2), { encoding: "utf-8" });
+
+  const tsPath_contract = join(__dirname, "../frontend/src/config/constants", `contracts.ts`);
+  fs.writeFileSync(tsPath_contract, `export default ${JSON.stringify(contractAddresses, null, 2)}`, {
+    encoding: "utf-8",
+  });
+
+  const writePath_lp = join(__dirname, "../frontend/src/config/constants", `lpAddresses.json`);
+  fs.writeFileSync(writePath_lp, JSON.stringify(lpAddresses, null, 2), { encoding: "utf-8" });
+
+  const tsPath_lp = join(__dirname, "../frontend/src/config/constants", `lpAddresses.ts`);
+  fs.writeFileSync(tsPath_lp, `export default ${JSON.stringify(lpAddresses, null, 2)}`, { encoding: "utf-8" });
 }
-main(0, 1)
+
+main(1, 1)
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

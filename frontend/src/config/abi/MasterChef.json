@@ -2,7 +2,7 @@
   {
     "inputs": [
       {
-        "internalType": "contract Kalomira",
+        "internalType": "contract IERC20",
         "name": "_kalo",
         "type": "address"
       },
@@ -78,31 +78,6 @@
       }
     ],
     "name": "EmergencyWithdraw",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "pid",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "Harvest",
     "type": "event"
   },
   {
@@ -243,19 +218,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getBlock",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -280,24 +242,11 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_pid",
-        "type": "uint256"
-      }
-    ],
-    "name": "harvest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "kalo",
     "outputs": [
       {
-        "internalType": "contract Kalomira",
+        "internalType": "contract IERC20",
         "name": "",
         "type": "address"
       }
@@ -323,32 +272,6 @@
     "name": "massUpdatePools",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_pid",
-        "type": "uint256"
-      }
-    ],
-    "name": "migrate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "migrator",
-    "outputs": [
-      {
-        "internalType": "contract IMigratorChef",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -481,12 +404,12 @@
   {
     "inputs": [
       {
-        "internalType": "contract IMigratorChef",
-        "name": "_migrator",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "amountPerBlock",
+        "type": "uint256"
       }
     ],
-    "name": "setMigrator",
+    "name": "setKaloPerBlock",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
