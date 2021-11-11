@@ -1,21 +1,21 @@
 import { FarmConfig } from "./types";
-import addresses from "./contracts";
+import lpAddresses from "./lpAddresses";
 
 const farms: FarmConfig[] = [
   {
     pid: 0,
     lpSymbol: "ibKAI-KALO",
-    lpAddresses: addresses.IBKAI_TOKEN,
+    lpAddresses: lpAddresses.IBKAI_KALO,
   },
   {
     pid: 1,
     lpSymbol: "ibKAI-DOGE",
-    lpAddresses: addresses.IBKAI_TOKEN,
+    lpAddresses: lpAddresses.IBKAI_DOGE,
   },
   {
     pid: 2,
     lpSymbol: "ibKAI-TEST",
-    lpAddresses: addresses.IBKAI_TOKEN,
+    lpAddresses: lpAddresses.IBKAI_TEST,
   },
 ];
 

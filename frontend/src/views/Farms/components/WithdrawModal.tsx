@@ -45,10 +45,10 @@ export default function WithdrawModal({ max, lpSymbol, onConfirm, onDismiss = ()
     try {
       console.log("Unstaking: ", unstakeAmount);
       await onConfirm(unstakeAmount);
+      setPendingTx(false);
       onDismiss();
     } catch (e) {
       console.error(e);
-    } finally {
       setPendingTx(false);
     }
   };

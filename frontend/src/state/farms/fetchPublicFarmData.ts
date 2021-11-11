@@ -5,6 +5,7 @@ import multicall from "utils/multicall";
 import { getAddress, getMasterchefAddress } from "utils/addressHelpers";
 import { BIG_ZERO, BIG_TEN } from "utils/bigNumber";
 import { Farm, SerializedBigNumber } from "state/types";
+import { getFullDisplayBalance } from "utils/formatBalance";
 
 type PublicFarmData = {
   // tokenAmountMc: SerializedBigNumber
@@ -22,7 +23,7 @@ const fetchFarm = async (farm: Farm): Promise<PublicFarmData> => {
   const { pid, lpAddresses } = farm;
   const lpAddress = getAddress(lpAddresses);
 
-  const [info, totalAllocPoint] = await multicall(masterchefABI, [
+  const [info, totalAllocPoint, kaloPerBlock] = await multicall(masterchefABI, [
     {
       address: getMasterchefAddress(),
       name: "poolInfo",
@@ -32,6 +33,10 @@ const fetchFarm = async (farm: Farm): Promise<PublicFarmData> => {
       address: getMasterchefAddress(),
       name: "totalAllocPoint",
     },
+    {
+      address: getMasterchefAddress(),
+      name: "kaloPerBlock",
+    },
   ]);
 
   const allocPoint = info ? new BigNumber(info.allocPoint?._hex) : BIG_ZERO;
@@ -39,7 +44,11 @@ const fetchFarm = async (farm: Farm): Promise<PublicFarmData> => {
 
   return {
     poolWeight: poolWeight.toJSON(),
-    multiplier: `${allocPoint.div(10).toString()}X`,
+    multiplier: `${getFullDisplayBalance(
+      allocPoint.div(new BigNumber(totalAllocPoint)).times(new BigNumber(kaloPerBlock)),
+      undefined,
+      1
+    )}X`,
   };
 };
 

@@ -45,10 +45,10 @@ export default function DepositModal({ max, lpSymbol, onConfirm, onDismiss = () 
     try {
       console.log("Staking: ", stakeAmount);
       await onConfirm(stakeAmount);
+      setPendingTx(false);
       onDismiss();
     } catch (e) {
       console.error(e);
-    } finally {
       setPendingTx(false);
     }
   };
