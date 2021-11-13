@@ -6,7 +6,6 @@ import {
   Factory,
   Factory__factory,
   FeeProvider,
-  FeeProvider__factory,
   IBKAIToken,
   IBKAIToken__factory,
   AddressProvider,

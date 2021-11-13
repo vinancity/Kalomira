@@ -2,7 +2,7 @@ import "@openzeppelin/test-helpers";
 
 import * as TimeHelpers from "./utils/timetravel";
 
-import { MasterChef, MasterChef__factory, Kalos, Kalos__factory, MockLP, MockLP__factory } from "../typechain";
+import { MasterChef, Kalos, MockERC20 } from "../typechain";
 import chai, { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 
@@ -22,7 +22,7 @@ describe("Farm Distributor", () => {
   let masterchef: MasterChef;
 
   let kalo: Kalos;
-  let lp: MockLP;
+  let lp: MockERC20;
 
   beforeEach(async () => {
     const [_deployer, _alice, _bob] = await ethers.getSigners();
@@ -33,21 +33,21 @@ describe("Farm Distributor", () => {
     bob = _bob;
 
     const KALO = await ethers.getContractFactory("Kalos", { signer: deployer });
-    kalo = await KALO.deploy();
+    kalo = (await KALO.deploy()) as unknown as Kalos;
     await kalo.deployed();
 
-    const LP = await ethers.getContractFactory("MockLP", { signer: deployer });
-    lp = await LP.deploy("LP1", "ibKAI-TEST", ethers.utils.parseEther("1000000000"));
+    const LP = await ethers.getContractFactory("MockERC20", { signer: deployer });
+    lp = (await LP.deploy("LP1", "ibKAI-TEST", ethers.utils.parseEther("1000000000"))) as MockERC20;
     await lp.deployed();
 
     const MasterChef = await ethers.getContractFactory("MasterChef", { signer: deployer });
-    masterchef = await MasterChef.deploy(
+    masterchef = (await MasterChef.deploy(
       kalo.address,
       await deployer.getAddress(),
       ethers.utils.parseEther("100"),
       0,
       1000
-    );
+    )) as unknown as MasterChef;
     await masterchef.deployed();
     await kalo.mint(masterchef.address, ethers.utils.parseEther("1000000000")); // 1 Billion KALO mint on deploy to masterchef
     await kalo.transferOwnership(masterchef.address);

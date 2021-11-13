@@ -10,7 +10,7 @@ import {
   Kalos,
   Kalos__factory,
   AddressProvider,
-  MockLP,
+  MockERC20,
 } from "../typechain";
 import chai, { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
@@ -34,7 +34,7 @@ describe("Treasury", () => {
   let treasuryAsBob: Treasury;
 
   let kls: KLS;
-  let usdt: MockLP;
+  let usdt: MockERC20;
 
   let kalo: Kalos;
   let kaloAsAlice: Kalos;
@@ -58,19 +58,19 @@ describe("Treasury", () => {
     await treasury.deployed();
 
     const KLS = await ethers.getContractFactory("KLS", { signer: deployer });
-    kls = await KLS.deploy();
+    kls = (await KLS.deploy()) as unknown as KLS;
     await kls.deployed();
 
-    const USDT = await ethers.getContractFactory("MockLP", { signer: deployer });
-    usdt = await USDT.deploy("USD Token", "USDT", ethers.utils.parseEther("10000000000"));
+    const USDT = await ethers.getContractFactory("MockERC20", { signer: deployer });
+    usdt = (await USDT.deploy("USD Token", "USDT", ethers.utils.parseEther("10000000000"))) as unknown as MockERC20;
     await usdt.deployed();
 
     const KALO = await ethers.getContractFactory("Kalos", { signer: deployer });
-    kalo = await KALO.deploy();
+    kalo = (await KALO.deploy()) as unknown as Kalos;
     await kalo.deployed();
 
     const REWARD = await ethers.getContractFactory("Kalos", { signer: deployer });
-    rewardToken = await REWARD.deploy();
+    rewardToken = (await REWARD.deploy()) as unknown as Kalos;
     await rewardToken.deployed();
 
     await treasury.setKLSRewardToken(usdt.address);
